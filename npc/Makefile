@@ -1,13 +1,12 @@
 OBJECTS = ./csrc/main.cpp ./vsrc/top.v
 TARGET = ./obj_dir/Vtop
 
-all: $(TARGET)
-$(TARGET): $(OBJECTS)
-	verilator -Wall --cc --exe --build ./csrc/main.cpp ./vsrc/top.v
+all: 
+	verilator -Wall --cc --exe ./csrc/main.cpp ./vsrc/top.v
     
 sim:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
-	ls -l obj-dir
+	make -j -C obj_dir -f Vtop.mk Vtop
 	obj_dir/Vtop
 
 include ../Makefile
