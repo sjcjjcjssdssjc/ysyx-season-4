@@ -8,5 +8,6 @@ sim:
 	$(call git_commit, "sim RTL") # DO NOT REMOVE THIS LINE!!!
 	make -j -C obj_dir -f Vtop.mk Vtop
 	obj_dir/Vtop
-
+clean:
+	rm -r obj_dir
 include ../Makefile
