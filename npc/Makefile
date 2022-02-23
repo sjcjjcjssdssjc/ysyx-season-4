@@ -3,7 +3,7 @@ NXDC_FILES = constr/top.nxdc
 INC_PATH ?=
 
 VERILATOR = verilator
-VERILATOR_CFLAGS += -MMD -cc --trace --exe --build \
+VERILATOR_CFLAGS += -MMD -cc  --exe  --trace --build \
 				-O3 --x-assign fast --x-initial fast --noassert
 
 BUILD_DIR = ./build
@@ -40,9 +40,11 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
 
 run: $(BIN)
-	@$^
+	@rm -rf logs
+	@mkdir -p logs
+	./build/top +trace
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR) logs
 
 .PHONY: clean run

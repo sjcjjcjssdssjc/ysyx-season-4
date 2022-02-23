@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <nvboard.h>
+//#include <nvboard.h>
 #include <memory>
 #include "Vtop.h"
 #include "verilated.h"
@@ -19,7 +19,8 @@ static void single_cycle(Vtop * dut) {
   dut->a = rand() & 1;
   dut->b = rand() & 1; 
   dut->eval();
-  printf("a = %d, b = %d, f = %d\n", dut->a, dut->b, dut->f);
+  VL_PRINTF("a = %x, b = %x, f = %x\n", dut->a, dut->b, dut->f);  
+  //printf("a = %d, b = %d, f = %d\n", dut->a, dut->b, dut->f);
   assert(dut->f == dut->a ^ dut->b);
 }
 
@@ -57,10 +58,10 @@ int main(int argc, char** argv, char** env) {
   //nvboard_bind_all_pins(dut);
   //nvboard_init();
   while(contextp->time() < sim_time && !contextp->gotFinish()) {
-    nvboard_update();
+    //nvboard_update();
     single_cycle(dut);
   }
   //nvboard_quit();
-  delete(dut);
+  dut->final();
   return 0;
 }
