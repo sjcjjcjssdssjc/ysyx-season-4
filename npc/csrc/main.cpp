@@ -30,20 +30,21 @@ int main(int argc, char** argv, char** env) {
     dut->clk = !dut->clk; 
     dut->eval();
     
-    tfp->dump(contextp->time());
+    //tfp->dump(contextp->time());
   }
 
-  while(contextp->time() < 500 && !contextp->gotFinish()) {//contextp->time() < sim_time && 
+  //contextp->time() < 50 && 
+  while(!contextp->gotFinish()) {//contextp->time() < sim_time && 
     nvboard_update();
     contextp->timeInc(1);
     dut->clk = !dut->clk;
-    dut->a = rand() & 1;
-    dut->b = rand() & 1; 
+    //dut->a = rand() & 1;
+    //dut->b = rand() & 1; 
     dut->eval();
 
     dut->rst = 0;//to fix the sample bug
-    tfp->dump(contextp->time());
-    printf("a = %d, b = %d, f = %d\n", dut->a, dut->b, dut->f);
+    //tfp->dump(contextp->time());
+    //printf("a = %d, b = %d, f = %d\n", dut->a, dut->b, dut->f);
     ///assert(dut->f == dut->a ^ dut->b);
   }
   tfp->close();
