@@ -37,7 +37,7 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		-top $(TOPNAME) $^ \
 		$(addprefix -CFLAGS , $(CFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
-		--Mdir $(OBJ_DIR) --exe -o $(abspath $(BIN))
+		--Mdir $(OBJ_DIR) --exe -o  $(abspath $(BIN))
 
 run: $(BIN)
 	@rm -rf logs
@@ -45,6 +45,6 @@ run: $(BIN)
 	./build/top +trace
 
 clean:
-	rm -rf $(BUILD_DIR) logs
+	rm -rf $(BUILD_DIR) logs obj_dir
 
 .PHONY: clean run
