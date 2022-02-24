@@ -42,7 +42,7 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 run: $(BIN)
 	@rm -rf logs
 	@mkdir -p logs
-	./build/top +trace
+	./build/top 
 
 clean:
 	rm -rf $(BUILD_DIR) logs obj_dir
