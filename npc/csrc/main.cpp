@@ -39,8 +39,8 @@ int main(int argc, char** argv, char** env) {
     contextp->timeInc(1);
     dut->clk = !dut->clk;
     dut->d = dut->d + 1;
-    dut->load = rand() & 1; 
     dut->eval();
+    dut->load = rand() & 1; 
 
     dut->rst = 0;//to fix the sample bug
     tfp->dump(contextp->time());
