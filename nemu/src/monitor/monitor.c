@@ -64,6 +64,20 @@ static int parse_args(int argc, char *argv[]) {
   };
   int o;
   while ( (o = getopt_long(argc, argv, "-bhl:d:p:", table, NULL)) != -1) {
+  /*
+  optstring  is  a  string containing the legitimate option characters.
+       If such a character is followed by a colon, the  option  requires  an
+       argument,  so  getopt() places a pointer to the following text in the
+       same argv-element, or the text of the following argv-element, in  op‐
+       targ.   Two  colons mean an option takes an optional arg; if there is
+       text in the current argv-element (i.e., in the same word as  the  op‐
+       tion  name  itself, for example, "-oarg"), then it is returned in op‐
+       targ, otherwise optarg is set to zero.  This is a GNU extension.   If
+       optstring  contains W followed by a semicolon, then -W foo is treated
+       as the long option --foo.  (The -W option is reserved by POSIX.2  for
+       implementation  extensions.)   This  behavior is a GNU extension, not
+       available with libraries before glibc 2.
+*/
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
       case 'p': sscanf(optarg, "%d", &difftest_port); break;

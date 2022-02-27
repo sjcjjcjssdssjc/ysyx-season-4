@@ -21,13 +21,17 @@ else
 CXX := g++
 endif
 LD := $(CXX)
+# addprefix(prefix,names...)
+# /I is include
+# fpic gens position independent code for shared libraries.
 INCLUDES = $(addprefix -I, $(INC_PATH))
 CFLAGS  := -O2 -MMD -Wall -Werror $(INCLUDES) $(CFLAGS)
 LDFLAGS := -O2 $(LDFLAGS)
 
 OBJS = $(SRCS:%.c=$(OBJ_DIR)/%.o) $(CXXSRC:%.cc=$(OBJ_DIR)/%.o)
 
-# Compilation patterns
+# Compilation patterns (< is the first dependency,$@ is all the files)
+# $(dir is $(OBJ_DIR)/ )
 $(OBJ_DIR)/%.o: %.c
 	@echo + CC $<
 	@mkdir -p $(dir $@)

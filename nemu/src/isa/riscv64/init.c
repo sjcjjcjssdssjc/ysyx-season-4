@@ -16,7 +16,7 @@ static void restart() {
   cpu.pc = RESET_VECTOR;
 
   /* The zero register is always 0. */
-  cpu.gpr[0] = 0;
+  cpu.gpr[0] = 0;//general purpose register
 }
 
 void init_isa() {
