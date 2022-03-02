@@ -2,6 +2,7 @@
 #include <cpu/cpu.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <memory/paddr.h>
 #include "sdb.h"
 
 static int is_batch_mode = false;
@@ -46,8 +47,8 @@ static int cmd_x(char * args){
   arg = strtok(NULL, " ");//second
   sscanf(arg,"%lx",&base);
   for(int i=0;i<len;i++){//long is 64bit
-    printf("%x\n",CONFIG_MSIZE);
-    //printf("%lx: %x\n",base + i*4, *((unsigned *)base + i));
+    word_t x = paddr_read(base + i*4, 4);
+    printf("%lx: %lx\n",base + i*4, x);
   }
   return 0;
 }
