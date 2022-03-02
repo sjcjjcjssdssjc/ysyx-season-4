@@ -38,6 +38,17 @@ static int cmd_q(char *args) {
   exit(0);
 }
 
+static int cmd_x(char * args){
+  char *arg = strtok(NULL, " ");//first
+  int len;
+  vaddr_t base;
+  len = atoi(arg);
+  arg = strtok(NULL, " ");//second
+  sscanf(arg,"%lx",&base);
+  printf("%lx %d\n",base,len);
+  return 0;
+}
+
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
   if(arg[0] == 'r'){
@@ -65,7 +76,8 @@ static struct {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   { "si","single step the program", cmd_si},
-  { "info","print program status(regs/supervise node)", cmd_info}
+  { "info","print program status(regs/supervise node)", cmd_info},
+  { "x","scan the memory", cmd_x}
   /* TODO: Add more commands */
 
 };
