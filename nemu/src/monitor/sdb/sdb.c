@@ -45,8 +45,8 @@ static int cmd_x(char * args){
   len = atoi(arg);
   arg = strtok(NULL, " ");//second
   sscanf(arg,"%lx",&base);
-  for(int i=0;i<len;i++){
-    printf("%ld\n",(long unsigned)(&len));
+  for(int i=0;i<len;i++){//long is 64bit
+    printf("%d\n",CONFIG_MSIZE);
     //printf("%lx: %x\n",base + i*4, *((unsigned *)base + i));
   }
   return 0;
