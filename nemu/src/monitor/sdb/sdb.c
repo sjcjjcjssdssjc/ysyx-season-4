@@ -37,6 +37,16 @@ static int cmd_q(char *args) {
   cpu_exec(0);
   exit(0);
 }
+
+static int cmd_info(char *args) {
+  char *arg = strtok(NULL, " ");
+  if(arg[0] == 'r'){
+    isa_reg_display();
+  }
+  else printf("unknown instruction\n");
+  return 0;
+}
+
 static int cmd_si(char *args) {
   char *arg = strtok(NULL, " ");
   int x = atoi(arg);
@@ -54,7 +64,8 @@ static struct {
   { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
-  { "si","single step the program", cmd_si}
+  { "si","single step the program", cmd_si},
+  { "info","print program status(regs/supervise node)", cmd_info}
   /* TODO: Add more commands */
 
 };
