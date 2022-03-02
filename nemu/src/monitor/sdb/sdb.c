@@ -46,7 +46,7 @@ static int cmd_x(char * args){
   arg = strtok(NULL, " ");//second
   sscanf(arg,"%lx",&base);
   for(int i=0;i<len;i++){
-    printf("%lx: \n",base + i*4);//, *((unsigned *)base + i*4));
+    printf("%lx: %x\n",base + i*4, *((unsigned *)base + i));
   }
   return 0;
 }
