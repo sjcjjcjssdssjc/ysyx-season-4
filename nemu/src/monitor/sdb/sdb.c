@@ -47,8 +47,8 @@ static int cmd_x(char * args){
   arg = strtok(NULL, " ");//second
   sscanf(arg,"%lx",&base);
   for(int i=0;i<len;i++){//long is 64bit
-    word_t x = paddr_read(base + i*4, 4);
-    printf("%lx: %lx\n",base + i*4, x);
+    word_t x = paddr_read(base + i, 1);
+    printf("%lx: %lx\n",base + i, x);
   }
   return 0;
 }
