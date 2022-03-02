@@ -40,13 +40,13 @@ static int cmd_q(char *args) {
 
 static int cmd_x(char * args){
   char *arg = strtok(NULL, " ");//first
-  int len;
+  unsigned int len;
   vaddr_t base;
   len = atoi(arg);
   arg = strtok(NULL, " ");//second
   sscanf(arg,"%lx",&base);
   for(int i=0;i<len;i++){
-    printf("%ls\n",&len);
+    printf("%ld\n",(long unsigned)(&len));
     //printf("%lx: %x\n",base + i*4, *((unsigned *)base + i));
   }
   return 0;
