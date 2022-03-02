@@ -48,7 +48,7 @@ static int cmd_x(char * args){
   sscanf(arg,"%lx",&base);
   for(int i=0;i<len;i++){//long is 64bit
     word_t x = paddr_read(base + i*4, 4);
-    printf("%lx: %lx\n",base + i*4, x);
+    printf("addr 0x%lx: 0x%lx\n",base + i*4, x);
   }
   return 0;
 }
