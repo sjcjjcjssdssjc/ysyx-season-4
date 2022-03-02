@@ -45,7 +45,7 @@ static int cmd_x(char * args){
   len = atoi(arg);
   arg = strtok(NULL, " ");//second
   sscanf(arg,"%lx",&base);
-  printf("%lx %d\n",base,len);
+  printf("%ld %d\n",base,len);
   return 0;
 }
 
