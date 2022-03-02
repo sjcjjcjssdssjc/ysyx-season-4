@@ -38,8 +38,10 @@ static int cmd_q(char *args) {
   exit(0);
 }
 static int cmd_si(char *args) {
-  cpu_exec(0);
-  exit(0);
+  char *arg = strtok(NULL, " ");
+  int x = atoi(arg);
+  cpu_exec(x);
+  return 0;
 }
 
 static int cmd_help(char *args);
