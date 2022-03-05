@@ -27,7 +27,6 @@ static char* rl_gets() {
 
   return line_read;
 }
-
 static int cmd_c(char *args) {
   cpu_exec(-1);
   return 0;
@@ -42,26 +41,23 @@ static int cmd_q(char *args) {
 static int cmd_x(char * args){
   char *arg = strtok(NULL, " ");//first
 
-  /*
   unsigned int len;
   vaddr_t base;
   len = atoi(arg);
-  */
-
-  arg = strtok(NULL, "\"");//second
-  printf("%s\n",args);
-  bool success;
-  expr(arg, &success);
   
-  /*
   sscanf(arg,"%lx",&base);
   for(int i=0;i<len;i++){//long is 64bit
     word_t x = paddr_read(base + i*4, 4);
     printf("addr 0x%lx: 0x%lx\n",base + i*4, x);
   }
-  */
-  
   return 0;
+}
+
+static int cmd_p(char * args){
+  char *arg = strtok(NULL, "\"");//second (there is no "")
+  bool success;
+  expr(arg, &success);
+  return success;
 }
 
 static int cmd_info(char *args) {
@@ -92,7 +88,8 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si","single step the program", cmd_si},
   { "info","print program status(regs/supervise node)", cmd_info},
-  { "x","scan the memory", cmd_x}
+  { "x","scan the memory", cmd_x},
+  { "p", "Value of expression", cmd_p },
   /* TODO: Add more commands */
 
 };
