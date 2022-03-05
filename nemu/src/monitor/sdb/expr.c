@@ -6,6 +6,24 @@
 #include <regex.h>
 #include <string.h>
 
+int is_bad(char * e)
+{
+  int sum = 0,position = 0;
+  while (e[position] != '\0') {
+    if(e[position] == '(')sum++;
+    else if(e[position] == ')')sum--;
+    if(sum < 0){
+      printf("false parent\n");
+      return 1;     
+    }
+    position++;
+  }
+  if(sum != 0){
+    printf("false parent\n");
+    return 1;
+  }
+  return 0;
+}
 // word_t eval(int p, int q) {
 //   if (p > q) {
 //     /* Bad expression */
@@ -92,21 +110,9 @@ static bool make_token(char *e) {
   regmatch_t pmatch;
 
   nr_token = 0;
-  int sum = 0;
-  while (e[position] != '\0') {
-    if(e[position] == '(')sum++;
-    else if(e[position] == ')')sum--;
-    if(sum < 0){
-      printf("false parent\n");
-      return -1;     
-    }
-    position++;
-  }
-  if(sum != 0){
-    printf("false parent\n");
+  if(is_bad(e)){
     return -1;
   }
-  position = 0;
   while (e[position] != '\0') {
     //printf("pos %d\n",position);
     /* Try all rules one by one. */
