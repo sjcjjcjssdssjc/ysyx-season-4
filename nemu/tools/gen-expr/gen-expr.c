@@ -58,6 +58,8 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    memset(buf,0,sizeof(buf));
+    now = 0;
     // char s = "(unsigned)";
     // for(int i=0;i<strlen(s);i++){
     //   gen(s[i]);
