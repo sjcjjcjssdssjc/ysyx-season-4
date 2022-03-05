@@ -6,24 +6,6 @@
 #include <regex.h>
 #include <string.h>
 
-int is_bad(char * e)
-{
-  int sum = 0,position = 0;
-  while (e[position] != '\0') {
-    if(e[position] == '(')sum++;
-    else if(e[position] == ')')sum--;
-    if(sum < 0){
-      printf("false parent\n");
-      return 1;     
-    }
-    position++;
-  }
-  if(sum != 0){
-    printf("false parent\n");
-    return 1;
-  }
-  return 0;
-}
 
 enum {
   TK_NOTYPE = 256, TK_EQ,
@@ -83,36 +65,81 @@ static Token tokens[32] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 int tot = 0;
 
-// word_t eval(int p, int q,bool *fail) {
-//   if (p > q) {
-//     /* Bad expression */
-//   }
-//   else if (p == q) {
-//     /* Single token.
-//      * For now this token should be a number.
-//      * Return the value of the number.
-//      */
-//   }
-//   else if (check_parentheses(p, q) == true) {
-//     /* The expression is surrounded by a matched pair of parentheses.
-//      * If that is the case, just throw away the parentheses.
-//      */
-//     return eval(p + 1, q - 1);
-//   }
-//   else {
-//     //op = the position of 主运算符 in the token expression;
-//     val1 = eval(p, op - 1);
-//     val2 = eval(op + 1, q);
+int is_bad(int p,int q){
+  int sum = 0;
+  for(int i = p; i <= q; i++) {
+    if(tokens[i].str[0] == '(')sum++;
+    else if(tokens[i].str[0] == ')')sum--;
+    if(sum < 0){
+      printf("false parent\n");
+      return 1;     
+    }
+  }
+  if(sum != 0){
+    printf("false parent\n");
+    return 1;
+  }
+  return 0;
+}
 
-//     switch (op_type) {
-//       case '+': return val1 + val2;
-//       case '-': 
-//       case '*': 
-//       case '/': 
-//       default: assert(0);
-//     }
-//   }
-// }
+int check_parentheses(int p,int q){
+  if(!is_bad(p + 1, q - 1) && p <= q 
+  && tokens[p].str[0] == '(' && tokens[q].str[0] == ')')return 1;
+  else return 0;
+}
+int level(char c){
+  if(c == '+' || c == '-')return 1;
+  else if(c == '*' || c == '/')return 2;
+  else return 3;
+}
+word_t eval(int p, int q,bool *fail) {
+  if (p > q) {
+    *fail = 1;
+    return 0;
+  }
+  else if (p == q) {
+    if(tokens[p].type != TK_DNUMBER){
+      *fail = 1;
+      return 0;
+    }
+    word_t val = 0;
+    int l = strlen(tokens[p].str);
+    for(int i = 0; i < l; i++){
+      val *= 10;
+      val += tokens[p].str[i] - '0';
+    }
+    return val;
+  }
+  else if (check_parentheses(p, q) == true) {
+    return eval(p + 1, q - 1, fail);
+  }
+  else {
+    int op = -1,sum = 0;
+    int nowlev = 2;
+    for(int i = p; i <= q; i++){
+      if(tokens[i].str[0] == '(')sum++;
+      else if(tokens[i].str[0] == ')')sum--;
+      if(sum == 0 && level(tokens[i].str[0]) <= nowlev){
+        nowlev = level(tokens[i].str[0]);
+        op = i;
+      }
+    }
+    if(op == -1){
+      *fail = 1;
+      return 0;
+    }
+    word_t val1 = eval(p, op - 1, fail);
+    word_t val2 = eval(op + 1, q, fail);
+
+    switch (tokens[op].str[0]) {
+      case '+': return val1 + val2;
+      case '-': return val1 - val2;
+      case '*': return val1 * val2;
+      case '/': return val1 / val2;
+      default: assert(0);
+    }
+  }
+}
 
 
 
@@ -123,9 +150,6 @@ static bool make_token(char *e) {
   regmatch_t pmatch;
 
   nr_token = 0;
-  if(is_bad(e)){
-    return -1;
-  }
   while (e[position] != '\0') {
     //printf("pos %d\n",position);
     /* Try all rules one by one. */
@@ -169,7 +193,6 @@ static bool make_token(char *e) {
       return false;
     }
   }
-  printf("true\n");
   return true;
 }
 
@@ -180,7 +203,13 @@ word_t expr(char *e, bool *success) {
     return 0;
   }
 
-  bool fail = 0;
 
-  return fail;
+  if(is_bad(0,tot - 1)){
+    *success = 0;
+    return -1;
+  }
+  bool fail = 0;
+  int ret = eval(0, tot - 1, &fail);
+  *success = !fail;
+  return ret;
 }
