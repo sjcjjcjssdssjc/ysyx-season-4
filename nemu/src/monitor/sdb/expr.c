@@ -92,7 +92,7 @@ int level(char c){
   else if(c == '*' || c == '/')return 2;
   else return 3;
 }
-unsigned eval(int p, int q,bool *fail) {
+word_t eval(int p, int q,bool *fail) {
   if (p > q) {
     *fail = 1;
     return 0;
@@ -102,7 +102,7 @@ unsigned eval(int p, int q,bool *fail) {
       *fail = 1;
       return 0;
     }
-    unsigned val = 0;
+    word_t val = 0;
     int l = strlen(tokens[p].str);
     for(int i = 0; i < l; i++){
       val *= 10;
@@ -114,7 +114,7 @@ unsigned eval(int p, int q,bool *fail) {
     return eval(p + 1, q - 1, fail);
   }
   else { 
-    printf("%u\n",(unsigned)(2+3)*(4/4 +3 -8 )/(22));
+    printf("%lu\n",(word_t)(2+3)*(4/4 +3 -8 )/(22));
     int op = -1,sum = 0;
     int nowlev = 2;
     for(int i = p; i <= q; i++){
@@ -130,10 +130,10 @@ unsigned eval(int p, int q,bool *fail) {
       *fail = 1;
       return 0;
     }
-    unsigned val1 = 0;
+    word_t val1 = 0;
     if(tokens[op].str[0] != '-' || p <= op - 1)
       val1 = eval(p, op - 1, fail);
-    unsigned val2 = eval(op + 1, q, fail);
+    word_t val2 = eval(op + 1, q, fail);
     printf("p %d q %d %d\n",p,q,op);
     switch (tokens[op].str[0]) {
       case '+': return val1 + val2;
@@ -201,7 +201,7 @@ static bool make_token(char *e) {
 }
 
 
-unsigned expr(char *e, bool *success) {
+word_t expr(char *e, bool *success) {
   tot = 0;
   if (!make_token(e)) {
     *success = false;
@@ -214,7 +214,7 @@ unsigned expr(char *e, bool *success) {
     return 0;
   }
   bool fail = 0;
-  unsigned ret = eval(0, tot - 1, &fail);
+  word_t ret = eval(0, tot - 1, &fail);
   *success = !fail;
   //printf("%deee\n",*success);
   return ret;

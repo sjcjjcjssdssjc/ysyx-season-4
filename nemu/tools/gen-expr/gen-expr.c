@@ -57,14 +57,15 @@ int main(int argc, char *argv[]) {
     sscanf(argv[1], "%d", &loop);
   }
   int i;
+
+  char c[]= "(long unsigned)";
+  for(int j=0;j<strlen(c);j++){
+    gen(c[j]);
+  }
   for (i = 0; i < loop; i ++) {
     //printf("buf is %s\n",buf);
-    now = 0;
+    now = 15;
     ifdiv = 0;
-    // char s = "(unsigned)";
-    // for(int i=0;i<strlen(s);i++){
-    //   gen(s[i]);
-    // }
     gen_rand_expr();
 
     sprintf(code_buf, code_format, buf);
@@ -80,12 +81,12 @@ int main(int argc, char *argv[]) {
     fp = popen("/tmp/.expr", "r");
     assert(fp != NULL);
 
-    int result;
-    int garb = fscanf(fp, "%d", &result);
+    uint64_t result;
+    int garb = fscanf(fp, "%lu", &result);
     garb++;
     pclose(fp);
 
-    printf("%u %s\n", result, buf);
+    printf("%lu %s\n", result, buf);
   }
   return 0;
 }
