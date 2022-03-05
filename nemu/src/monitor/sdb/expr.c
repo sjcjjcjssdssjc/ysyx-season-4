@@ -98,6 +98,7 @@ word_t eval(int p, int q,bool *fail) {
     return 0;
   }
   else if (p == q) {
+    printf("p %d q %d\n",p,q);
     if(tokens[p].type != TK_DNUMBER){
       *fail = 1;
       return 0;
@@ -123,7 +124,6 @@ word_t eval(int p, int q,bool *fail) {
       if(sum == 0 && level(tokens[i].str[0]) <= nowlev){
         nowlev = level(tokens[i].str[0]);
         op = i;
-        break;
       }
     }
     if(op == -1){
