@@ -119,6 +119,7 @@ word_t eval(int p, int q,bool *fail) {
     for(int i = p; i <= q; i++){
       if(tokens[i].str[0] == '(')sum++;
       else if(tokens[i].str[0] == ')')sum--;
+      printf("%d %d\n",i,sum);
       if(sum == 0 && level(tokens[i].str[0]) <= nowlev){
         nowlev = level(tokens[i].str[0]);
         op = i;
