@@ -123,6 +123,7 @@ word_t eval(int p, int q,bool *fail) {
       if(sum == 0 && level(tokens[i].str[0]) <= nowlev){
         nowlev = level(tokens[i].str[0]);
         op = i;
+        break;
       }
     }
     if(op == -1){
@@ -201,6 +202,7 @@ static bool make_token(char *e) {
 
 
 word_t expr(char *e, bool *success) {
+  tot = 0;
   if (!make_token(e)) {
     *success = false;
     return 0;
