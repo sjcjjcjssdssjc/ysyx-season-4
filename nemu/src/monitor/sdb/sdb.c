@@ -44,7 +44,7 @@ static int cmd_x(char * args){
   unsigned int len;
   vaddr_t base;
   len = atoi(arg);
-  arg = strtok(NULL, " ");//second
+  arg = strtok(NULL, "\"");//second
   // printf("%s\n",args);
   // bool success;
   // expr(arg, &success);
