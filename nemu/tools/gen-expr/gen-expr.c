@@ -15,9 +15,32 @@ static char *code_format =
 "  printf(\"%%u\", result); "
 "  return 0; "
 "}";
-
+int now = 0;
+void gen_num(){
+  int x = rand() % 100;
+  sprintf(buf + now, "%d", x);
+  now += strlen(buf + now);
+}
+void gen(char s){
+  sprintf(buf + now, "%c", s);
+  now++;
+}
+void gen_rand_op(){
+  int x = rand() % 4;
+  if(x == 0)gen('+');
+  else if(x == 1)gen('-');
+  else if(x == 2)gen('*');
+  else gen('/');
+}
+int choose(int x){
+  return = rand() % x;
+}
 static void gen_rand_expr() {
-  buf[0] = '\0';
+  switch (choose(3)) {
+    case 0: gen_num(); break;
+    case 1: gen('('); gen_rand_expr(); gen(')'); break;
+    default: gen_rand_expr(); gen_rand_op(); gen_rand_expr(); break;
+  }
 }
 
 int main(int argc, char *argv[]) {

@@ -34,7 +34,7 @@ static struct rule {
   {"[0-9]+", TK_DNUMBER}, 
   {"==", TK_EQ},        // equal
 };
-
+#define TOKEN_NUM 32
 #define NR_REGEX ARRLEN(rules)
 
 static regex_t re[NR_REGEX] = {};
@@ -61,7 +61,7 @@ typedef struct token {
   char str[32];
 } Token;
 
-static Token tokens[32] __attribute__((used)) = {};
+static Token tokens[TOKEN_NUM] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
 int tot = 0;
 
@@ -173,7 +173,7 @@ static bool make_token(char *e) {
         switch (rules[i].token_type) {
           case(TK_NOTYPE): break;
           default: 
-          if(substr_len >= 32){
+          if(substr_len >= TOKEN_NUM){
             printf("too long\n");
             return false;
           }
