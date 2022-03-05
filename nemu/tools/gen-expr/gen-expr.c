@@ -16,20 +16,23 @@ static char *code_format =
 "  return 0; "
 "}";
 int now = 0;
+int ifdiv = 0;
 //  '/home/heisenberg/ysyx-workbench/nemu/tools/gen-expr/build/gen-expr' 1
 void gen_num(){
   int x = rand() % 100;
+  if(x == 0 && ifdiv)x++;
   sprintf(buf + now, "%d", x);
-  now += strlen(buf + now);
-  buf[now] = 0;
+  int l = strlen(buf + now);
+  now += l;
 }
 void gen(char s){
   sprintf(buf + now, "%c", s);
   now++;
-  buf[now] = 0;
 }
 void gen_rand_op(){
   int x = rand() % 4;
+  if(x == 3)ifdiv = 1;
+  else ifdiv = 0;
   if(x == 0)gen('+');
   else if(x == 1)gen('-');
   else if(x == 2)gen('*');
@@ -55,6 +58,10 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    // char s = "(unsigned)";
+    // for(int i=0;i<strlen(s);i++){
+    //   gen(s[i]);
+    // }
     gen_rand_expr();
 
     sprintf(code_buf, code_format, buf);
