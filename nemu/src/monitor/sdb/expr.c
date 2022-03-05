@@ -69,7 +69,21 @@ static bool make_token(char *e) {
   regmatch_t pmatch;
 
   nr_token = 0;
-
+  int sum = 0;
+  while (e[position] != '\0') {
+    if(e[position] == '(')sum++;
+    else if(e[position] == ')')sum--;
+    if(sum < 0){
+      printf("false parent\n");
+      return -1;     
+    }
+    position++;
+  }
+  if(sum != 0){
+    printf("false parent\n");
+    return -1;
+  }
+  position = 0;
   while (e[position] != '\0') {
     //printf("pos %d\n",position);
     /* Try all rules one by one. */
