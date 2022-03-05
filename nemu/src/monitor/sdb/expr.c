@@ -6,6 +6,29 @@
 #include <regex.h>
 #include <string.h>
 
+// word_t eval(int p, int q) {
+//   if (p > q) {
+//     /* Bad expression */
+//   }
+//   else if (p == q) {
+//     /* Single token.
+//      * For now this token should be a number.
+//      * Return the value of the number.
+//      */
+//   }
+//   else if (check_parentheses(p, q) == true) {
+//     /* The expression is surrounded by a matched pair of parentheses.
+//      * If that is the case, just throw away the parentheses.
+//      */
+//     return eval(p + 1, q - 1);
+//   }
+//   else {
+//     /* We should do more things here. */
+//   }
+//   return 0;
+// }
+
+
 enum {
   TK_NOTYPE = 256, TK_EQ,
   TK_DNUMBER,//decimal
