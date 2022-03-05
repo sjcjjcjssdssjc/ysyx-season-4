@@ -90,12 +90,14 @@ static bool make_token(char *e) {
         switch (rules[i].token_type) {
           case(TK_NOTYPE): break;
           default: 
-          if(strlen(rules[i].regex) >= 32){
+          if(substr_len >= 32){
             printf("too long\n");
             return -1;
           }
           tokens[tot].type = rules[i].token_type;
-          strcpy(tokens[tot].str,rules[i].regex);
+          for(int j = 0; j < substr_len; j++){
+            tokens[tot].str[j] = e[position + j];
+          }
           printf("%d %s\n",tokens[tot].type,tokens[tot].str);
           tot++;
         }
