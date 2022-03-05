@@ -119,7 +119,7 @@ word_t eval(int p, int q,bool *fail) {
     for(int i = p; i <= q; i++){
       if(tokens[i].str[0] == '(')sum++;
       else if(tokens[i].str[0] == ')')sum--;
-      printf("%d %d\n",i,sum);
+      //printf("%d %d\n",i,sum);
       if(sum == 0 && level(tokens[i].str[0]) <= nowlev){
         nowlev = level(tokens[i].str[0]);
         op = i;
@@ -133,7 +133,7 @@ word_t eval(int p, int q,bool *fail) {
     if(tokens[op].str[0] != '-' || p <= op - 1)
       val1 = eval(p, op - 1, fail);
     word_t val2 = eval(op + 1, q, fail);
-    printf("p %d q %d %d\n",p,q,op);
+    //printf("p %d q %d %d\n",p,q,op);
     switch (tokens[op].str[0]) {
       case '+': return val1 + val2;
       case '-': return val1 - val2;
