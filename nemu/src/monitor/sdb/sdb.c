@@ -57,7 +57,7 @@ static int cmd_p(char * args){
   char *arg = strtok(NULL, "\"");//second (there is no "")
   bool success;
 
-  printf("the value is%lu \n",expr(arg, &success));
+  printf("the value is %u \n", (unsigned)expr(arg, &success));
   if(success)printf("valid.\n");
   else printf("invalid.\n");
   return success;
