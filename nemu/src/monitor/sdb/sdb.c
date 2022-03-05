@@ -41,20 +41,20 @@ static int cmd_q(char *args) {
 
 static int cmd_x(char * args){
   char *arg = strtok(NULL, " ");//first
-  // unsigned int len;
-  // vaddr_t base;
-  // len = atoi(arg);
+  unsigned int len;
+  vaddr_t base;
+  len = atoi(arg);
   arg = strtok(NULL, " ");//second
-  printf("%s\n",args);
-  bool success;
-  expr(arg, &success);
-  /*
+  // printf("%s\n",args);
+  // bool success;
+  // expr(arg, &success);
+  
   sscanf(arg,"%lx",&base);
   for(int i=0;i<len;i++){//long is 64bit
     word_t x = paddr_read(base + i*4, 4);
     printf("addr 0x%lx: 0x%lx\n",base + i*4, x);
   }
-  */
+  
   return 0;
 }
 
