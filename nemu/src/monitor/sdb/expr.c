@@ -114,7 +114,6 @@ word_t eval(int p, int q,bool *fail) {
     return eval(p + 1, q - 1, fail);
   }
   else { 
-    printf("p %d q %d\n",p,q);
     int op = -1,sum = 0;
     int nowlev = 2;
     for(int i = p; i <= q; i++){
@@ -133,7 +132,7 @@ word_t eval(int p, int q,bool *fail) {
     
     word_t val1 = eval(p, op - 1, fail);
     word_t val2 = eval(op + 1, q, fail);
-    printf("%d\n",op);
+    printf("p %d q %d %d\n",p,q,op);
     switch (tokens[op].str[0]) {
       case '+': return val1 + val2;
       case '-': return val1 - val2;
