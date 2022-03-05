@@ -34,7 +34,7 @@ static struct rule {
   {"[0-9]+", TK_DNUMBER}, 
   {"==", TK_EQ},        // equal
 };
-#define TOKEN_NUM 320
+#define TOKEN_NUM 3200
 #define NR_REGEX ARRLEN(rules)
 
 static regex_t re[NR_REGEX] = {};
