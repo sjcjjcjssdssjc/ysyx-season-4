@@ -71,7 +71,7 @@ static bool make_token(char *e) {
   nr_token = 0;
 
   while (e[position] != '\0') {
-    printf("pos %d\n",position);
+    //printf("pos %d\n",position);
     /* Try all rules one by one. */
     for (i = 0; i < NR_REGEX; i ++) {
       if (regexec(&re[i], e + position, 1, &pmatch, 0) == 0 && pmatch.rm_so == 0) {
@@ -96,14 +96,14 @@ static bool make_token(char *e) {
           }
           tokens[tot].type = rules[i].token_type;
           for(int j = 0; j < substr_len; j++){
-            printf("%c\n",e[position + j]);
+            //printf("%c\n",e[position + j]);
             tokens[tot].str[j] = e[position + j];
           }
-          printf("%d %s\n",tokens[tot].type,tokens[tot].str);
+          //printf("%d %s\n",tokens[tot].type,tokens[tot].str);
           tot++;
         }
         position += substr_len;
-        printf("aft: %d",position);
+        //printf("aft: %d",position);
         break;
       }
     }

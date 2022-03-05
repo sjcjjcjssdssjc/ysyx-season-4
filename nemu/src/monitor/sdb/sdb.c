@@ -45,6 +45,7 @@ static int cmd_x(char * args){
   // vaddr_t base;
   // len = atoi(arg);
   arg = strtok(NULL, " ");//second
+  printf("%s\n",arg);
   bool success;
   expr(arg, &success);
   /*
