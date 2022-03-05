@@ -96,6 +96,7 @@ static bool make_token(char *e) {
           }
           tokens[tot].type = rules[i].token_type;
           for(int j = 0; j < substr_len; j++){
+            printf("%c\n",e[position + j]);
             tokens[tot].str[j] = e[position + j];
           }
           printf("%d %s\n",tokens[tot].type,tokens[tot].str);
