@@ -33,7 +33,7 @@ void gen_rand_op(){
   else gen('/');
 }
 int choose(int x){
-  return = rand() % x;
+  return rand() % x;
 }
 static void gen_rand_expr() {
   switch (choose(3)) {
@@ -68,7 +68,8 @@ int main(int argc, char *argv[]) {
     assert(fp != NULL);
 
     int result;
-    fscanf(fp, "%d", &result);
+    int garb = fscanf(fp, "%d", &result);
+    garb++;
     pclose(fp);
 
     printf("%u %s\n", result, buf);
