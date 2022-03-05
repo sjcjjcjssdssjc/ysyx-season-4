@@ -21,10 +21,12 @@ void gen_num(){
   int x = rand() % 100;
   sprintf(buf + now, "%d", x);
   now += strlen(buf + now);
+  buf[now] = 0;
 }
 void gen(char s){
   sprintf(buf + now, "%c", s);
   now++;
+  buf[now] = 0;
 }
 void gen_rand_op(){
   int x = rand() % 4;
