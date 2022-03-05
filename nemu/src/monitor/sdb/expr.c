@@ -99,7 +99,7 @@ static bool make_token(char *e) {
             //printf("%c\n",e[position + j]);
             tokens[tot].str[j] = e[position + j];
           }
-          //printf("%d %s\n",tokens[tot].type,tokens[tot].str);
+          printf("%d %s\n",tokens[tot].type,tokens[tot].str);
           tot++;
         }
         position += substr_len;
@@ -113,7 +113,7 @@ static bool make_token(char *e) {
       return false;
     }
   }
-
+  printf("true\n");
   return true;
 }
 
