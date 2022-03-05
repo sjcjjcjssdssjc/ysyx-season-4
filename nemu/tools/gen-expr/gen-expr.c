@@ -42,6 +42,7 @@ int choose(int x){
   return rand() % x;
 }
 static void gen_rand_expr() {
+  printf("%d\n",num);
   switch (choose(3)) {
     case 0: gen_num(); break;
     case 1: gen('('); gen_rand_expr(); gen(')'); break;
@@ -58,7 +59,9 @@ int main(int argc, char *argv[]) {
   }
   int i;
   for (i = 0; i < loop; i ++) {
+    printf("buf is %s\n",buf);
     now = 0;
+    ifdiv = 0;
     // char s = "(unsigned)";
     // for(int i=0;i<strlen(s);i++){
     //   gen(s[i]);
