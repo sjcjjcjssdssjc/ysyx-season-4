@@ -16,6 +16,7 @@ static char *code_format =
 "  return 0; "
 "}";
 int now = 0;
+//  '/home/heisenberg/ysyx-workbench/nemu/tools/gen-expr/build/gen-expr' 1
 void gen_num(){
   int x = rand() % 100;
   sprintf(buf + now, "%d", x);
