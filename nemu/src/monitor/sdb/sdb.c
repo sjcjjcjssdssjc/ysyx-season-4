@@ -56,7 +56,7 @@ static int cmd_x(char * args){
 static int cmd_p(char * args){
   char *arg = strtok(NULL, "\"");//second (there is no "")
   bool success;
-  expr(arg, &success);
+  printf("%ld\n",expr(arg, &success));
   return success;
 }
 
