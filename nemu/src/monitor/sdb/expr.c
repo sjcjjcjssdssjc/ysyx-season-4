@@ -148,7 +148,6 @@ word_t eval(int p, int q,bool *fail) {
 
 
 static bool make_token(char *e) {
-  Log("%s\n",e);
   int position = 0;
   int i;
   regmatch_t pmatch;
@@ -176,7 +175,7 @@ static bool make_token(char *e) {
           default: 
           if(substr_len >= 32){
             printf("too long\n");
-            return -1;
+            return false;
           }
           tokens[tot].type = rules[i].token_type;
           for(int j = 0; j < substr_len; j++){
@@ -216,6 +215,6 @@ word_t expr(char *e, bool *success) {
   bool fail = 0;
   int ret = eval(0, tot - 1, &fail);
   *success = !fail;
-  printf("%deee\n",*success);
+  //printf("%deee\n",*success);
   return ret;
 }
