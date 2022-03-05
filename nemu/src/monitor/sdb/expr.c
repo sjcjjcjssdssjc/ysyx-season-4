@@ -103,7 +103,7 @@ static bool make_token(char *e) {
           tot++;
         }
         position += substr_len;
-
+        printf("aft: %d",position);
         break;
       }
     }
