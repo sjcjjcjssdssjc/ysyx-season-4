@@ -9,7 +9,7 @@
 enum {
   TK_NOTYPE = 256, TK_EQ,
   TK_DNUMBER,//decimal
-
+  TK_QUOTE,
   /* TODO: Add more token types */
 
 };
