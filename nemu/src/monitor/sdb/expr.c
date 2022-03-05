@@ -131,13 +131,15 @@ word_t eval(int p, int q,bool *fail) {
     word_t val1 = eval(p, op - 1, fail);
     word_t val2 = eval(op + 1, q, fail);
 
+    int ret = 0;
     switch (tokens[op].str[0]) {
-      case '+': return val1 + val2;
-      case '-': return val1 - val2;
-      case '*': return val1 * val2;
-      case '/': return val1 / val2;
+      case '+': ret = val1 + val2;
+      case '-': ret = val1 - val2;
+      case '*': ret = val1 * val2;
+      case '/': ret = val1 / val2;
       default: assert(0);
     }
+    return ret;
   }
 }
 
