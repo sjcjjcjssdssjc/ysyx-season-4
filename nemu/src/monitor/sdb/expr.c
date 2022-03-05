@@ -182,7 +182,7 @@ static bool make_token(char *e) {
             //printf("%c\n",e[position + j]);
             tokens[tot].str[j] = e[position + j];
           }
-          printf("%d %s\n",tokens[tot].type,tokens[tot].str);
+          //printf("%s\n",tokens[tot].str);
           tot++;
         }
         position += substr_len;
