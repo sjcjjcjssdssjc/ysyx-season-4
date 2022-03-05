@@ -114,7 +114,7 @@ unsigned eval(int p, int q,bool *fail) {
     return eval(p + 1, q - 1, fail);
   }
   else { 
-    printf("%u\n",(2+3)*(4/4 +3 -8 )/(23-1));
+    printf("%u\n",(2+3)*(4/4 +3 -8 )/(22));
     int op = -1,sum = 0;
     int nowlev = 2;
     for(int i = p; i <= q; i++){
