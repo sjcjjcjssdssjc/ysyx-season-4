@@ -214,5 +214,6 @@ word_t expr(char *e, bool *success) {
   bool fail = 0;
   int ret = eval(0, tot - 1, &fail);
   *success = !fail;
+  printf("%d\n",*success);
   return ret;
 }
