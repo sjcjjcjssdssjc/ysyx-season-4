@@ -39,6 +39,7 @@ static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, 
 }
 static void jal_op(word_t dest, word_t src1, Decode *s){
   R(dest) = s->snpc; 
+  printf("%lu\n",src1);
   s->dnpc += src1;
 }
 static void jalr_op(word_t dest, word_t src1, word_t src2, Decode *s){
