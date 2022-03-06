@@ -22,7 +22,7 @@ enum {
 static word_t immI(uint32_t i) { return SEXT(BITS(i, 31, 20), 12); }
 static word_t immU(uint32_t i) { return SEXT(BITS(i, 31, 12), 20) << 12; }
 static word_t immS(uint32_t i) { return (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); }
-static word_t immJ(uint32_t i) { return (SEXT(BITS(i, 31, 31), 1) << 19) | BITS(i, 30, 21) << 9 | BITS(i, 20, 20) << 8 | BITS(i, 19, 12); }
+static word_t immJ(uint32_t i) { printf("%x\n",i);return (SEXT(BITS(i, 31, 31), 1) << 19) | BITS(i, 30, 21) << 9 | BITS(i, 20, 20) << 8 | BITS(i, 19, 12); }
 static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, int type) {
   uint32_t i = s->isa.inst.val;
   int rd  = BITS(i, 11, 7);
@@ -39,7 +39,7 @@ static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, 
 }
 static void jal_op(word_t dest, word_t src1, Decode *s){
   R(dest) = s->snpc; 
-  printf("%lu\n",src1);
+  //printf("%lu\n",src1);
   s->dnpc += src1;
 }
 static void jalr_op(word_t dest, word_t src1, word_t src2, Decode *s){
