@@ -11,8 +11,8 @@ static char code_buf[65536 + 128] = {}; // a little larger than `buf`
 static char *code_format =
 "#include <stdio.h>\n"
 "int main() { "
-"  unsigned result = %s; "
-"  printf(\"%%u\", result); "
+"  long unsigned result = %s; "
+"  printf(\"%%lu\", result); "
 "  return 0; "
 "}";
 int now = 0;
@@ -30,7 +30,7 @@ void gen(char s){
   now++;
 }
 void gen_rand_op(){
-  int x = rand() % 4;
+  long unsigned x = rand() % 4;
   if(x == 3)ifdiv = 1;
   else ifdiv = 0;
   if(x == 0)gen('+');
