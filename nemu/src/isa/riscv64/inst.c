@@ -26,7 +26,7 @@ static word_t immJ(uint32_t i) { printf("%x\n",i >> 12);return (SEXT(BITS(i, 31,
 static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, int type) {
   uint32_t i = s->isa.inst.val;
   int rd  = BITS(i, 11, 7);
-  int rs1 = BITS(i, 19, 15)+1;
+  int rs1 = BITS(i, 19, 15);
   int rs2 = BITS(i, 24, 20);
   destR(rd);//dest register is always[11:7]
   switch (type) {
