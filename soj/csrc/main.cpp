@@ -8,7 +8,7 @@
 
 #define CONFIG_INSTSIZE 0x100
 #define CONFIG_MSIZE 0x800000
-static uint32_t inst[CONFIG_INSTSIZE] = {0x12308113//x[1] = x[2] + 0x123
+static uint32_t inst[CONFIG_INSTSIZE] = {0x12308113//x[1] = x[1] + 0x123
 };
 static uint8_t pmem[CONFIG_MSIZE];//big endian
 uint64_t read_paddr(int addr, int len){
@@ -50,6 +50,7 @@ int main(int argc, char** argv, char** env) {
     //nvboard_update();
     contextp->timeInc(1);
     dut->clk = !dut->clk;
+    dut->instruction = inst[((dut->pc)-0x80000000)>>2];
     dut->eval();
     dut->in = rand() & 0xF; 
     dut->rst = 0;//to fix the sample bug
