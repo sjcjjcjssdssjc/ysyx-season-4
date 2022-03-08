@@ -145,7 +145,6 @@ word_t eval(int p, int q,bool *fail) {
     if(tokens[op].str[0] != '-' || p <= op - 1)
       val1 = eval(p, op - 1, fail);
     word_t val2 = eval(op + 1, q, fail);
-    printf("p %d q %d %d\n",p,q,op);
     switch (tokens[op].str[0]) {
       case '+': return val1 + val2;
       case '-': return val1 - val2;
@@ -194,6 +193,7 @@ static bool make_token(char *e) {
             //printf("%c\n",e[position + j]);
             tokens[nr_token].str[j] = e[position + j];
           }
+          tokens[nr_token].str[substr_len] = 0;
           //printf("%s\n",tokens[tot].str);
           nr_token++;
         }
