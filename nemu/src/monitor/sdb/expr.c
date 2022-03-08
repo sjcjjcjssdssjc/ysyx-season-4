@@ -103,6 +103,8 @@ word_t eval(int p, int q,bool *fail) {
     return 0;
   }
   else if (p == q || (q == p + 1 && tokens[p].type == TK_DEREF)) {
+    if((q == p + 1 && tokens[p].type == TK_DEREF))
+      printf("deref");
     if(tokens[p].type != TK_DNUMBER && tokens[p].type != TK_HEX && tokens[p].type != TK_REG){
       *fail = 1;
       return 0;
