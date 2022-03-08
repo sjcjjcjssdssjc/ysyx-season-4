@@ -67,7 +67,9 @@ static int cmd_info(char *args) {
   if(arg[0] == 'r'){
     isa_reg_display();
   }
-  else printf("unknown instruction\n");
+  else if(arg[0] == 'w'){
+    
+  }else printf("unknown instruction\n");
   return 0;
 }
 

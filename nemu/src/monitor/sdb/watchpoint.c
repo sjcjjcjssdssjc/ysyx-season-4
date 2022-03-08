@@ -7,7 +7,8 @@ typedef struct watchpoint {
   struct watchpoint *next;
 
   /* TODO: Add more members if necessary */
-
+  char *expr;
+  word_t val;//val of expr
 } WP;
 
 static WP wp_pool[NR_WP] = {};
@@ -53,6 +54,22 @@ void free_wp(WP *wp){
       wp -> next = free_;
       free_ = wp;
       return;
+    }
+  }
+}
+void seek_changes(){
+  WP * now;
+  for(now = head; now != NULL; now = now -> next){
+    bool sanity;
+    word_t val = expr(now -> expr, &sanity) ;
+    if(!sanity){
+      printf("the watchpoint is insane\n");
+    }
+    else if(val != now -> val){
+
+      printf("watchpoint %s changed from %ld(%lx)to %ld(%lx)\n",now -> expr, 
+      now -> val, now -> val, val, val);
+      now -> val = val;
     }
   }
 }
