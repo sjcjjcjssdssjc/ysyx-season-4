@@ -93,8 +93,9 @@ int check_parentheses(int p,int q){
   else return 0;
 }
 int level(int c){
-  if(c == '+' || c == '-')return 1;//low
-  else if(c == '*' || c == '/')return 2;
+  if(c == '+' || c == '-')return 0;//low
+  else if(c == '*' || c == '/')return 1;
+  else if(c == TK_DEREF)return 2;
   else return 3;//high
 }
 word_t eval(int p, int q,bool *fail) {
@@ -152,14 +153,15 @@ word_t eval(int p, int q,bool *fail) {
       return 0;
     } else{
       word_t val1 = 0;
-      if(tokens[op].type != '-' || p <= op - 1)//str[0] need to be changed
+      if((tokens[op].type != '-' && tokens[op].type != TK_DEREF) || p <= op - 1)//str[0] need to be changed
         val1 = eval(p, op - 1, fail);
       word_t val2 = eval(op + 1, q, fail);
       switch (tokens[op].type) {
         case '+': return val1 + val2;
         case '-': return val1 - val2;
-        case '*': {printf("%ld %ld\n",val1,val2); return val1 * val2;}
+        case '*': return val1 * val2;
         case '/': return val1 / val2;
+        case TK_DEREF: return paddr_read(val2, 8);
         default: assert(0);
       }
     }
@@ -256,3 +258,5 @@ word_t expr(char *e, bool *success) {
 // c
 // p "2*(*t0)"
 // p "(0x5+*t0)"
+// p "*(t1+0x80000000)"
+// p "*(t1+0x80000000) + 1"
