@@ -5,7 +5,7 @@
  */
 #include <regex.h>
 #include <string.h>
-
+#include <memory/paddr.h>
 extern const char *regs[];
 enum {
   TK_NOTYPE = 256, TK_EQ,
@@ -102,10 +102,13 @@ word_t eval(int p, int q,bool *fail) {
     *fail = 1;
     return 0;
   }
-  else if (p == q) {
+  else if (p == q || (q == p + 1 && tokens[p].type == TK_DEREF)) {
     if(tokens[p].type != TK_DNUMBER && tokens[p].type != TK_HEX && tokens[p].type != TK_REG){
       *fail = 1;
       return 0;
+    }
+    else if(tokens[p].type == TK_DEREF){
+      return paddr_read(eval(q, q, fail), 8);
     }
     word_t val = 0;
     if(tokens[p].type == TK_DNUMBER){
@@ -145,9 +148,6 @@ word_t eval(int p, int q,bool *fail) {
     if(op == -1){
       *fail = 1;
       return 0;
-    }
-    if(tokens[op].type == TK_DEREF){
-
     } else{
       word_t val1 = 0;
       if(tokens[op].str[0] != '-' || p <= op - 1)//str[0] need to be changed
