@@ -76,8 +76,10 @@ static int cmd_watch(char * args){
   
   WP* wp = new_wp();
   if(wp == 0)assert(0);
-  wp -> expr = (char *)malloc(strlen(arg));
-  wp -> val = expr(arg, &success);
+  int l = strlen(arg);
+  wp -> expr = (char *)malloc(l);
+  memcpy(wp -> expr, arg, l);
+  wp -> val = expr(wp -> expr , &success);
   if(success == 0)assert(0);
   return success;
 }
