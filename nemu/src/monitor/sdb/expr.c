@@ -12,7 +12,8 @@ enum {
   TK_DNUMBER,//decimal
   TK_QUOTE,
   TK_DEREF,
-  TK_REG
+  TK_REG,
+  TK_HEX,
 
 };
 
@@ -33,6 +34,7 @@ static struct rule {
   {"\\(", '('},         
   {"\\)", ')'}, 
   {"[0-9]+", TK_DNUMBER}, 
+  {"\\x", TK_HEX}, 
   {"==", TK_EQ},        // equal
   {"\\$[0]", TK_REG},
   {"[a-z][a-z]", TK_REG},
