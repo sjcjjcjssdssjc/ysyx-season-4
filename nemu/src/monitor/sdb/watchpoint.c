@@ -1,7 +1,7 @@
 #include "sdb.h"
 
 #define NR_WP 32
-
+extern NEMUState nemu_state;
 typedef struct watchpoint {
   int NO;
   struct watchpoint *next;
@@ -70,7 +70,7 @@ void seek_changes(){
       printf("watchpoint %s changed from %ld(%lx)to %ld(%lx)\n",now -> expr, 
       now -> val, now -> val, val, val);
       now -> val = val;
-
+      nemu_state.state = NEMU_STOP;
     }
   }
 }
