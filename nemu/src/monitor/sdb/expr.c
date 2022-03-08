@@ -103,17 +103,23 @@ word_t eval(int p, int q,bool *fail) {
     return 0;
   }
   else if (p == q) {
-    if(tokens[p].type != TK_DNUMBER){
+    if(tokens[p].type != TK_DNUMBER && tokens[p].type != TK_HEX){
       *fail = 1;
       return 0;
     }
     word_t val = 0;
-    int l = strlen(tokens[p].str);
-    for(int i = 0; i < l; i++){
-      val *= 10;
-      val += tokens[p].str[i] - '0';
+    if(tokens[p].type == TK_DNUMBER){
+      int l = strlen(tokens[p].str);
+      for(int i = 0; i < l; i++){
+        val *= 10;
+        val += tokens[p].str[i] - '0';
+      }
+      return val;
     }
-    return val;
+    else{
+      sscanf(tokens[p].str,"%lx",&val);
+      return val;
+    }
   }
   else if (check_parentheses(p, q) == true) {
     return eval(p + 1, q - 1, fail);
