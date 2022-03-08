@@ -255,3 +255,4 @@ word_t expr(char *e, bool *success) {
 // p "2*(t0)"
 // c
 // p "2*(*t0)"
+// p "(0x5+*t0)"
