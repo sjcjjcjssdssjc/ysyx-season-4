@@ -70,20 +70,24 @@ static int cmd_p(char * args){
   else printf("invalid.\n");
   return success;
 }
-
+static int cmd_watch(char * args){
+  char *arg = strtok(NULL, "\"");//second (there is no "")
+  bool success;
+  
+  WP* wp = new_wp();
+  if(wp == 0)assert(0);
+  wp -> expr = (char *)malloc(strlen(arg));
+  wp -> val = expr(arg, &success);
+  if(success == 0)assert(0);
+  return success;
+}
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
   if(arg[0] == 'r'){
     isa_reg_display();
   }
-  else if(arg[0] == 'w'){
-    arg = strtok(NULL, "\"");
-    bool success = 1;
-    WP* wp = new_wp();
-    if(wp == 0)assert(0);
-    wp -> expr = (char *)malloc(strlen(arg));
-    wp -> val = expr(arg, &success);
-    if(success == 0)assert(0);
+  else if(arg[0] == 'w'){//and delete,menuconfig
+    
   }else printf("unknown instruction\n");
   return 0;
 }
@@ -109,6 +113,7 @@ static struct {
   { "info","print program status(regs/supervise node)", cmd_info},
   { "x","scan the memory", cmd_x},
   { "p", "Value of expression", cmd_p },
+  { "watch", "watch variable and see when it changes", cmd_watch },
   /* TODO: Add more commands */
 
 };
