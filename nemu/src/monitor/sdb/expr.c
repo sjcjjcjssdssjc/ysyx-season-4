@@ -158,7 +158,7 @@ word_t eval(int p, int q,bool *fail) {
       switch (tokens[op].type) {
         case '+': return val1 + val2;
         case '-': return val1 - val2;
-        case '*': return val1 * val2;
+        case '*': {printf("%ld %ld\n",val1,val2); return val1 * val2;}
         case '/': return val1 / val2;
         default: assert(0);
       }
