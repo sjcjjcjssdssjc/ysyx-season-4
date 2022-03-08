@@ -104,8 +104,8 @@ word_t eval(int p, int q,bool *fail) {
     return 0;
   }
   else if (p == q || (q == p + 1 && tokens[p].type == TK_DEREF)) {
-    if((q == p + 1 && tokens[p].type == TK_DEREF))
-      printf("deref");
+    // if((q == p + 1 && tokens[p].type == TK_DEREF))
+    //   printf("deref");
     if(tokens[p].type == TK_DEREF){
       return paddr_read(eval(q, q, fail), 8);
     }else if(tokens[p].type != TK_DNUMBER && tokens[p].type != TK_HEX && tokens[p].type != TK_REG){
@@ -187,7 +187,7 @@ static bool make_token(char *e) {
         int substr_len = pmatch.rm_eo;
 
         Log("match rules[%d] = \"%s\" at position %d with len %d: %.*s",
-            i, rules[i].regex, position, substr_len, substr_len, substr_start);
+           i, rules[i].regex, position, substr_len, substr_len, substr_start);
 
 
         /* TODO: Now a new token is recognized with rules[i]. Add codes
@@ -203,7 +203,7 @@ static bool make_token(char *e) {
             return false;
           }
           tokens[nr_token].type = rules[i].token_type;
-          printf("tp %d\n",tokens[nr_token].type);
+          //printf("tp %d\n",tokens[nr_token].type);
           for(int j = 0; j < substr_len; j++){
             //printf("%c\n",e[position + j]);
             tokens[nr_token].str[j] = e[position + j];
@@ -243,7 +243,7 @@ word_t expr(char *e, bool *success) {
     if (tokens[i].type == '*' && (i == 0 || (tokens[i - 1].type != ')'
     && tokens[i - 1].type != TK_DNUMBER && tokens[i - 1].type != TK_HEX
     && tokens[i - 1].type != TK_REG)) ) {
-      printf("%d set to deref\n",i);
+      //printf("%d set to deref\n",i);
       tokens[i].type = TK_DEREF;
     }
   }
