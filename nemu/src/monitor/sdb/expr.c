@@ -234,6 +234,12 @@ word_t expr(char *e, bool *success) {
     *success = 0;
     return 0;
   }
+  for (int i = 0; i < nr_token; i++) {
+    if (tokens[i].type == '*' && (i == 0 || tokens[i - 1].type == ')'
+    || tokens[i - 1].type == TK_DNUMBER || tokens[i - 1].type == TK_EQ) ) {
+      tokens[i].type = TK_DEREF;
+    }
+  }
   bool fail = 0;
   word_t ret = eval(0, nr_token - 1, &fail);
   *success = !fail;

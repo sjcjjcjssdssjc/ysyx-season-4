@@ -12,20 +12,3 @@ void isa_reg_display() {
     printf("%s: %lx\n",regs[i],cpu.gpr[i]);
   }
 }
-
-// word_t isa_reg_str2val(const char *s, bool *success) {
-//   if (!make_token(s)) {
-//     *success = false;
-//     return 0;
-//   }
-//   /* TODO: Implement code to evaluate the expression. */
-
-//   for (i = 0; i < nr_token; i++) {
-//     if (tokens[i].type == '*' && (i == 0 || tokens[i - 1].type == ')' || tokens[i - 1].type == TK_DNUMBER 
-//     || tokens[i - 1].type == TK_EQ) ) {
-//       tokens[i].type = DEREF;
-//     }
-//   }
-//   return eval(0, nr_token - 1);
-
-// }
