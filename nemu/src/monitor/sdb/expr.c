@@ -119,6 +119,7 @@ word_t eval(int p, int q,bool *fail) {
     else if(tokens[p].type == TK_REG){
       for(int i = 0; i < 32; i++){
         if(strcmp(regs[i], tokens[i].str) == 0){
+          printf("%d %ld\n",i,cpu.gpr[i]);
           return cpu.gpr[i];
         }
       }
