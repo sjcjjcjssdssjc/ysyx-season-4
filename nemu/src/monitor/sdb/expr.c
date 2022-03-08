@@ -33,8 +33,8 @@ static struct rule {
   {"\\/", '/'},         // divide
   {"\\(", '('},         
   {"\\)", ')'}, 
+  {"[0][x][0-9+]", TK_HEX}, 
   {"[0-9]+", TK_DNUMBER}, 
-  {"\\x", TK_HEX}, 
   {"==", TK_EQ},        // equal
   {"\\$[0]", TK_REG},
   {"[a-z][a-z]", TK_REG},
