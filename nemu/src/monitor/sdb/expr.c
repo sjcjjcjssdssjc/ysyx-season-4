@@ -118,15 +118,12 @@ word_t eval(int p, int q,bool *fail) {
     }
     else if(tokens[p].type == TK_REG){
       for(int i = 0; i < 32; i++){
-        printf("%s %s\n",regs[i], tokens[i].str);
         if(strcmp(regs[i], tokens[p].str) == 0){
-          printf("%d %ld\n",i,cpu.gpr[i]);
           return cpu.gpr[i];
         }
       }
     } else{
       sscanf(tokens[p].str,"%lx",&val);
-      printf("%lx\n",val);
       return val;
     }
   }
