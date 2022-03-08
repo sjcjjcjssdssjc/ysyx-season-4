@@ -201,7 +201,7 @@ static bool make_token(char *e) {
             return false;
           }
           tokens[nr_token].type = rules[i].token_type;
-          printf("tp %c\n",(char)tokens[nr_token].type);
+          printf("tp %d\n",tokens[nr_token].type);
           for(int j = 0; j < substr_len; j++){
             //printf("%c\n",e[position + j]);
             tokens[nr_token].str[j] = e[position + j];
