@@ -1,4 +1,4 @@
-TOPNAME = top
+TOPNAME = ysyx_22040127_top
 #NXDC_FILES = constr/top.nxdc
 INC_PATH ?=
 
@@ -38,7 +38,7 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 run: $(BIN)
 	@rm -rf logs
 	@mkdir -p logs
-	./build/top 
+	./build/ysyx_22040127_top 
 
 clean:
 	rm -rf $(BUILD_DIR) logs obj_dir

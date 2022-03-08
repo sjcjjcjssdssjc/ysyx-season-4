@@ -1,8 +1,10 @@
-main.o: /home/heisenberg/ysyx-workbench/soj/csrc/main.cpp Vtop.h \
- /usr/local/share/verilator/include/verilated.h \
+main.o: /home/heisenberg/ysyx-workbench/soj/csrc/main.cpp \
+ Vysyx_22040127_top.h /usr/local/share/verilator/include/verilated.h \
  /usr/local/share/verilator/include/verilatedos.h \
  /usr/local/share/verilator/include/verilated_types.h \
  /usr/local/share/verilator/include/verilated_funcs.h \
+ /usr/local/share/verilator/include/vltstd/svdpi.h \
+ Vysyx_22040127_top__Dpi.h \
  /usr/local/share/verilator/include/verilated_vcd_c.h \
  /usr/local/share/verilator/include/verilated.h \
  /usr/local/share/verilator/include/verilated_trace.h \

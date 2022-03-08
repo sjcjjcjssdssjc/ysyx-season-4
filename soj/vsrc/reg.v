@@ -10,18 +10,20 @@
 //     else if (wen) dout <= din;
 //   end
 // endmodule
-module RegisterFile #(ADDR_WIDTH = 5, DATA_WIDTH = 64) (
+module ysyx_22040127_RegisterFile #(ADDR_WIDTH = 5, DATA_WIDTH = 64) (
   input clk,
+  input wen,
   input [DATA_WIDTH-1:0] wdata,
   input [ADDR_WIDTH-1:0] waddr,
   input [ADDR_WIDTH-1:0] raddr1,
   input [ADDR_WIDTH-1:0] raddr2,
-  input wen,
   output[DATA_WIDTH-1:0] rdata1,
-  output[DATA_WIDTH-1:0] rdata2,
+  output[DATA_WIDTH-1:0] rdata2
 );
-  reg [DATA_WIDTH-1:0] rf [ADDR_WIDTH-1:0];
-  assign rf[0] = 0;
+  reg [DATA_WIDTH-1:0] rf [(1<<ADDR_WIDTH)-1:0];
+  wire non_zerow;//waddr != 0
+  assign non_zerow = (|waddr);
+  assign rf[0] = 64'b0;
   assign rdata1 = rf[raddr1];
   assign rdata2 = rf[raddr2];
   always @(posedge clk) begin
