@@ -108,7 +108,6 @@ word_t eval(int p, int q,bool *fail) {
       return 0;
     }
     word_t val = 0;
-    printf("%d %d\n",tokens[p].type, TK_REG);
     if(tokens[p].type == TK_DNUMBER){
       int l = strlen(tokens[p].str);
       for(int i = 0; i < l; i++){
@@ -119,6 +118,7 @@ word_t eval(int p, int q,bool *fail) {
     }
     else if(tokens[p].type == TK_REG){
       for(int i = 0; i < 32; i++){
+        printf("%s %s\n",regs[i], tokens[i].str);
         if(strcmp(regs[i], tokens[i].str) == 0){
           printf("%d %ld\n",i,cpu.gpr[i]);
           return cpu.gpr[i];
