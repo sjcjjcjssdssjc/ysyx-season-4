@@ -93,9 +93,9 @@ int check_parentheses(int p,int q){
   else return 0;
 }
 int level(int c){
-  if(c == '+' || c == '-')return 1;
+  if(c == '+' || c == '-')return 1;//low
   else if(c == '*' || c == '/')return 2;
-  else return 3;
+  else return 3;//high
 }
 word_t eval(int p, int q,bool *fail) {
   if (p > q) {
@@ -146,16 +146,20 @@ word_t eval(int p, int q,bool *fail) {
       *fail = 1;
       return 0;
     }
-    word_t val1 = 0;
-    if(tokens[op].str[0] != '-' || p <= op - 1)
-      val1 = eval(p, op - 1, fail);
-    word_t val2 = eval(op + 1, q, fail);
-    switch (tokens[op].str[0]) {
-      case '+': return val1 + val2;
-      case '-': return val1 - val2;
-      case '*': return val1 * val2;
-      case '/': return val1 / val2;
-      default: assert(0);
+    if(tokens[op].type == TK_DEREF){
+
+    } else{
+      word_t val1 = 0;
+      if(tokens[op].str[0] != '-' || p <= op - 1)//str[0] need to be changed
+        val1 = eval(p, op - 1, fail);
+      word_t val2 = eval(op + 1, q, fail);
+      switch (tokens[op].str[0]) {
+        case '+': return val1 + val2;
+        case '-': return val1 - val2;
+        case '*': return val1 * val2;
+        case '/': return val1 / val2;
+        default: assert(0);
+      }
     }
     
   }
