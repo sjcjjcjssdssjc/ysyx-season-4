@@ -73,8 +73,8 @@ static int nr_token __attribute__((used))  = 0;
 int is_bad(int p,int q){
   int sum = 0;
   for(int i = p; i <= q; i++) {
-    if(tokens[i].str[0] == '(')sum++;
-    else if(tokens[i].str[0] == ')')sum--;
+    if(tokens[i].type == '(')sum++;
+    else if(tokens[i].type == ')')sum--;
     if(sum < 0){
       printf("false parent\n");
       return 1;     
@@ -89,7 +89,7 @@ int is_bad(int p,int q){
 
 int check_parentheses(int p,int q){
   if(!is_bad(p + 1, q - 1) && p <= q 
-  && tokens[p].str[0] == '(' && tokens[q].str[0] == ')')return 1;
+  && tokens[p].type == '(' && tokens[q].type == ')')return 1;
   else return 0;
 }
 int level(int c){
@@ -139,8 +139,8 @@ word_t eval(int p, int q,bool *fail) {
     int op = -1,sum = 0;
     int nowlev = 2;
     for(int i = p; i <= q; i++){
-      if(tokens[i].str[0] == '(')sum++;
-      else if(tokens[i].str[0] == ')')sum--;
+      if(tokens[i].type == '(')sum++;
+      else if(tokens[i].type == ')')sum--;
       //printf("%d %d\n",i,sum);
       if(sum == 0 && level(tokens[i].type) <= nowlev){
         nowlev = level(tokens[i].type);
@@ -152,10 +152,10 @@ word_t eval(int p, int q,bool *fail) {
       return 0;
     } else{
       word_t val1 = 0;
-      if(tokens[op].str[0] != '-' || p <= op - 1)//str[0] need to be changed
+      if(tokens[op].type != '-' || p <= op - 1)//str[0] need to be changed
         val1 = eval(p, op - 1, fail);
       word_t val2 = eval(op + 1, q, fail);
-      switch (tokens[op].str[0]) {
+      switch (tokens[op].type) {
         case '+': return val1 + val2;
         case '-': return val1 - val2;
         case '*': return val1 * val2;
