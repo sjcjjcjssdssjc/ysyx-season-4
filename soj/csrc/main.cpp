@@ -53,7 +53,6 @@ int main(int argc, char** argv, char** env) {
     contextp->timeInc(1);
     dut->clk = !dut->clk; 
     dut->eval();
-    
     tfp->dump(contextp->time());
   }
 
