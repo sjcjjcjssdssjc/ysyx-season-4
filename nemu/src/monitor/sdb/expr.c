@@ -105,13 +105,13 @@ word_t eval(int p, int q,bool *fail) {
   else if (p == q || (q == p + 1 && tokens[p].type == TK_DEREF)) {
     if((q == p + 1 && tokens[p].type == TK_DEREF))
       printf("deref");
-    if(tokens[p].type != TK_DNUMBER && tokens[p].type != TK_HEX && tokens[p].type != TK_REG){
+    if(tokens[p].type == TK_DEREF){
+      return paddr_read(eval(q, q, fail), 8);
+    }else if(tokens[p].type != TK_DNUMBER && tokens[p].type != TK_HEX && tokens[p].type != TK_REG){
       *fail = 1;
       return 0;
     }
-    else if(tokens[p].type == TK_DEREF){
-      return paddr_read(eval(q, q, fail), 8);
-    }
+    
     word_t val = 0;
     if(tokens[p].type == TK_DNUMBER){
       int l = strlen(tokens[p].str);
@@ -251,3 +251,7 @@ word_t expr(char *e, bool *success) {
   //printf("%deee\n",*success);
   return ret;
 }
+// p "2*3"
+// p "2*(t0)"
+// c
+// p "2*(*t0)"
