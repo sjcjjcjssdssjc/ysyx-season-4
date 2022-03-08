@@ -35,6 +35,8 @@ static struct rule {
   {"[0-9]+", TK_DNUMBER}, 
   {"==", TK_EQ},        // equal
   {"\\$[0]", TK_REG},
+  {"[a-z][a-z]", TK_REG},
+  {"[a-z][0-9]+", TK_REG},
 };
 #define TOKEN_NUM 3200
 #define NR_REGEX ARRLEN(rules)
