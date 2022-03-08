@@ -92,7 +92,7 @@ int check_parentheses(int p,int q){
   && tokens[p].str[0] == '(' && tokens[q].str[0] == ')')return 1;
   else return 0;
 }
-int level(char c){
+int level(int c){
   if(c == '+' || c == '-')return 1;
   else if(c == '*' || c == '/')return 2;
   else return 3;
@@ -137,8 +137,8 @@ word_t eval(int p, int q,bool *fail) {
       if(tokens[i].str[0] == '(')sum++;
       else if(tokens[i].str[0] == ')')sum--;
       //printf("%d %d\n",i,sum);
-      if(sum == 0 && level(tokens[i].str[0]) <= nowlev){
-        nowlev = level(tokens[i].str[0]);
+      if(sum == 0 && level(tokens[i].type) <= nowlev){
+        nowlev = level(tokens[i].type);
         op = i;
       }
     }
