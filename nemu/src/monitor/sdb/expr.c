@@ -63,7 +63,6 @@ typedef struct token {
 
 static Token tokens[TOKEN_NUM] __attribute__((used)) = {};
 static int nr_token __attribute__((used))  = 0;
-int tot = 0;
 
 int is_bad(int p,int q){
   int sum = 0;
@@ -178,13 +177,13 @@ static bool make_token(char *e) {
             printf("too long\n");
             return false;
           }
-          tokens[tot].type = rules[i].token_type;
+          tokens[nr_token].type = rules[i].token_type;
           for(int j = 0; j < substr_len; j++){
             //printf("%c\n",e[position + j]);
-            tokens[tot].str[j] = e[position + j];
+            tokens[nr_token].str[j] = e[position + j];
           }
           //printf("%s\n",tokens[tot].str);
-          tot++;
+          nr_token++;
         }
         position += substr_len;
         //printf("aft: %d",position);
@@ -202,19 +201,19 @@ static bool make_token(char *e) {
 
 
 word_t expr(char *e, bool *success) {
-  tot = 0;
+  nr_token = 0;
   if (!make_token(e)) {
     *success = false;
     return 0;
   }
 
 
-  if(is_bad(0,tot - 1)){
+  if(is_bad(0,nr_token - 1)){
     *success = 0;
     return 0;
   }
   bool fail = 0;
-  word_t ret = eval(0, tot - 1, &fail);
+  word_t ret = eval(0, nr_token - 1, &fail);
   *success = !fail;
   //printf("%deee\n",*success);
   return ret;

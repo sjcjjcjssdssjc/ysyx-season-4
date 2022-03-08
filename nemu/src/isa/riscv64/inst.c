@@ -21,10 +21,12 @@ enum {
 #define destI(i) do { *dest = i; } while (0)
 
 static word_t immI(uint32_t i) { return SEXT(BITS(i, 31, 20), 12); }
-static word_t immB(uint32_t i) { return SEXT(BITS(i, 31, 31), 1) << 12 | BITS(i, 30, 25) << 5 | BITS(i, 11, 8) << 1 | BITS(i, 7, 7) << 11; }//careful
+static word_t immB(uint32_t i) { return SEXT(BITS(i, 31, 31), 1) << 12
+ | BITS(i, 30, 25) << 5 | BITS(i, 11, 8) << 1 | BITS(i, 7, 7) << 11; }//careful
 static word_t immU(uint32_t i) { return SEXT(BITS(i, 31, 12), 20) << 12; }
 static word_t immS(uint32_t i) { return (SEXT(BITS(i, 31, 25), 7) << 5) | BITS(i, 11, 7); }
-static word_t immJ(uint32_t i) { return (SEXT(BITS(i, 31, 31), 1) << 20) | BITS(i, 30, 21) << 1 | BITS(i, 20, 20) << 11 | BITS(i, 19, 12) << 12; }
+static word_t immJ(uint32_t i) { return (SEXT(BITS(i, 31, 31), 1) << 20) | BITS(i, 30, 21) << 1 
+| BITS(i, 20, 20) << 11 | BITS(i, 19, 12) << 12; }
 static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, int type) {
   uint32_t i = s->isa.inst.val;
   int rd  = BITS(i, 11, 7);
@@ -133,8 +135,6 @@ static int decode_exec(Decode *s) {
   INSTPAT("000000? ????? ????? 001 ????? 00100 11", slli   , I, R(dest) = src1 << (src2 & 0x3F));//new
   INSTPAT("000000? ????? ????? 001 ????? 00110 11", slliw  , I, R(dest) = SEXT(src1 << (src2 & 0x3F), 32));//new
   INSTPAT("000000? ????? ????? 101 ????? 00110 11", srliw  , I, R(dest) = SEXT((src1 & 0xFFFFFFFF) >> src2, 32));//new
-
-
   INSTPAT("??????? ????? ????? 011 ????? 01000 11", sd     , S, Mw(src1 + dest, 8, src2));
   INSTPAT("??????? ????? ????? 000 ????? 01000 11", sb     , S, Mw(src1 + dest, 1, src2 & 0xFF));//(need RSC)
   INSTPAT("??????? ????? ????? 001 ????? 01000 11", sh     , S, Mw(src1 + dest, 2, src2 & 0xFFFF));//(need RSC)
@@ -145,7 +145,6 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? 110 ????? 11000 11", bltu   , B, bltu_op(dest, src1, src2, s));//newnew
   INSTPAT("??????? ????? ????? 101 ????? 11000 11", bge    , B, bge_op(dest, src1, src2, s));//newnew
   INSTPAT("??????? ????? ????? 111 ????? 11000 11", bgeu   , B, bgeu_op(dest, src1, src2, s));
-
   INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal    , J, jal_op(dest, src1, s));
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
