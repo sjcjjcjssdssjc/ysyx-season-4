@@ -79,6 +79,7 @@ static int cmd_watch(char * args){
   int l = strlen(arg);
   wp -> expr = (char *)malloc(l);
   memcpy(wp -> expr, arg, l);
+  wp -> expr[l] = 0;
   wp -> val = expr(wp -> expr , &success);
   if(success == 0)assert(0);
   return success;
