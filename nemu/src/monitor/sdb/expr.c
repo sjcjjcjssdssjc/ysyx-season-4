@@ -6,7 +6,7 @@
 #include <regex.h>
 #include <string.h>
 
-
+extern const char *regs[];
 enum {
   TK_NOTYPE = 256, TK_EQ,
   TK_DNUMBER,//decimal
@@ -103,7 +103,7 @@ word_t eval(int p, int q,bool *fail) {
     return 0;
   }
   else if (p == q) {
-    if(tokens[p].type != TK_DNUMBER && tokens[p].type != TK_HEX){
+    if(tokens[p].type != TK_DNUMBER && tokens[p].type != TK_HEX && tokens[p].type != TK_REG){
       *fail = 1;
       return 0;
     }
@@ -116,7 +116,13 @@ word_t eval(int p, int q,bool *fail) {
       }
       return val;
     }
-    else{
+    else if(tokens[p].type == TK_REG){
+      for(int i = 0; i < 32; i++){
+        if(strcmp(regs[i], tokens[i].str) == 0){
+          return cpu.gpr[i];
+        }
+      }
+    } else{
       sscanf(tokens[p].str,"%lx",&val);
       printf("%lx\n",val);
       return val;
@@ -154,6 +160,7 @@ word_t eval(int p, int q,bool *fail) {
     }
     
   }
+  return -1;
 }
 
 
