@@ -141,7 +141,7 @@ word_t eval(int p, int q,bool *fail) {
     for(int i = p; i <= q; i++){
       if(tokens[i].type == '(')sum++;
       else if(tokens[i].type == ')')sum--;
-      printf("%d %c\n",i,(char)tokens[i].type);
+      //printf("%d %c\n",i,(char)tokens[i].type);
       if(sum == 0 && level(tokens[i].type) <= nowlev){
         nowlev = level(tokens[i].type);
         op = i;
@@ -201,6 +201,7 @@ static bool make_token(char *e) {
             return false;
           }
           tokens[nr_token].type = rules[i].token_type;
+          printf("tp %c\n",(char)tokens[nr_token].type);
           for(int j = 0; j < substr_len; j++){
             //printf("%c\n",e[position + j]);
             tokens[nr_token].str[j] = e[position + j];
