@@ -141,7 +141,7 @@ word_t eval(int p, int q,bool *fail) {
     for(int i = p; i <= q; i++){
       if(tokens[i].type == '(')sum++;
       else if(tokens[i].type == ')')sum--;
-      //printf("%d %d\n",i,sum);
+      printf("%d %c\n",i,(char)tokens[i].type);
       if(sum == 0 && level(tokens[i].type) <= nowlev){
         nowlev = level(tokens[i].type);
         op = i;
