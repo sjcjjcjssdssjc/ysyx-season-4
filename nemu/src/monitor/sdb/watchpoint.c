@@ -61,7 +61,7 @@ void seek_changes(){
   WP * now;
   for(now = head; now != NULL; now = now -> next){
     bool sanity;
-    word_t val = expr(now -> expr, &sanity) ;
+    word_t val = expr(now -> expr, &sanity);//expr has no ""
     if(!sanity){
       printf("the watchpoint is insane\n");
     }
@@ -70,6 +70,7 @@ void seek_changes(){
       printf("watchpoint %s changed from %ld(%lx)to %ld(%lx)\n",now -> expr, 
       now -> val, now -> val, val, val);
       now -> val = val;
+
     }
   }
 }
