@@ -9,6 +9,15 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+typedef struct watchpoint {
+  int NO;
+  struct watchpoint *next;
+
+  /* TODO: Add more members if necessary */
+  char *expr;
+  word_t val;//val of expr
+} WP;
+extern WP* new_wp();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -68,7 +77,13 @@ static int cmd_info(char *args) {
     isa_reg_display();
   }
   else if(arg[0] == 'w'){
-    
+    arg = strtok(NULL, "\"");
+    bool success = 1;
+    WP* wp = new_wp();
+    if(wp == 0)assert(0);
+    wp -> expr = (char *)malloc(strlen(arg));
+    wp -> val = expr(arg, &success);
+    if(success == 0)assert(0);
   }else printf("unknown instruction\n");
   return 0;
 }
