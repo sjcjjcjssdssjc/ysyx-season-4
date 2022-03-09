@@ -68,7 +68,7 @@ void seek_changes(){
     }
     else if(val != now -> val){
 
-      printf("watchpoint %s changed from %ld(%lx)to %ld(%lx)\n",now -> expr, 
+      printf("watchpoint %s changed from %ld(0x%lx)to %ld(0x%lx)\n",now -> expr, 
       now -> val, now -> val, val, val);
       now -> val = val;
       nemu_state.state = NEMU_STOP;
@@ -78,6 +78,6 @@ void seek_changes(){
 void info_wp(){
   WP * now;
   for(now = head; now != NULL; now = now -> next){
-    printf("value of watchpoint %s is %ld(%lx)\n",now -> expr, now -> val, now -> val);
+    printf("value of watchpoint %s is %ld(0x%lx)\n",now -> expr, now -> val, now -> val);
   }
 }
