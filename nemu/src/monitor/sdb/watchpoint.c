@@ -81,9 +81,9 @@ void info_wp(){
   for(now = head; now != NULL; now = now -> next){
     printf("value of watchpoint %s is %ld(0x%lx)\n",now -> expr, now -> val, now -> val);
   }
-  for(now = free_; now != NULL; now = now -> next){
-    printf("value of free watchpoint %d\n",now->NO);
-  }
+  // for(now = free_; now != NULL; now = now -> next){
+  //   printf("value of free watchpoint %d\n",now->NO);
+  // }
 }
 /*
 watch "ra"
@@ -92,7 +92,7 @@ watch "a1"
 watch "a2"
 c
 d "ra"
-d "sp"
+d "a1"
 c
 watch "ra"
 c
