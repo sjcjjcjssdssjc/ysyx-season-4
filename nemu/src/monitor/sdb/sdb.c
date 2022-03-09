@@ -9,6 +9,7 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+void info_wp();
 typedef struct watchpoint {
   int NO;
   struct watchpoint *next;
@@ -90,7 +91,7 @@ static int cmd_info(char *args) {
     isa_reg_display();
   }
   else if(arg[0] == 'w'){//and delete,menuconfig
-    
+    info_wp();
   }else printf("unknown instruction\n");
   return 0;
 }

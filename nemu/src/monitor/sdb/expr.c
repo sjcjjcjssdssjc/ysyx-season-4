@@ -76,12 +76,10 @@ int is_bad(int p,int q){
     if(tokens[i].type == '(')sum++;
     else if(tokens[i].type == ')')sum--;
     if(sum < 0){
-      printf("false parent\n");
       return 1;     
     }
   }
   if(sum != 0){
-    printf("false parent\n");
     return 1;
   }
   return 0;
