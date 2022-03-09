@@ -46,10 +46,11 @@ WP* new_wp(){
   }
   return 0;
 }
-void free_wp(WP *wp){
-  WP * now;
+void free_wp(char *arg){
+  WP *now, *wp;
   for(now = head; now != NULL; now = now -> next){
-    if(now -> next == wp){
+    if(now -> next && strcmp(now -> next -> expr, arg) == 0){
+      wp = now -> next;
       now -> next = wp -> next;
       wp -> next = free_;
       free_ = wp;
@@ -81,3 +82,23 @@ void info_wp(){
     printf("value of watchpoint %s is %ld(0x%lx)\n",now -> expr, now -> val, now -> val);
   }
 }
+/*
+watch "ra"
+watch "sp"
+watch "a1"
+watch "a2"
+c
+d "ra"
+d "sp"
+c
+watch "ra"
+c
+d "ra"
+d "a1"
+c
+info w
+c
+d "a2"
+info w
+q
+*/

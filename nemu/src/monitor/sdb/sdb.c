@@ -10,6 +10,7 @@ static int is_batch_mode = false;
 void init_regex();
 void init_wp_pool();
 void info_wp();
+void free_wp(char *arg);
 typedef struct watchpoint {
   int NO;
   struct watchpoint *next;
@@ -41,7 +42,11 @@ static int cmd_c(char *args) {
   cpu_exec(-1);
   return 0;
 }
-
+static int cmd_d(char *args){
+  char *arg = strtok(NULL, " ");//first
+  free_wp(arg);
+  return 0;
+}
 
 static int cmd_q(char *args) {
   exit(0);
@@ -118,6 +123,7 @@ static struct {
   { "x","scan the memory", cmd_x},
   { "p", "Value of expression", cmd_p },
   { "watch", "watch variable and see when it changes", cmd_watch },
+  { "d", "delete the watchpoint", cmd_d },
   /* TODO: Add more commands */
 
 };
