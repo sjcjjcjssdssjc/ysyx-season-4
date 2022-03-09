@@ -43,7 +43,7 @@ static int cmd_c(char *args) {
   return 0;
 }
 static int cmd_d(char *args){
-  char *arg = strtok(NULL, " ");//first
+  char *arg = strtok(NULL, "\"");//first
   free_wp(arg);
   return 0;
 }
