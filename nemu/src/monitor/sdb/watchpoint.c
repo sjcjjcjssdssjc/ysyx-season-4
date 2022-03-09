@@ -82,7 +82,7 @@ void info_wp(){
     printf("value of watchpoint %s is %ld(0x%lx)\n",now -> expr, now -> val, now -> val);
   }
   for(now = free_; now != NULL; now = now -> next){
-    printf("value of free watchpoint %d",now->NO);
+    printf("value of free watchpoint %d\n",now->NO);
   }
 }
 /*
