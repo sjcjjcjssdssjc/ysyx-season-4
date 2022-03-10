@@ -60,9 +60,9 @@ static void exec_once(Decode *s, vaddr_t pc) {
     ind += sprintf(iringbuf[iring_tail] + ind, " %02x ",inst[i]);
   }
   ind += sprintf(iringbuf[iring_tail] + ind, "%s",p);
+  printf("%s\n",iringbuf[iring_tail - 1]);
   iring_tail = (iring_tail + 1) % IRINGBUF_SIZE;
   if(!iring_tail)overburden = 1;
-  printf("%s\n",iringbuf[iring_tail - 1]);
   //printf("%lx: %02x %02x %02x %02x %s\n",tmp,inst[0],p);
   //printf("")
 #endif
