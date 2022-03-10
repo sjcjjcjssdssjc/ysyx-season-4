@@ -57,7 +57,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   int ind = 0;
   ind += sprintf(iringbuf[iring_tail], "%lx: ",tmp);
   for (i = 0; i < ilen; i ++) {
-    ind += sprintf(iringbuf[iring_tail] + ind, " %02x",inst[i]);
+    ind += sprintf(iringbuf[iring_tail] + ind, " %02x ",inst[i]);
   }
   ind += sprintf(iringbuf[iring_tail] + ind, "%s\n",p);
   iring_tail = (iring_tail + 1) % IRINGBUF_SIZE;
