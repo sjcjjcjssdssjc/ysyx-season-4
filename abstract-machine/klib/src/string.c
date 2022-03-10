@@ -16,15 +16,13 @@ char *strcpy(char *dest, const char *src) {
 	return tmp;
 }
 
-char *strncpy(char *dest, const char *src, size_t n) {
-  char *tmp = dest;
-	while (n) {
-		if ((*tmp = *src) != 0)
+char *strncpy(char *dst, const char *src, size_t n) {
+  char *tmp = dst;
+	while (n--) {
+		if ((*tmp++ = *src) != 0)
 			src++;
-		tmp++;
-		n--;
 	}
-	return dest;
+	return dst;
 }
 
 char *strcat(char *dest, const char *src) {
