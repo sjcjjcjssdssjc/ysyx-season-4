@@ -18,7 +18,6 @@ char *strcpy(char *dst, const char *src) {
     tmp++;
     src++;
   }
-	//while ((*dest++ = *src++) != 0);
 	return dst;
 }
 
@@ -35,9 +34,12 @@ char *strncpy(char *dst, const char *src, size_t n) {
 
 char *strcat(char *dst, const char *src) {
   char *tmp = dst;
-	while (*dst++);
+	while (*dst)dst++;
   dst--;
-	while ((*dst++ = *src++) != 0);
+	while ((*dst = *src)){
+    dst++;
+    src++;
+  }
 	return tmp;
 }
 
