@@ -86,10 +86,10 @@ void *memmove(void *dest, const void *src, size_t n) {
 }
 
 void *memcpy(void *dest, const void *src, size_t n) {
-  char *tmp = dest;
+  char *d = dest;
 	const char *s = src;
 	while (n--)
-		*tmp++ = *s++;
+		*d++ = *s++;
 	return dest;
 }
 
