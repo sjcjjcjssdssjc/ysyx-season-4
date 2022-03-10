@@ -25,11 +25,11 @@ char *strncpy(char *dst, const char *src, size_t n) {
 	return dst;
 }
 
-char *strcat(char *dest, const char *src) {
-  char *tmp = dest;
-	while (*dest++);
-  dest--;
-	while ((*dest++ = *src++) != '\0');
+char *strcat(char *dst, const char *src) {
+  char *tmp = dst;
+	while (*dst++);
+  dst--;
+	while ((*dst++ = *src++) != '\0');
 	return tmp;
 }
 
