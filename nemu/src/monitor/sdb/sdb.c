@@ -76,6 +76,7 @@ static int cmd_p(char * args){
   else printf("invalid.\n");
   return success;
 }
+
 static int cmd_watch(char * args){
   char *arg = strtok(NULL, "\"");//second (there is no "")
   bool success;
@@ -90,6 +91,7 @@ static int cmd_watch(char * args){
   if(success == 0)assert(0);
   return success;
 }
+
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
   if(arg[0] == 'r'){
