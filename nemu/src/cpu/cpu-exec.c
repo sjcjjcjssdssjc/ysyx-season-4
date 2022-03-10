@@ -56,13 +56,13 @@ static void exec_once(Decode *s, vaddr_t pc) {
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
   int ind = 0;
   ind += sprintf(iringbuf[iring_tail], "%lx: ",tmp);
-  // for (i = 0; i < ilen; i ++) {
-  //   ind += sprintf(iringbuf[iring_tail] + ind, " %02x",inst[i]);
-  // }
-  // ind += sprintf(iringbuf[iring_tail] + ind, "%s\n",p);
+  for (i = 0; i < ilen; i ++) {
+    ind += sprintf(iringbuf[iring_tail] + ind, " %02x",inst[i]);
+  }
+  ind += sprintf(iringbuf[iring_tail] + ind, "%s\n",p);
   iring_tail = (iring_tail + 1) % IRINGBUF_SIZE;
   if(!iring_tail)overburden = 1;
-  printf("%s\n",iringbuf[iring_tail]);
+  printf("%s\n",iringbuf[0]);
   //printf("%lx: %02x %02x %02x %02x %s\n",tmp,inst[0],p);
   //printf("")
 #endif
