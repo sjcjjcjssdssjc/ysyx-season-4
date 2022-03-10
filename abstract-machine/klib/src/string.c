@@ -43,14 +43,13 @@ char *strcat(char *dst, const char *src) {
 }
 
 int strcmp(const char *s1, const char *s2) {
-  unsigned char c1, c2;
-	while (1) {
-		c1 = *s1++;
-		c2 = *s2++;
-		if (c1 != c2)
-			return c1 < c2 ? -1 : 1;
-		else if (!c1)break;
+  unsigned char c1 = *s1, c2 = *s2;
+	while (c1 == c2 && c1) {
+		c1 = *++s1;
+		c2 = *++s2;
 	}
+	if (c1 != c2)
+		return c1 < c2 ? -1 : 1;
 	return 0;
 }
 
