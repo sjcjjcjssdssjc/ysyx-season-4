@@ -9,7 +9,7 @@
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 10
-#define IRINGBUF_SIZE 16
+#define IRINGBUF_SIZE 8
 
 CPU_state cpu = {};
 int overburden = 0, iring_tail = 0;
@@ -20,6 +20,16 @@ static bool g_print_step = false;
 
 void device_update();
 void seek_changes();
+static void print_surrounding_inst(){
+  
+  int i = 0;
+  if(overburden)i = (iring_tail + 1) % IRINGBUF_SIZE;
+  for(; i != iring_tail; i = (i + 1) % IRINGBUF_SIZE){
+    if(i != iring_tail)printf("    %s\n",iringbuf[i]);
+    else printf("--> %s\n",iringbuf[i]);
+  }
+  
+}
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
@@ -60,7 +70,6 @@ static void exec_once(Decode *s, vaddr_t pc) {
     ind += sprintf(iringbuf[iring_tail] + ind, " %02x ",inst[i]);
   }
   ind += sprintf(iringbuf[iring_tail] + ind, "%s",p);
-  printf("%s\n",iringbuf[iring_tail]);
   iring_tail = (iring_tail + 1) % IRINGBUF_SIZE;
   if(!iring_tail)overburden = 1;
   //printf("%lx: %02x %02x %02x %02x %s\n",tmp,inst[0],p);
@@ -91,6 +100,7 @@ static void statistic() {
 void assert_fail_msg() {
   isa_reg_display();
   statistic();
+  print_surrounding_inst();
 }
 
 /* Simulate how the CPU works. */
