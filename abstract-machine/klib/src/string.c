@@ -10,9 +10,15 @@ size_t strlen(const char *s) {
 	return now - s;
 }
 
-char *strcpy(char *dest, const char *src) {
-  char *tmp = dest;
-	while ((*dest++ = *src++) != 0);
+char *strcpy(char *dst, const char *src) {
+  char *tmp = dst;
+  int l = strlen(src);
+  for(int i = 0; i < l ;i++){
+    *tmp = *src;
+    tmp++;
+    src++;
+  }
+	//while ((*dest++ = *src++) != 0);
 	return tmp;
 }
 
@@ -24,10 +30,6 @@ char *strncpy(char *dst, const char *src, size_t n) {
     tmp++;
     src++;
   }
-	// while (n--) {
-	// 	if ((*tmp++ = *src) != 0)
-	// 		src++;
-	// }
 	return dst;
 }
 
