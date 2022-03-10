@@ -67,18 +67,18 @@ void *memset(void *s, int c, size_t n) {
 void *memmove(void *dest, const void *src, size_t n) {
   char *tmp;
 	const char *s;
-	if (dest <= src) {
+	if (dest <= src) {//process the overlap
 		tmp = dest;
 		s = src;
 		while (n--)
 			*tmp++ = *s++;
-	} else {
+	} else {//src  dest
 		tmp = dest;
-		tmp += n;
+		//tmp += n;
 		s = src;
-		s += n;
-		while (n--)
-			*--tmp = *--s;
+		//s += n;
+while (n--)
+			*tmp++ = *s++;
 	}
 	return dest;
 }
