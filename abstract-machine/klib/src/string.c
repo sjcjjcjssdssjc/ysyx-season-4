@@ -30,6 +30,7 @@ char *strncpy(char *dest, const char *src, size_t n) {
 char *strcat(char *dest, const char *src) {
   char *tmp = dest;
 	while (*dest++);
+  dest--;
 	while ((*dest++ = *src++) != '\0');
 	return tmp;
 }
