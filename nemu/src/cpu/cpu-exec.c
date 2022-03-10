@@ -26,9 +26,9 @@ static void print_surrounding_inst(){
   printf("%d\n",overburden);
   if(overburden)i = (iring_tail);
   for(; (i + 1) % IRINGBUF_SIZE != iring_tail; i = (i + 1) % IRINGBUF_SIZE){
-    if(i != iring_tail)printf("    %s\n",iringbuf[i]);
-    else printf("--> %s\n",iringbuf[i]);
+    printf("    %s\n",iringbuf[i]);
   }
+  printf("--> %s\n",iringbuf[i]);
   
 }
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
