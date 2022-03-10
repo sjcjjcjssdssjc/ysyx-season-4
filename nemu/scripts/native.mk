@@ -11,7 +11,7 @@ $(BINARY): compile_git
 
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
-ifdef CONFIG_BATCH
+ifndef CONFIG_BATCH
 override ARGS += --b
 endif
 
