@@ -10,13 +10,45 @@ int printf(const char *fmt, ...) {
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
-  panic("Not implemented");
+  char *now;
+  for(now = out;*fmt != 0;fmt++){
+    if(*fmt != '%'){
+      *now = *fmt;
+      now++;
+    }
+    else{
+      fmt++;
+      if(*fmt == 'd'){
+        int num = va_arg(ap, int);
+        int rev = 0;
+        while(num){
+          rev *= 10;
+          rev += num % 10;
+          num /= 10;
+        }
+        while(rev){
+          *out++ = rev % 10 + '0';
+          rev /= 10;
+        }
+      }
+      else if(*fmt == 's'){//s
+        char *tmp = va_arg(ap, char *);
+        int l = strlen(tmp);
+        while(l--)*now++ = *tmp++;
+      }
+    }
+  }
+  *now = 0;
+  return now - out;//return the length of the string
 }
 
 int sprintf(char *out, const char *fmt, ...) {
-  va_list args;
-  va_start(args, fmt);
-  return 0;
+  int ret;
+  va_list ap;
+  va_start(ap, fmt);
+  ret = vsprintf(out, fmt, ap);
+  va_end(ap);
+  return ret;
 }
 
 int snprintf(char *out, size_t n, const char *fmt, ...) {
