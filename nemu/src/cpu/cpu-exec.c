@@ -74,7 +74,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   if(!iring_tail && !first_inst)overburden = 1;
   first_inst = 0;
   iring_tail = (iring_tail + 1) % IRINGBUF_SIZE;
-  print_surrounding_inst();
+  //print_surrounding_inst();
   //printf("%lx: %02x %02x %02x %02x %s\n",tmp,inst[0],p);
   //printf("")
 #endif
