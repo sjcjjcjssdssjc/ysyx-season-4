@@ -219,6 +219,6 @@ config BATCH
   default y
 config WATCHPOINT
   bool "Enable watchpoint"
-  default n
+  default y
 
 endmenu
