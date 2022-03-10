@@ -92,13 +92,13 @@ void *memcpy(void *dest, const void *src, size_t n) {
 }
 
 int memcmp(const void *s1, const void *s2, size_t n) {
-  const char *su1, *su2;
+  const char *dst = s1, *src = s2;
 	int res = 0;
-	for (su1 = s1, su2 = s2; n > 0; n--){
-		if ((res = *su1 - *su2) != 0)
+	while(n--){
+		if ((*dst - *src))
 			break;
-    su1++;
-    su2++;
+    dst++;
+    src++;
   }
 	return res;
 }
