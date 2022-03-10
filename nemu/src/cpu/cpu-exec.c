@@ -9,10 +9,11 @@
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 10
+#define IRINGBUF_SIZE 16
 
 CPU_state cpu = {};
-int iring_front = 0, iring_end = 0;
-char iringbuf[15][100];
+int overburden = 0, iring_tail = 0;
+char iringbuf[IRINGBUF_SIZE][100];
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
@@ -53,7 +54,17 @@ static void exec_once(Decode *s, vaddr_t pc) {
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
       MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
-  printf("%lx: %s\n",tmp,p);
+  int ind = 0;
+  ind += sprintf(iringbuf[iring_tail], "%lx: ",tmp);
+  for (i = 0; i < ilen; i ++) {
+    ind += sprintf(iringbuf[iring_tail] + ind, " %02x",inst[i]);
+  }
+  ind += sprintf(iringbuf[iring_tail] + ind, "%s\n",p);
+  iring_tail = (iring_tail + 1) % IRINGBUF_SIZE;
+  if(!iring_tail)overburden = 1;
+  printf("%s\n",iringbuf[iring_tail]);
+  //printf("%lx: %02x %02x %02x %02x %s\n",tmp,inst[0],p);
+  //printf("")
 #endif
 }
 
