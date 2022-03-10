@@ -5,8 +5,9 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 size_t strlen(const char *s) {
-  const char *now;
-	for (now = s; *now != '\0'; now++);
+  const char *now = s;
+  while(*now != 0)now++;
+	//for (now = s; *now != '\0'; now++);
 	return now - s;
 }
 
