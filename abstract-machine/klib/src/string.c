@@ -7,13 +7,12 @@
 size_t strlen(const char *s) {
   const char *now = s;
   while(*now != 0)now++;
-	//for (now = s; *now != '\0'; now++);
 	return now - s;
 }
 
 char *strcpy(char *dest, const char *src) {
   char *tmp = dest;
-	while ((*dest++ = *src++) != '\0');
+	while ((*dest++ = *src++) != 0);
 	return tmp;
 }
 
@@ -30,7 +29,7 @@ char *strcat(char *dst, const char *src) {
   char *tmp = dst;
 	while (*dst++);
   dst--;
-	while ((*dst++ = *src++) != '\0');
+	while ((*dst++ = *src++) != 0);
 	return tmp;
 }
 
