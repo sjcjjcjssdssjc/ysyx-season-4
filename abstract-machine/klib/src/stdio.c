@@ -27,7 +27,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
           num /= 10;
         }
         while(rev){
-          *out++ = rev % 10 + '0';
+          *now++ = rev % 10 + '0';
           rev /= 10;
         }
       }
