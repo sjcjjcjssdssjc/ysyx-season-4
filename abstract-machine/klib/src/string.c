@@ -18,10 +18,16 @@ char *strcpy(char *dest, const char *src) {
 
 char *strncpy(char *dst, const char *src, size_t n) {
   char *tmp = dst;
-	while (n--) {
-		if ((*tmp++ = *src) != 0)
-			src++;
-	}
+  int l = strlen(src);
+  for(int i = 0;i < n && i < l;i++){
+    *tmp = *src;
+    tmp++;
+    src++;
+  }
+	// while (n--) {
+	// 	if ((*tmp++ = *src) != 0)
+	// 		src++;
+	// }
 	return dst;
 }
 
