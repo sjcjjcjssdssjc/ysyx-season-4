@@ -20,13 +20,14 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       fmt++;
       if(*fmt == 'd'){
         int num = va_arg(ap, int);
-        int rev = 0;
+        int rev = 0,len = 0;
         while(num){
           rev *= 10;
           rev += num % 10;
           num /= 10;
+          len++;
         }
-        while(rev){
+        while(len--){
           *now++ = rev % 10 + '0';
           rev /= 10;
         }
