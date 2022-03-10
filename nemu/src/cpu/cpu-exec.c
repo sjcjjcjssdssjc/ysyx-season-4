@@ -12,7 +12,7 @@
 #define IRINGBUF_SIZE 2
 
 CPU_state cpu = {};
-int overburden = 0, iring_tail = 0;
+int overburden = 0, iring_tail = 0, first_inst = 1;
 char iringbuf[IRINGBUF_SIZE][100];
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
@@ -71,8 +71,9 @@ static void exec_once(Decode *s, vaddr_t pc) {
     ind += sprintf(iringbuf[iring_tail] + ind, " %02x ",inst[i]);
   }
   ind += sprintf(iringbuf[iring_tail] + ind, "%s",p);
+  if(!iring_tail && !first_inst)overburden = 1;
+  first_inst = 0;
   iring_tail = (iring_tail + 1) % IRINGBUF_SIZE;
-  if(!iring_tail)overburden = 1;
   print_surrounding_inst();
   //printf("%lx: %02x %02x %02x %02x %s\n",tmp,inst[0],p);
   //printf("")
