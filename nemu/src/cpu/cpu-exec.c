@@ -9,7 +9,7 @@
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 10
-#define IRINGBUF_SIZE 8
+#define IRINGBUF_SIZE 2
 
 CPU_state cpu = {};
 int overburden = 0, iring_tail = 0;
