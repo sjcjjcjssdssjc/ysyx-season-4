@@ -9,7 +9,7 @@
  * You can modify this value as you want.
  */
 #define MAX_INST_TO_PRINT 10
-#define IRINGBUF_SIZE 2
+#define IRINGBUF_SIZE 3 //must be >= 3
 
 CPU_state cpu = {};
 int overburden = 0, iring_tail = 0, first_inst = 1;
@@ -25,7 +25,7 @@ static void print_surrounding_inst(){
   int i = 0;
   printf("%d\n",overburden);
   if(overburden)i = (iring_tail);
-  for(; (i + 1) % IRINGBUF_SIZE != iring_tail; i = (i + 1) % IRINGBUF_SIZE){
+  for(; i != iring_tail; i = (i + 1) % IRINGBUF_SIZE){
     if(i != iring_tail)printf("    %s\n",iringbuf[i]);
     else printf("--> %s\n",iringbuf[i]);
   }
