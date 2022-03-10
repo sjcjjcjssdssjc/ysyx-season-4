@@ -217,5 +217,8 @@ config RT_CHECK
 config BATCH
   bool "Enable batch processing"
   default y
+config WATCHPOINT
+  bool "Enable watchpoint"
+  default n
 
 endmenu
