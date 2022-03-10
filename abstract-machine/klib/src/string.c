@@ -54,14 +54,13 @@ int strcmp(const char *s1, const char *s2) {
 }
 
 int strncmp(const char *s1, const char *s2, size_t n) {
-  unsigned char c1, c2;
-	while (n--) {
-		c1 = *s1++;
-		c2 = *s2++;
-		if (c1 != c2)
-			return c1 < c2 ? -1 : 1;
-		else if (!c1)break;
+  unsigned char c1 = *s1, c2 = *s2;
+	while (n-- && c1 == c2 && c1) {
+		c1 = *++s1;
+		c2 = *++s2;
 	}
+	if (c1 != c2)
+		return c1 < c2 ? -1 : 1;
 	return 0;
 }
 
