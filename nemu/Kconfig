@@ -214,7 +214,7 @@ endchoice
 config RT_CHECK
   bool "Enable runtime checking"
   default y
-config CONFIG_BATCH
+config BATCH
   bool "Enable batch processing"
   default y
 
