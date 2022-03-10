@@ -23,7 +23,7 @@ void seek_changes();
 static void print_surrounding_inst(){
   
   int i = 0;
-  printf("%d\n",overburden);
+  //printf("%d\n",overburden);
   if(overburden)i = (iring_tail);
   for(; (i + 1) % IRINGBUF_SIZE != iring_tail; i = (i + 1) % IRINGBUF_SIZE){
     printf("    %s\n",iringbuf[i]);
