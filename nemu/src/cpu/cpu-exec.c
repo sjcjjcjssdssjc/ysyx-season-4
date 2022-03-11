@@ -27,6 +27,7 @@ bool ftrace = 0;
 void device_update();
 void seek_changes();
 void parse_elf(const char *elf_file){
+  if(elf_file == NULL)return;
   ftrace = 1;//give elf, so we trace
   FILE *fp;
   fp = fopen(elf_file, "rb");
