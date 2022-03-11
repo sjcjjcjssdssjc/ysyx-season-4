@@ -8,7 +8,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 //#define __NATIVE_USE_KLIB__
 
 // string.h
