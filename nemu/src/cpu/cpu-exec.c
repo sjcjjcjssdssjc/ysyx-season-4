@@ -2,6 +2,9 @@
 #include <cpu/decode.h>
 #include <cpu/difftest.h>
 #include <locale.h>
+#include <common.h>
+#include <elf.h>
+#include <string.h>
 
 /* The assembly code of instructions executed is only output to the screen
  * when the number of instructions executed is less than this value.
@@ -12,14 +15,46 @@
 #define IRINGBUF_SIZE 8 //must be >= 3
 
 CPU_state cpu = {};
-int overburden = 0, iring_tail = 0, first_inst = 1;
 char iringbuf[IRINGBUF_SIZE][100];
+int overburden = 0;
+int iring_tail = 0;
+int first_inst = 1;
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
+bool ftrace = 0;
 
 void device_update();
 void seek_changes();
+void parse_elf(const char *elf_file){
+  ftrace = 1;//give elf, so we trace
+  FILE *fp;
+  fp = fopen(elf_file, "rb");
+  if(fp){
+    Elf64_Ehdr header; 
+    int ret = fread(&header, 1, sizeof(header), fp);
+    if(!ret)panic("cannot read file");
+    // check so its really an elf file
+    if(header.e_type == 0x7f &&
+       header.e_ident[1] == 'E' &&
+       header.e_ident[2] == 'L' &&
+       header.e_ident[3] == 'F') {
+       printf("ok\n");
+       // write the header to the output file
+       //FILE* fout = fopen(outputFile, "wb");
+       //if(fout) {
+       //  fwrite(&header, 1, sizeof(header), fout);
+       //  fclose(fout);
+       //}
+     }
+
+    // finally close the file
+    fclose(fp);
+  }
+  else{
+    panic("elf file err");
+  }
+}
 static void print_surrounding_inst(){
   
   int i = 0;
