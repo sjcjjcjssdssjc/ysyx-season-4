@@ -220,5 +220,8 @@ config BATCH
 config WATCHPOINT
   bool "Enable watchpoint"
   default y
+config MTRACE
+  bool "Enable memory tracing"
+  default n
 
 endmenu
