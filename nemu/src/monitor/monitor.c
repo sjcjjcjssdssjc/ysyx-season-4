@@ -83,7 +83,7 @@ static int parse_args(int argc, char *argv[]) {
        available with libraries before glibc 2.
 */
     switch (o) {
-      case 'b': sdb_set_batch_mode(); break;
+      case 'b': printf("bb\n"); sdb_set_batch_mode(); break;
       case 'p': sscanf(optarg, "%d", &difftest_port); break;
       case 'l': log_file = optarg; break;
       case 'd': diff_so_file = optarg; break;
