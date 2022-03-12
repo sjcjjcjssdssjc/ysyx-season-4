@@ -73,11 +73,12 @@ void parse_elf(const char *elf_file){
       printf("section is %s\n",now);
       if(strcmp(now,".symtab") != 0)continue;
       
-      Elf64_Sym *symtab = malloc(shdr[i].sh_size);
+      Elf64_Sym *symtab = malloc(shdr[i].sh_size);//888
       ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
       ret = fread(symtab, shdr[i].sh_size, 1, fp);
-
-      printf("%d %s\n",symtab->st_name, tmp + symtab->st_name);
+      for(int i = 0;i < shdr[i].sh_size / sizeof(Elf64_Sym); i++){
+        printf("%d %s\n",symtab[i].st_name, tmp + symtab[i].st_name);
+      }
       
     }
     // finally close the file
