@@ -63,13 +63,21 @@ void parse_elf(const char *elf_file){
     //This member holds the section header table index of the entry
     //associated with the section name string table.
     char* tmp = (char *)malloc(shdr[header.e_shstrndx].sh_size);
-    ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);
+    ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);//section header string
     printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,strlen(tmp));
     if(ret == 0)panic("cannot read section");
     for(int i = 0; i < header.e_shnum; i++){
-      printf("%d %s\n",ret,tmp);
       char *now = tmp + shdr[i].sh_name;
+      // sh_name is an index into the section header string table section, giving
+      // the location of a null-terminated string.
       printf("%s\n",now);
+      if(strcmp(now,".symtab") != 0)continue;
+      uint8_t data[shdr[i].sh_size];
+      ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
+      ret = fread(data, shdr[i].sh_size, 1, fp);
+      for(int i = 0;i < shdr[i].sh_size; i++){
+        printf("%x\n",data[i]);
+      }
     }
     // finally close the file
     fclose(fp);
