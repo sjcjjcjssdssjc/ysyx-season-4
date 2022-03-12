@@ -72,11 +72,12 @@ void parse_elf(const char *elf_file){
       // the location of a null-terminated string.
       printf("section is %s\n",now);
       if(strcmp(now,".symtab") != 0)continue;
-      printf("pass %ld\n",shdr[i].sh_size);
+      
       uint8_t data[shdr[i].sh_size];
       ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
       ret = fread(data, shdr[i].sh_size, 1, fp);
-      for(int i = 0;i < shdr[i].sh_size; i++){
+      printf("pass %ld\n",shdr[i].sh_size);
+      for(int i = 0;i < shdr[i].sh_size;i++){
         printf("%x\n",data[i]);
       }
     }
