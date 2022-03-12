@@ -55,13 +55,14 @@ void parse_elf(const char *elf_file){
     shdr = (Elf64_Shdr*)malloc(sizeof(Elf64_Shdr) * header.e_shnum);
     if(shdr == NULL)panic("unable to allocate memory for section header");
     ret = fread(shdr, 1, sizeof(Elf64_Shdr) * header.e_shnum, fp);
-    rewind(fp);//rewind to the start
+    rewind(fp);//rewind to the start (not needed?)
     //printf("%ld %ld\n",shdr[header.e_shstrndx].sh_offset,shdr[0].sh_offset);
     fseek(fp, shdr[header.e_shstrndx].sh_offset, SEEK_SET);//
 
     //This member holds the section header table index of the entry
     //associated with the section name string table.
     char* tmp = (char *)malloc(shdr[header.e_shstrndx].sh_size);
+    printf("%ld oooo\n",shdr[header.e_shstrndx].sh_size);
     ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);
     if(ret == 0)panic("cannot read section");
     for(int i = 0; i < header.e_shnum; i++){
