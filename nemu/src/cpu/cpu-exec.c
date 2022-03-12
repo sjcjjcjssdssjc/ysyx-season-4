@@ -33,7 +33,7 @@ void parse_elf(const char *elf_file){
   }
   ftrace = 1;//give elf, so we trace
   FILE *fp;
-  fp = fopen(elf_file, "rb");
+  fp = fopen(elf_file, "r");
   if(fp){
     Elf64_Ehdr header; //elf header
     Elf64_Shdr* shdr;  //section header
@@ -58,6 +58,9 @@ void parse_elf(const char *elf_file){
     rewind(fp);//rewind to the start
     //printf("%ld %ld\n",shdr[header.e_shstrndx].sh_offset,shdr[0].sh_offset);
     fseek(fp, shdr[header.e_shstrndx].sh_offset, SEEK_SET);//
+
+    //This member holds the section header table index of the entry
+    //associated with the section name string table.
     char* tmp = (char *)malloc(shdr[header.e_shstrndx].sh_size);
     ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);
     if(ret == 0)panic("cannot read section");
