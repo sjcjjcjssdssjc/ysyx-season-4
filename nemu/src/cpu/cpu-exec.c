@@ -62,7 +62,7 @@ void parse_elf(const char *elf_file){
     //This member holds the section header table index of the entry
     //associated with the section name string table.
     char* tmp = (char *)malloc(shdr[header.e_shstrndx].sh_size);
-    printf("%ld oooo\n",shdr[header.e_shstrndx].sh_size);
+    printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,sizeof(tmp));
     ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);
     if(ret == 0)panic("cannot read section");
     for(int i = 0; i < header.e_shnum; i++){
