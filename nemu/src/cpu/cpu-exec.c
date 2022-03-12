@@ -62,12 +62,12 @@ void parse_elf(const char *elf_file){
 
     //This member holds the section header table index of the entry
     //associated with the section name string table.
-    char* tmp = (char *)malloc(shdr[header.e_shstrndx].sh_size);
-    ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);//section header string
-    printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,strlen(tmp));
+    char* strtab = (char *)malloc(shdr[header.e_shstrndx].sh_size);
+    ret = fread(strtab, shdr[header.e_shstrndx].sh_size, 1, fp);//section header string
+    printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,strlen(strtab));
     if(ret == 0)panic("cannot read section");
     for(int i = 0; i < header.e_shnum; i++){
-      char *now = tmp + shdr[i].sh_name;
+      char *now = strtab + shdr[i].sh_name;
       // sh_name is an index into the section header string table section, giving
       // the location of a null-terminated string.
       printf("section is %s\n",now);
@@ -78,7 +78,7 @@ void parse_elf(const char *elf_file){
       ret = fread(symtab, shdr[i].sh_size, 1, fp);
       printf("%ld %ld\n",shdr[i].sh_size , sizeof(Elf64_Sym));
       for(int j = 0;j < shdr[i].sh_size / sizeof(Elf64_Sym); j++){
-        printf("%d %s\n",symtab[j].st_name, tmp + symtab[j].st_name);
+        printf("%d %s\n",symtab[j].st_name, strtab + symtab[j].st_name);
       }
       
     }
