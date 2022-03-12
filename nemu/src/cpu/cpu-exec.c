@@ -76,6 +76,7 @@ void parse_elf(const char *elf_file){
       Elf64_Sym *symtab = malloc(shdr[i].sh_size);//888
       ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
       ret = fread(symtab, shdr[i].sh_size, 1, fp);
+      printf("%ld %ld\n",shdr[i].sh_size , sizeof(Elf64_Sym));
       for(int i = 0;i < shdr[i].sh_size / sizeof(Elf64_Sym); i++){
         printf("%d %s\n",symtab[i].st_name, tmp + symtab[i].st_name);
       }
