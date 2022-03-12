@@ -70,8 +70,9 @@ void parse_elf(const char *elf_file){
       char *now = tmp + shdr[i].sh_name;
       // sh_name is an index into the section header string table section, giving
       // the location of a null-terminated string.
-      printf("%s\n",now);
+      printf("section is %s\n",now);
       if(strcmp(now,".symtab") != 0)continue;
+      printf("pass\n");
       uint8_t data[shdr[i].sh_size];
       ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
       ret = fread(data, shdr[i].sh_size, 1, fp);
