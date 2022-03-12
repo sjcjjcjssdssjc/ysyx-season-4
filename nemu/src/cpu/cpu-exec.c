@@ -36,6 +36,7 @@ void parse_elf(const char *elf_file){
   fp = fopen(elf_file, "rb");
   if(fp){
     Elf64_Ehdr header; //elf header
+    Elf64_Shdr* shdr;  //section header
     //Elf64_Phdr pheader;//program header
     int ret = fread(&header, 1, sizeof(header), fp);
     if(!ret)panic("cannot read file");
@@ -51,20 +52,19 @@ void parse_elf(const char *elf_file){
 
     ret = fseek(fp, header.e_shoff, SEEK_SET);
     if(ret != 0)panic("failed to seek header table's file offset");
-
-    Elf64_Shdr* shdr = (Elf64_Shdr*)malloc(sizeof(Elf64_Shdr) * header.e_shnum);
+    shdr = (Elf64_Shdr*)malloc(sizeof(Elf64_Shdr) * header.e_shnum);
     if(shdr == NULL)panic("unable to allocate memory for section header");
-
     ret = fread(shdr, 1, sizeof(Elf64_Shdr) * header.e_shnum, fp);
-    rewind(fp);
-    printf("%ld %ld\n",shdr[header.e_shstrndx].sh_offset,shdr[0].sh_offset);
+    rewind(fp);//rewind to the start
+    //printf("%ld %ld\n",shdr[header.e_shstrndx].sh_offset,shdr[0].sh_offset);
     fseek(fp, shdr[header.e_shstrndx].sh_offset, SEEK_SET);//
-    char tmp[shdr[header.e_shstrndx].sh_size];
+    char* tmp = (char *)malloc(shdr[header.e_shstrndx].sh_size);
     ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);
     if(ret == 0)panic("cannot read section");
     for(int i = 0; i < header.e_shnum; i++){
+      printf("%s\n",tmp);
       char *now = tmp + shdr[i].sh_name;
-      printf("%s\n",now);
+      //printf("%s\n",now);
       if(strcmp(now,".dynsym") != 0)panic("fin");
     }
     // finally close the file
