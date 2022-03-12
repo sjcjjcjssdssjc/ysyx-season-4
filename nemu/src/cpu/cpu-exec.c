@@ -39,6 +39,7 @@ void parse_elf(const char *elf_file){
     int ret = fread(&header, 1, sizeof(header), fp);
     if(!ret)panic("cannot read file");
     // check so its really an elf file
+    printf("%x %c %c %c\n",header.e_type, header.e_ident[1], header.e_ident[2], header.e_ident[3]);
     if(header.e_type == 0x7f &&
        header.e_ident[1] == 'E' &&
        header.e_ident[2] == 'L' &&
