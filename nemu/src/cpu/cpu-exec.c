@@ -28,7 +28,7 @@ void device_update();
 void seek_changes();
 void parse_elf(const char *elf_file){
   if(elf_file == NULL){
-    Log("Elf file missing\n");
+    panic("Elf file missing\n");
     return;
   }
   ftrace = 1;//give elf, so we trace
