@@ -50,9 +50,9 @@ void parse_elf(const char *elf_file){
     }
     else printf("Unrecognized elf header format\n");
 
+    printf("%ld\n",header.e_shoff);
     ret = fseek(fp, header.e_shoff, SEEK_SET);
     if(ret != 0)panic("failed to seek header table's file offset");
-    printf("%ld---\n",sizeof(*shdr));
     shdr = (Elf64_Shdr*)malloc(sizeof(*shdr) * header.e_shnum);
     if(shdr == NULL)panic("unable to allocate memory for section header");
     ret = fread(shdr, 1, sizeof(Elf64_Shdr) * header.e_shnum, fp);
@@ -69,8 +69,7 @@ void parse_elf(const char *elf_file){
     for(int i = 0; i < header.e_shnum; i++){
       printf("%d %s\n",ret,tmp);
       char *now = tmp + shdr[i].sh_name;
-      //printf("%s\n",now);
-      if(strcmp(now,".dynsym") != 0)panic("fin");
+      printf("%s\n",now);
     }
     // finally close the file
     fclose(fp);
