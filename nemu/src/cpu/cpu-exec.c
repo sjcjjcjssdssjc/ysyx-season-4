@@ -52,8 +52,8 @@ void parse_elf(const char *elf_file){
 
     ret = fseek(fp, header.e_shoff, SEEK_SET);
     if(ret != 0)panic("failed to seek header table's file offset");
-    printf("%ld---\n",sizeof(shdr));
-    shdr = (Elf64_Shdr*)malloc(sizeof(shdr) * header.e_shnum);
+    printf("%ld---\n",sizeof(*shdr));
+    shdr = (Elf64_Shdr*)malloc(sizeof(*shdr) * header.e_shnum);
     if(shdr == NULL)panic("unable to allocate memory for section header");
     ret = fread(shdr, 1, sizeof(Elf64_Shdr) * header.e_shnum, fp);
     //rewind(fp);//rewind to the start (not needed?)
