@@ -51,6 +51,7 @@ void parse_elf(const char *elf_file){
        //  fclose(fout);
        //}
      }
+     else printf("Unrecognized elf header format\n");
 
     // finally close the file
     fclose(fp);

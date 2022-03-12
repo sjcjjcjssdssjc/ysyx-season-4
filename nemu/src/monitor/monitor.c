@@ -82,7 +82,7 @@ static int parse_args(int argc, char *argv[]) {
        implementation  extensions.)   This  behavior is a GNU extension, not
        available with libraries before glibc 2.
 */
-    printf("%c\n",o);
+    //printf("%c\n",o);
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
       case 'p': sscanf(optarg, "%d", &difftest_port); break;
