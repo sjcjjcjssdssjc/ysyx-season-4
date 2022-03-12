@@ -57,6 +57,7 @@ void parse_elf(const char *elf_file){
 
     ret = fread(shdr, 1, sizeof(Elf64_Shdr) * header.e_shnum, fp);
     rewind(fp);
+    printf("%ld %ld\n",shdr[header.e_shstrndx].sh_offset,shdr[0].sh_offset);
     fseek(fp, shdr[header.e_shstrndx].sh_offset, SEEK_SET);//
     char tmp[shdr[header.e_shstrndx].sh_size];
     ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);
