@@ -62,7 +62,7 @@ void parse_elf(const char *elf_file){
     ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);
     if(ret == 0)panic("cannot read section");
     for(int i = 0; i < header.e_shnum; i++){
-      printf("%s\n",tmp);
+      printf("%d %s\n",ret,tmp);
       char *now = tmp + shdr[i].sh_name;
       //printf("%s\n",now);
       if(strcmp(now,".dynsym") != 0)panic("fin");
