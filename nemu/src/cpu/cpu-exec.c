@@ -77,9 +77,9 @@ void parse_elf(const char *elf_file){
       ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
       ret = fread(data, shdr[i].sh_size, 1, fp);
       printf("pass %ld\n",shdr[i].sh_size);
-      for(int j = 0;j < shdr[i].sh_size;j++){
-        printf("%x\n",data[j]);
-      }
+       for(int j = 0;j < shdr[i].sh_size;j++){//24 * 36 = 888
+         printf("%d %x\n",j + 1,data[j]);
+       }
     }
     // finally close the file
     fclose(fp);
