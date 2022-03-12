@@ -35,25 +35,36 @@ void parse_elf(const char *elf_file){
   FILE *fp;
   fp = fopen(elf_file, "rb");
   if(fp){
-    Elf64_Ehdr header; 
+    Elf64_Ehdr header; //elf header
+    //Elf64_Phdr pheader;//program header
     int ret = fread(&header, 1, sizeof(header), fp);
     if(!ret)panic("cannot read file");
     // check so its really an elf file
-    printf("%x %c %c %c\n",header.e_type, header.e_ident[1], header.e_ident[2], header.e_ident[3]);
+    //printf("%x %c %c %c\n",header.e_type, header.e_ident[1], header.e_ident[2], header.e_ident[3]);
     if(header.e_type == ET_EXEC  &&
        header.e_ident[1] == 'E' &&
        header.e_ident[2] == 'L' &&
        header.e_ident[3] == 'F') {
-       printf("ok\n");
-       // write the header to the output file
-       //FILE* fout = fopen(outputFile, "wb");
-       //if(fout) {
-       //  fwrite(&header, 1, sizeof(header), fout);
-       //  fclose(fout);
-       //}
-     }
-     else printf("Unrecognized elf header format\n");
+       //printf("ok\n");
+    }
+    else printf("Unrecognized elf header format\n");
 
+    ret = fseek(fp, header.e_shoff, SEEK_SET);
+    if(ret != 0)panic("failed to seek header table's file offset");
+
+    Elf64_Shdr* shdr = (Elf64_Shdr*)malloc(sizeof(Elf64_Shdr) * header.e_shnum);
+    if(shdr == NULL)panic("unable to allocate memory for section header");
+
+    ret = fread(shdr, 1, sizeof(Elf64_Shdr) * header.e_shnum, fp);
+    rewind(fp);
+    fseek(fp, shdr[header.e_shstrndx].sh_offset, SEEK_SET);//
+    char tmp[shdr[header.e_shstrndx].sh_size];
+    ret = fread(tmp, shdr[header.e_shstrndx].sh_size, 1, fp);
+    if(ret == 0)panic("cannot read section");
+    for(int i = 0; i < header.e_shnum; i++){
+      char *now = tmp + shdr[i].sh_name;
+      if(strcmp(now,".dynsym") != 0)panic("fin");
+    }
     // finally close the file
     fclose(fp);
   }
