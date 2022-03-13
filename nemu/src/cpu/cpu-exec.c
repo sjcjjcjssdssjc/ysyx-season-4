@@ -65,6 +65,7 @@ void parse_elf(const char *elf_file){
     ret = fread(strtab, shdr[header.e_shstrndx].sh_size, 1, fp);//section header string
     printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,strlen(strtab));
     if(ret == 0)panic("cannot read section");
+    for(int i=0;i<shdr[header.e_shstrndx].sh_size;i++)printf("%c",strtab[i]);
     for(int i = 0; i < header.e_shnum; i++){
       char *now = strtab + shdr[i].sh_name;
       // sh_name is an index into the section header string table section, giving
