@@ -128,10 +128,12 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #endif
   s->pc = pc;
   s->snpc = pc;//when ias_exec_once is called, snpc +=4
+#ifdef CONFIG_FTRACE
   int ret = 0;//2
   if(((s)->isa.inst.val) == 0x8067){
     ret = 1;//3
   }
+#endif
   isa_exec_once(s);
   cpu.pc = s->dnpc;
   //if(ret)printf("%lx ret to %lx\n",pre,cpu.pc);
