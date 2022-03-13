@@ -129,12 +129,15 @@ static void exec_once(Decode *s, vaddr_t pc) {
 
 #ifdef CONFIG_FTRACE
   vaddr_t prev_pc = pc;
+  int ret = 0;
+  if(((s)->isa.inst.val & 0xFFFFFFFF) == 0x00008067)ret = 1;
   if(symtab){
     for(int i = 0;i < symtab_len; i++){
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
      
       if(symtab[i].st_value == cpu.pc){
-        printf("%lx: call [%s@%lx]\n",prev_pc, symstrtab + symtab[i].st_name, cpu.pc);
+        if(!ret)printf("%lx: call [%s@%lx]\n",prev_pc, symstrtab + symtab[i].st_name, cpu.pc);
+        else printf("%lx: ret [%s]\n",prev_pc, symstrtab + symtab[i].st_name);
       }
     }
   }
