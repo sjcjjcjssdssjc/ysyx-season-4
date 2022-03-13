@@ -25,6 +25,7 @@ static bool g_print_step = false;
 Elf64_Sym *symtab = NULL;
 char* symstrtab = 0;
 uint64_t symtab_len = 0;
+int stksiz = 0;//call stack size
 
 void device_update();
 void seek_changes();
@@ -131,7 +132,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   cpu.pc = s->dnpc;
 
 #ifdef CONFIG_FTRACE
-  int ret = 0, stksiz = 0;//stack size
+  int ret = 0;
   //printf("%x\n",(s)->isa.inst.val);
   if(((s)->isa.inst.val) == 0x8067)ret = 1;
   if(symtab){
