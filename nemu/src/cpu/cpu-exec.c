@@ -139,13 +139,13 @@ static void exec_once(Decode *s, vaddr_t pc) {
     for(int i = 0;i < symtab_len; i++){
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
      
-      if(symtab[i].st_value == pc && pre <= 0x80800000 && !ret){
+      if(symtab[i].st_value == cpu.pc && pre <= 0x80800000 && !ret){
           //printf("%d\n",stksiz);
           for(int i = 0;i < stksiz; i++)printf(" ");
           printf("%lx: call [%s@%lx]\n",pre, symstrtab + symtab[i].st_name, cpu.pc);
           stksiz++;
       }
-      else if(ret){
+      else if(symtab[i].st_value == cpu.pc && ret){
         stksiz--;
         for(int i = 0;i < stksiz; i++)printf(" ");
         printf("%lx: ret [%s]\n",pre, symstrtab + symtab[i].st_name);
