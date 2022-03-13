@@ -143,7 +143,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
       if(symtab[i].st_value == cpu.pc && pre <= 0x80800000 && !ret){
           //printf("%d\n",stksiz);
           for(int i = 0;i < stksiz; i++)printf(" ");
-          printf("%lx: call [%s@%lx]\n",pre, symstrtab + symtab[i].st_name, cpu.pc);
+          printf("%lx: call [%s@%lx]\n",pc, symstrtab + symtab[i].st_name, cpu.pc);
           stksiz++;
       }
     }
