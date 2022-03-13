@@ -127,7 +127,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   vaddr_t pre = s->pc;//1
 #endif
   s->pc = pc;
-  s->snpc = pc;
+  s->snpc = pc;//when ias_exec_once is called, snpc +=4
   int ret = 0;//2
   if(((s)->isa.inst.val) == 0x8067){
     ret = 1;//3
@@ -150,7 +150,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
     if(ret){
       stksiz--;
       for(int i = 0;i < stksiz; i++)printf(" ");
-      printf("%lx: ret to %lx\n",pre, cpu.pc);
+      printf("%lx: ret to %lx\n",pc, cpu.pc);
     }
   }
 #endif
