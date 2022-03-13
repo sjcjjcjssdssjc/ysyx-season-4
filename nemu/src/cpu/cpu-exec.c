@@ -37,7 +37,6 @@ void parse_elf(const char *elf_file){
   if(fp){
     Elf64_Ehdr header; //elf header
     Elf64_Shdr* shdr;  //section header
-    //Elf64_Phdr pheader;//program header
     int ret = fread(&header, 1, sizeof(header), fp);
     if(!ret)panic("cannot read file");
     // check so its really an elf file
@@ -57,28 +56,38 @@ void parse_elf(const char *elf_file){
     ret = fread(shdr, 1, sizeof(Elf64_Shdr) * header.e_shnum, fp);
     //rewind(fp);//rewind to the start (not needed?)
     //printf("%ld %ld\n",shdr[header.e_shstrndx].sh_offset,shdr[0].sh_offset);
-    fseek(fp, shdr[header.e_shstrndx].sh_offset, SEEK_SET);//
 
     //This member holds the section header table index of the entry
     //associated with the section name string table.
-    char* strtab = (char *)malloc(shdr[header.e_shstrndx].sh_size);
-    ret = fread(strtab, shdr[header.e_shstrndx].sh_size, 1, fp);//section header string
-    printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,strlen(strtab));
+    char* secstrtab = (char *)malloc(shdr[header.e_shstrndx].sh_size);
+    char* symstrtab = 0;
+
+    //fseek(fp, shdr_strtab.sh_offset, SEEK_SET);//
+    //ret = fread(symstrtab, shdr_strtab.sh_size, 1, fp);
+    fseek(fp, shdr[header.e_shstrndx].sh_offset, SEEK_SET);//
+    ret = fread(secstrtab, shdr[header.e_shstrndx].sh_size, 1, fp);//section header string
+    printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,strlen(secstrtab));
     if(ret == 0)panic("cannot read section");
-    for(int i=0;i<shdr[header.e_shstrndx].sh_size;i++)printf("%c",strtab[i]);
-    for(int i = 0; i < header.e_shnum; i++){
-      char *now = strtab + shdr[i].sh_name;
+    for(int i = header.e_shnum; i >= 0; i--){
+      char *now = secstrtab + shdr[i].sh_name;
       // sh_name is an index into the section header string table section, giving
       // the location of a null-terminated string.
       printf("section is %s\n",now);
-      if(strcmp(now,".symtab") != 0)continue;
-      
-      Elf64_Sym *symtab = malloc(shdr[i].sh_size);//888
-      ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
-      ret = fread(symtab, shdr[i].sh_size, 1, fp);
-      printf("%ld %ld\n",shdr[i].sh_size , sizeof(Elf64_Sym));
-      for(int j = 0;j < shdr[i].sh_size / sizeof(Elf64_Sym); j++){
-        printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, strtab + symtab[j].st_name);
+      if(strcmp(now,".symtab") == 0){
+        Elf64_Sym *symtab = malloc(shdr[i].sh_size);//888
+        ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
+        ret = fread(symtab, shdr[i].sh_size, 1, fp);
+        //printf("%ld %ld\n",shdr[i].sh_size , sizeof(Elf64_Sym));
+        if(symstrtab){
+          for(int j = 0;j < shdr[i].sh_size / sizeof(Elf64_Sym); j++){
+            printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
+          }
+        }
+      }
+      else if(strcmp(now,".strtab") == 0){
+        symstrtab = (char *)malloc(shdr[i].sh_size);
+        fseek(fp, shdr[i].sh_offset, SEEK_SET);//
+        ret = fread(symstrtab, shdr[i].sh_size, 1, fp);//section header string
       }
       
     }
