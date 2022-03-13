@@ -49,7 +49,6 @@ void parse_elf(const char *elf_file){
        //printf("ok\n");
     }
     else printf("Unrecognized elf header format\n");
-
     printf("%ld\n",header.e_shoff);
     ret = fseek(fp, header.e_shoff, SEEK_SET);
     if(ret != 0)panic("failed to seek header table's file offset");
@@ -78,7 +77,7 @@ void parse_elf(const char *elf_file){
       ret = fread(symtab, shdr[i].sh_size, 1, fp);
       printf("%ld %ld\n",shdr[i].sh_size , sizeof(Elf64_Sym));
       for(int j = 0;j < shdr[i].sh_size / sizeof(Elf64_Sym); j++){
-        printf("%d:%d %s\n",j, symtab[j].st_name, strtab + symtab[j].st_name);
+        printf("%ld:%d %s\n",symtab[j].st_value, symtab[j].st_name, strtab + symtab[j].st_name);
       }
       
     }
