@@ -23,7 +23,7 @@ endif
 ifdef CONFIG_FTRACE
 override ARGS += --e
 override ARGS += $(abspath $(IMAGE_REL).elf)
-$(info $(WORK_DIR)/$(IMAGE_REL).elf)
+#$(info $(WORK_DIR)/$(IMAGE_REL).elf)
 $(info $(AM_HOME))
 endif
 
