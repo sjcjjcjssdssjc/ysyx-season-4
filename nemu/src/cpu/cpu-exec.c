@@ -29,11 +29,15 @@ int stksiz = 0;//call stack size
 
 void device_update();
 void seek_changes();
-void parse_elf(const char *elf_file){
+void parse_elf(char *elf_file){
   if(elf_file == NULL){
     panic("Elf file missing\n");
     return;
   }
+  int l = strlen(elf_file);//.bin -> .elf
+  elf_file[l-3] = 'e';
+  elf_file[l-2] = 'l';
+  elf_file[l-1] = 'f';
   printf("%s\n",elf_file);
   FILE *fp;
   fp = fopen(elf_file, "r");
