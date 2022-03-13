@@ -92,9 +92,11 @@ void parse_elf(char *elf_file){
         ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
         ret = fread(symtab, shdr[i].sh_size, 1, fp);
         symtab_len = shdr[i].sh_size / sizeof(Elf64_Sym);
+        /*
         for(int j = 0;j < symtab_len; j++){
           printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
         }
+        */
         break;
       }
     }
