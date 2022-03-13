@@ -128,7 +128,6 @@ static void exec_once(Decode *s, vaddr_t pc) {
   cpu.pc = s->dnpc;
 
 #ifdef CONFIG_FTRACE
-  vaddr_t prev_pc = pc;
   int ret = 0;
   //printf("%x\n",(s)->isa.inst.val);
   if(((s)->isa.inst.val) == 0x8067)ret = 1;
@@ -136,9 +135,9 @@ static void exec_once(Decode *s, vaddr_t pc) {
     for(int i = 0;i < symtab_len; i++){
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
      
-      if(symtab[i].st_value == cpu.pc){
-        if(!ret)printf("%lx: call [%s@%lx]\n",prev_pc, symstrtab + symtab[i].st_name, cpu.pc);
-        else printf("%lx: ret [%s]\n",prev_pc, symstrtab + symtab[i].st_name);
+      if(symtab[i].st_value == pc){
+        if(!ret)printf("%lx: call [%s@%lx]\n",pc, symstrtab + symtab[i].st_name, cpu.pc);
+        else printf("%lx: ret [%s]\n",pc, symstrtab + symtab[i].st_name);
       }
     }
   }
