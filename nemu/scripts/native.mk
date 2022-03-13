@@ -13,7 +13,7 @@ compile_git:
 $(BINARY): compile_git
 
 # Some convenient rules
-
+WORK_DIR  = $(shell pwd)
 override ARGS ?= --log=$(BUILD_DIR)/nemu-log.txt
 override ARGS += $(ARGS_DIFF)
 ifdef CONFIG_BATCH
@@ -21,9 +21,9 @@ override ARGS += --b
 endif
 ifdef CONFIG_FTRACE
 override ARGS += --e
-override ARGS += $(abspath $(AM_HOME)/$(IMAGE_REL).elf)
+override ARGS += $(abspath $(WORK_DIR)/$(IMAGE_REL).elf)
 #$(info $(WORK_DIR)/$(IMAGE_REL).elf)
-$(info amhome is $(AM_HOME))
+$(info amhome is $(WORK_DIR))
 endif
 
 # Command to execute NEMU
