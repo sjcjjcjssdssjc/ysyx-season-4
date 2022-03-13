@@ -21,7 +21,7 @@ endif
 ifdef CONFIG_FTRACE
 override ARGS += --e
 override ARGS += $(abspath $(IMAGE_REL).elf)
-$(info $(abspath $(IMAGE_REL).elf))
+$(info mymymymymy $(abspath $(IMAGE_REL).elf))
 endif
 
 # Command to execute NEMU
