@@ -122,6 +122,9 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 }
 
 static void exec_once(Decode *s, vaddr_t pc) {
+#ifdef CONFIG_FTRACE
+  vaddr_t pre = s->pc;
+#endif
   s->pc = pc;
   s->snpc = pc;
   isa_exec_once(s);
@@ -136,8 +139,8 @@ static void exec_once(Decode *s, vaddr_t pc) {
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
      
       if(symtab[i].st_value == pc){
-        if(!ret)printf("%lx: call [%s@%lx]\n",pc, symstrtab + symtab[i].st_name, cpu.pc);
-        else printf("%lx: ret [%s]\n",pc, symstrtab + symtab[i].st_name);
+        if(!ret)printf("%lx: call [%s@%lx]\n",pre, symstrtab + symtab[i].st_name, cpu.pc);
+        else printf("%lx: ret [%s]\n",pre, symstrtab + symtab[i].st_name);
       }
     }
   }
