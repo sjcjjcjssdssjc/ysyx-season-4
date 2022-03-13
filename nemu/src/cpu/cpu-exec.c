@@ -34,6 +34,7 @@ void parse_elf(const char *elf_file){
     panic("Elf file missing\n");
     return;
   }
+  printf("%s\n",elf_file);
   FILE *fp;
   fp = fopen(elf_file, "r");
   if(fp){
