@@ -20,8 +20,8 @@ override ARGS += --b
 endif
 ifdef CONFIG_FTRACE
 override ARGS += --e
-override ARGS += $(abspath $(WORK_DIR)/$(BINARY).elf)
 
+override ARGS += $(abspath $(WORK_DIR)/$(IMG).elf)
 $(info amhome is $(WORK_DIR))
 endif
 
