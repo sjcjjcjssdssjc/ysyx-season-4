@@ -140,7 +140,9 @@ void init_monitor(int argc, char *argv[]) {
     MUXDEF(CONFIG_ISA_riscv64, "riscv64", "bad")))) "-pc-linux-gnu"
   ));
 
+#ifdef CONFIG_FTRACE
   parse_elf(elf_file);
+#endif
   /* Display welcome message. */
   welcome();
 }

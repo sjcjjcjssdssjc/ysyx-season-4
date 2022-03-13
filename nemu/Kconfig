@@ -223,5 +223,8 @@ config WATCHPOINT
 config MTRACE
   bool "Enable memory tracing"
   default n
+config FTRACE
+  bool "Enable function tracing"
+  default n
 
 endmenu
