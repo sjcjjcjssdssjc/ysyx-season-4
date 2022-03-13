@@ -138,7 +138,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
     for(int i = 0;i < symtab_len; i++){
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
      
-      if(symtab[i].st_value == pc && pc >= 0x80000000){
+      if(symtab[i].st_value == pc && pc <= 0x80800000){
         if(!ret)printf("%lx: call [%s@%lx]\n",pre, symstrtab + symtab[i].st_name, cpu.pc);
         else printf("%lx: ret [%s]\n",pre, symstrtab + symtab[i].st_name);
       }
