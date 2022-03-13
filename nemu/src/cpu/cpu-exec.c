@@ -134,7 +134,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
      
       if(symtab[i].st_value == cpu.pc){
-        printf("%lx: call %s\n",prev_pc, symstrtab + symtab[i].st_name);
+        printf("%lx: call [%s@%lx]\n",prev_pc, symstrtab + symtab[i].st_name, cpu.pc);
       }
     }
   }
