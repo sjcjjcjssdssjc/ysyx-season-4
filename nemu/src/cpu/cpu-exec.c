@@ -128,18 +128,17 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #endif
   s->pc = pc;
   s->snpc = pc;
+  int ret = 0;//2
+  if(((s)->isa.inst.val) == 0x8067)ret = 1;//3
   isa_exec_once(s);
   cpu.pc = s->dnpc;
-  printf("%lx %lx %lx\n",pre,s->snpc,cpu.pc);
+  //printf("%lx %lx %lx\n",pre,s->snpc,cpu.pc);
 #ifdef CONFIG_FTRACE
-  //int ret = 0;//2
-  //printf("%x\n",(s)->isa.inst.val);
-  //if(((s)->isa.inst.val) == 0x8067)ret = 1;//3
   if(symtab){
     for(int i = 0;i < symtab_len; i++){
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
      
-      /*
+      
       if(symtab[i].st_value == cpu.pc && pre <= 0x80800000 && !ret){
           //printf("%d\n",stksiz);
           for(int i = 0;i < stksiz; i++)printf(" ");
@@ -151,7 +150,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
         for(int i = 0;i < stksiz; i++)printf(" ");
         printf("%lx: ret [%s]\n",pre, symstrtab + symtab[i].st_name);
       }
-      */
+      
     }
     
   }
