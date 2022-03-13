@@ -21,7 +21,7 @@ endif
 ifdef CONFIG_FTRACE
 override ARGS += --e
 
-override ARGS += $(abspath $(IMG).elf)
+override ARGS += $(abspath $(IMG))
 $(info amhome is $(WORK_DIR))
 endif
 
