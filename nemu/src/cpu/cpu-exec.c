@@ -133,21 +133,24 @@ static void exec_once(Decode *s, vaddr_t pc) {
 #ifdef CONFIG_FTRACE
   int ret = 0, stksiz = 0;//stack size
   //printf("%x\n",(s)->isa.inst.val);
-  if(((s)->isa.inst.val) == 0x8067)ret = 1,stksiz--;
+  if(((s)->isa.inst.val) == 0x8067)ret = 1;
   if(symtab){
     for(int i = 0;i < symtab_len; i++){
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
      
       if(symtab[i].st_value == pc && pre <= 0x80800000){
-        
         if(!ret){
           for(int i = 0;i < stksiz; i++)printf("  ");
           printf("%lx: call [%s@%lx]\n",pre, symstrtab + symtab[i].st_name, cpu.pc);
           stksiz++;
         }
-        else printf("%lx: ret [%s]\n",pre, symstrtab + symtab[i].st_name);
+        else {
+          stksiz--;
+          printf("%lx: ret [%s]\n",pre, symstrtab + symtab[i].st_name);
+        }
       }
     }
+    
   }
 #endif
 
