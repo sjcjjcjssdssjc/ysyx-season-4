@@ -23,6 +23,7 @@ uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
 Elf64_Sym *symtab = NULL;
+char* symstrtab = 0;
 uint64_t symtab_len = 0;
 
 void device_update();
@@ -59,7 +60,6 @@ void parse_elf(const char *elf_file){
     //This member holds the section header table index of the entry
     //associated with the section name string table.
     char* secstrtab = (char *)malloc(shdr[header.e_shstrndx].sh_size);
-    char* symstrtab = 0;
 
     //fseek(fp, shdr_strtab.sh_offset, SEEK_SET);//
     //ret = fread(symstrtab, shdr_strtab.sh_size, 1, fp);
@@ -129,7 +129,15 @@ static void exec_once(Decode *s, vaddr_t pc) {
 
 #ifdef CONFIG_FTRACE
   vaddr_t prev_pc = pc;
-
+  if(symtab){
+    for(int i = 0;i < symtab_len; i++){
+      //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
+     
+      if(symtab[i].st_value == cpu.pc){
+        printf("%lx: call %s\n",prev_pc, symstrtab + symtab[i].st_name);
+      }
+    }
+  }
 #endif
 
 #ifdef CONFIG_ITRACE
