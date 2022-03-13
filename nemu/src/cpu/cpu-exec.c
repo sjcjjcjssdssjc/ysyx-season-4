@@ -22,7 +22,8 @@ int first_inst = 1;
 uint64_t g_nr_guest_inst = 0;
 static uint64_t g_timer = 0; // unit: us
 static bool g_print_step = false;
-bool ftrace = 0;
+Elf64_Sym *symtab = NULL;
+uint64_t symtab_len = 0;
 
 void device_update();
 void seek_changes();
@@ -31,7 +32,6 @@ void parse_elf(const char *elf_file){
     panic("Elf file missing\n");
     return;
   }
-  ftrace = 1;//give elf, so we trace
   FILE *fp;
   fp = fopen(elf_file, "r");
   if(fp){
@@ -73,23 +73,25 @@ void parse_elf(const char *elf_file){
         symstrtab = (char *)malloc(shdr[i].sh_size);
         fseek(fp, shdr[i].sh_offset, SEEK_SET);//
         ret = fread(symstrtab, shdr[i].sh_size, 1, fp);//section header string
+        break;
       }
     }
+    if(!symstrtab)panic("symstrtab not found");
     for(int i = header.e_shnum; i >= 0; i--){
       char *now = secstrtab + shdr[i].sh_name;
       // sh_name is an index into the section header string table section, giving
       // the location of a null-terminated string.
       printf("section is %s\n",now);
       if(strcmp(now,".symtab") == 0){
-        Elf64_Sym *symtab = malloc(shdr[i].sh_size);//888
+        symtab = malloc(shdr[i].sh_size);//888
         ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
         ret = fread(symtab, shdr[i].sh_size, 1, fp);
         //printf("%ld %ld\n",shdr[i].sh_size , sizeof(Elf64_Sym));
-        if(symstrtab){
-          for(int j = 0;j < shdr[i].sh_size / sizeof(Elf64_Sym); j++){
-            printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
-          }
+        symtab_len = shdr[i].sh_size / sizeof(Elf64_Sym);
+        for(int j = 0;j < symtab_len; j++){
+          printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
         }
+        break;
       }
     }
     // finally close the file
@@ -127,8 +129,9 @@ static void exec_once(Decode *s, vaddr_t pc) {
 
 #ifdef CONFIG_FTRACE
   vaddr_t prev_pc = pc;
-  
+
 #endif
+
 #ifdef CONFIG_ITRACE
   vaddr_t tmp = pc;
   char *p = s->logbuf;

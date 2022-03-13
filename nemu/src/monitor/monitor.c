@@ -9,7 +9,7 @@ void init_difftest(char *ref_so_file, long img_size, int port);
 void init_device();
 void init_sdb();
 void init_disasm(const char *triple);
-void parse_elf(const char *elf_file);// src/cpu/cpu-exec.c
+void parse_elf(const char *elf_file);// src/cpu/cpu-exec.c(need to be changed)
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ASNI_FMT("ON", ASNI_FG_GREEN), ASNI_FMT("OFF", ASNI_FG_RED)));
