@@ -129,9 +129,12 @@ static void exec_once(Decode *s, vaddr_t pc) {
   s->pc = pc;
   s->snpc = pc;
   int ret = 0;//2
-  if(((s)->isa.inst.val) == 0x8067)ret = 1;//3
+  if(((s)->isa.inst.val) == 0x8067){
+    ret = 1;//3
+  }
   isa_exec_once(s);
   cpu.pc = s->dnpc;
+  if(ret)printf("%lx ret to %lx\n",pre,cpu.pc);
   //printf("%lx %lx %lx\n",pre,s->snpc,cpu.pc);
 #ifdef CONFIG_FTRACE
   if(symtab){
