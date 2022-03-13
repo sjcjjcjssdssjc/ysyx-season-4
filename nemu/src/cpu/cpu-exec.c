@@ -38,7 +38,6 @@ void parse_elf(char *elf_file){
   elf_file[l-3] = 'e';
   elf_file[l-2] = 'l';
   elf_file[l-1] = 'f';
-  printf("%s\n",elf_file);
   FILE *fp;
   fp = fopen(elf_file, "r");
   if(fp){
@@ -87,12 +86,11 @@ void parse_elf(char *elf_file){
       char *now = secstrtab + shdr[i].sh_name;
       // sh_name is an index into the section header string table section, giving
       // the location of a null-terminated string.
-      printf("section is %s\n",now);
+      // printf("section is %s\n",now);
       if(strcmp(now,".symtab") == 0){
         symtab = malloc(shdr[i].sh_size);//888
         ret = fseek(fp, shdr[i].sh_offset, SEEK_SET);
         ret = fread(symtab, shdr[i].sh_size, 1, fp);
-        //printf("%ld %ld\n",shdr[i].sh_size , sizeof(Elf64_Sym));
         symtab_len = shdr[i].sh_size / sizeof(Elf64_Sym);
         for(int j = 0;j < symtab_len; j++){
           printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);
