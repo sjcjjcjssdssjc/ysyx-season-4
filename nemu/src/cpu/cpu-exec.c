@@ -48,7 +48,6 @@ void parse_elf(const char *elf_file){
        //printf("ok\n");
     }
     else printf("Unrecognized elf header format\n");
-    printf("%ld\n",header.e_shoff);
     ret = fseek(fp, header.e_shoff, SEEK_SET);
     if(ret != 0)panic("failed to seek header table's file offset");
     shdr = (Elf64_Shdr*)malloc(sizeof(*shdr) * header.e_shnum);
@@ -66,8 +65,16 @@ void parse_elf(const char *elf_file){
     //ret = fread(symstrtab, shdr_strtab.sh_size, 1, fp);
     fseek(fp, shdr[header.e_shstrndx].sh_offset, SEEK_SET);//
     ret = fread(secstrtab, shdr[header.e_shstrndx].sh_size, 1, fp);//section header string
-    printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,strlen(secstrtab));
+    //printf("%ld %ldoooo\n",shdr[header.e_shstrndx].sh_size,strlen(secstrtab));
     if(ret == 0)panic("cannot read section");
+    for(int i = header.e_shnum; i >= 0; i--){
+      char *now = secstrtab + shdr[i].sh_name;
+      if(strcmp(now,".strtab") == 0){
+        symstrtab = (char *)malloc(shdr[i].sh_size);
+        fseek(fp, shdr[i].sh_offset, SEEK_SET);//
+        ret = fread(symstrtab, shdr[i].sh_size, 1, fp);//section header string
+      }
+    }
     for(int i = header.e_shnum; i >= 0; i--){
       char *now = secstrtab + shdr[i].sh_name;
       // sh_name is an index into the section header string table section, giving
@@ -84,12 +91,6 @@ void parse_elf(const char *elf_file){
           }
         }
       }
-      else if(strcmp(now,".strtab") == 0){
-        symstrtab = (char *)malloc(shdr[i].sh_size);
-        fseek(fp, shdr[i].sh_offset, SEEK_SET);//
-        ret = fread(symstrtab, shdr[i].sh_size, 1, fp);//section header string
-      }
-      
     }
     // finally close the file
     fclose(fp);
