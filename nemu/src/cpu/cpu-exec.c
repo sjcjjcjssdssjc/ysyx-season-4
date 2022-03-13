@@ -124,13 +124,13 @@ static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 
 static void exec_once(Decode *s, vaddr_t pc) {
 #ifdef CONFIG_FTRACE
-  //vaddr_t pre = s->pc;//1
+  vaddr_t pre = s->pc;//1
 #endif
   s->pc = pc;
   s->snpc = pc;
   isa_exec_once(s);
   cpu.pc = s->dnpc;
-  printf("%lx %lx\n",s->snpc,cpu.pc);
+  printf("%lx %lx %lx\n",pre,s->snpc,cpu.pc);
 #ifdef CONFIG_FTRACE
   //int ret = 0;//2
   //printf("%x\n",(s)->isa.inst.val);
