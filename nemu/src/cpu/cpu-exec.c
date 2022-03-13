@@ -147,6 +147,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
       }
       else if(ret){
         stksiz--;
+        for(int i = 0;i < stksiz; i++)printf(" ");
         printf("%lx: ret [%s]\n",pre, symstrtab + symtab[i].st_name);
       }
     }
