@@ -35,10 +35,10 @@ $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 		$(addprefix -CFLAGS , $(CFLAGS)) $(addprefix -LDFLAGS , $(LDFLAGS)) \
 		--Mdir $(OBJ_DIR) --exe -o  $(abspath $(BIN))
 
-run: $(BIN)
+run: $(BIN) 
 	@rm -rf logs
 	@mkdir -p logs
-	./build/ysyx_22040127_top 
+	./build/ysyx_22040127_top $(ARGS)
 
 clean:
 	rm -rf $(BUILD_DIR) logs obj_dir

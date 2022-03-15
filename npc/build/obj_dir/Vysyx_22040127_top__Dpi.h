@@ -16,7 +16,7 @@ extern "C" {
 
 
     // DPI IMPORTS
-    // DPI import at /home/heisenberg/ysyx-workbench/soj/vsrc/top.v:27:32
+    // DPI import at /home/heisenberg/ysyx-workbench/npc/vsrc/top.v:31:32
     extern void set_simtime();
 
 #ifdef __cplusplus

@@ -6,7 +6,12 @@
 #include "Vysyx_22040127_top__Dpi.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
+
+#define INST_SIZE 4
+//#ifndef CONFIG_TARGET_AM
+#include <getopt.h>
 int sim_time, n;
+int read_bin = 0;
 void set_simtime(){
   sim_time = 0;
 }
@@ -32,10 +37,37 @@ uint64_t read_paddr(int addr, int len){
 }
 void nvboard_bind_all_pins(Vysyx_22040127_top* dut);
 
+static char *bin_file = NULL;
+static int parse_args(int argc, char *argv[]) {
+  int o;
+  const struct option table[] = {
+   {"bin"      , required_argument, NULL, 'n'},
+  };
+  while ( (o = getopt_long(argc, argv, "-n:", table, NULL)) != -1) {
+
+    printf("%c %s\n",(char)o,optarg);
+    switch (o) {
+      case 'n': bin_file = optarg; read_bin = 1; break;
+      default:
+        printf("you are not prepared!\n");
+        exit(0);
+    }
+  }
+  return 0;
+}
+
 int main(int argc, char** argv, char** env) { 
   VerilatedContext* contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
-
+  parse_args(argc, argv);
+  if(read_bin){
+    FILE *fp;
+    fp = fopen(bin_file, "rb");
+    uint32_t inst,cnt = 0;
+    while(fread(&inst, INST_SIZE, 1, fp)){
+      rom[cnt++] = inst;
+    }
+  }
   Vysyx_22040127_top* dut = new Vysyx_22040127_top{contextp};
   VerilatedVcdC* tfp = new VerilatedVcdC;
   contextp->traceEverOn(true);
@@ -62,11 +94,15 @@ int main(int argc, char** argv, char** env) {
     contextp->timeInc(1);
     dut->clk = !dut->clk;
     dut->eval();
+    tfp->dump(contextp->time());
+    printf("after %x\n",dut->pc);
+    
+    if(contextp->time() >= sim_time)break;
     dut->instruction = rom[((dut->pc)-0x80000000)>>2];
     dut->rst = 0;//to fix the sample bug
     tfp->dump(contextp->time());
     ///assert(dut->f == dut->a ^ dut->b);
-    printf("%d\n",sim_time);
+    printf("%x\n",dut->pc);
   }
   tfp->close();
   //nvboard_quit();

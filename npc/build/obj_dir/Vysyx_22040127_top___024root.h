@@ -15,10 +15,13 @@ VL_MODULE(Vysyx_22040127_top___024root) {
     VL_IN8(clk,0,0);
     VL_IN8(rst,0,0);
     CData/*2:0*/ ysyx_22040127_top__DOT__inst_type;
+    CData/*0:0*/ ysyx_22040127_top__DOT__jalr;
     CData/*0:0*/ __Vclklast__TOP__clk;
     VL_IN(instruction,31,0);
     VL_OUT(pc,31,0);
-    QData/*63:0*/ ysyx_22040127_top__DOT__r_wdata;
+    QData/*63:0*/ ysyx_22040127_top__DOT__alu_output;
+    QData/*63:0*/ ysyx_22040127_top__DOT__imm;
+    QData/*63:0*/ ysyx_22040127_top__DOT__src0;
     VlUnpacked<QData/*63:0*/, 32> ysyx_22040127_top__DOT__regs__DOT__rf;
     VlUnpacked<CData/*0:0*/, 3> __Vm_traceActivity;
 

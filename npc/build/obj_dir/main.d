@@ -1,4 +1,4 @@
-main.o: /home/heisenberg/ysyx-workbench/soj/csrc/main.cpp \
+main.o: /home/heisenberg/ysyx-workbench/npc/csrc/main.cpp \
  Vysyx_22040127_top.h /usr/local/share/verilator/include/verilated.h \
  /usr/local/share/verilator/include/verilatedos.h \
  /usr/local/share/verilator/include/verilated_types.h \
