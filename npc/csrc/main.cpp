@@ -14,8 +14,9 @@ int sim_time, n;
 int read_bin = 0;
 void set_simtime(){
   sim_time = 0;
+  printf("Good Job\n");
 }
-#define CONFIG_INSTSIZE 0x1000
+#define CONFIG_INSTSIZE 0x80000
 #define CONFIG_MSIZE 0x800000
 static uint32_t rom[CONFIG_INSTSIZE] = {0x12308093//x[1] = x[1] + 0x123
 ,0xFFF08093//x[1] = x[1] - 0x1
@@ -95,14 +96,11 @@ int main(int argc, char** argv, char** env) {
     dut->clk = !dut->clk;
     dut->eval();
     tfp->dump(contextp->time());
-    printf("after %x\n",dut->pc);
     
     if(contextp->time() >= sim_time)break;
     dut->instruction = rom[((dut->pc)-0x80000000)>>2];
     dut->rst = 0;//to fix the sample bug
     tfp->dump(contextp->time());
-    ///assert(dut->f == dut->a ^ dut->b);
-    printf("%x\n",dut->pc);
   }
   tfp->close();
   //nvboard_quit();

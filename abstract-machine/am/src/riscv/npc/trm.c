@@ -18,7 +18,10 @@ void putch(char ch) {
 }
 
 void halt(int code) {
-  while (1);
+  asm volatile("mv a0, %0; ebreak" : :"r"(code));
+  
+  //should not reach here
+  while(1);
 }
 
 void _trm_init() {
