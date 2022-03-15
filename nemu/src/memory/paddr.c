@@ -22,7 +22,7 @@ static word_t pmem_read(paddr_t addr, int len) {//word_t and paddr_t are uint64
 
 static void pmem_write(paddr_t addr, int len, word_t data) {
   #ifdef CONFIG_MTRACE 
-  printf("read memory 0x%x with length %d,data is 0x%lx\n", addr, len, data);
+  printf("write memory 0x%x with length %d,data is 0x%lx\n", addr, len, data);
   #endif
   host_write(guest_to_host(addr), len, data);
 }
