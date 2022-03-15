@@ -126,7 +126,23 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___combo__TOP__0(Vysyx_22040127_t
                                                         : 0U)
                                                        : 0U)
                                                       : 0U))
-                                                    : 0U)
+                                                    : 
+                                                   ((8U 
+                                                     & vlSelf->instruction)
+                                                     ? 0U
+                                                     : 
+                                                    ((4U 
+                                                      & vlSelf->instruction)
+                                                      ? 0U
+                                                      : 
+                                                     ((2U 
+                                                       & vlSelf->instruction)
+                                                       ? 
+                                                      ((1U 
+                                                        & vlSelf->instruction)
+                                                        ? 2U
+                                                        : 0U)
+                                                       : 0U))))
                                                    : 
                                                   ((0x10U 
                                                     & vlSelf->instruction)

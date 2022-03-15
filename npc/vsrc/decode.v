@@ -35,6 +35,7 @@ module ysyx_22040127_decode(
       7'b1100111:inst_type = TYPE_I;//jalr
       7'b1101111:inst_type = TYPE_J;//jal
       7'b1110011:inst_type = TYPE_N;
+      7'b0100011:inst_type = TYPE_S;
       default:inst_type = TYPE_I;
     endcase
   end
