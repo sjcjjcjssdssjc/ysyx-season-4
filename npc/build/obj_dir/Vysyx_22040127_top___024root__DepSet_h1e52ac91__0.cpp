@@ -37,9 +37,10 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
                        : ((IData)(vlSelf->ysyx_22040127_top__DOT__jalr)
                            ? (0xfffffffeU & (IData)(vlSelf->ysyx_22040127_top__DOT__alu_output))
                            : ((IData)(4U) + vlSelf->pc))));
-    if ((1U & (((~ (IData)((0U != (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)))) 
-                | (1U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))) 
-               | (3U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))))) {
+    if (((((~ (IData)((0U != (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)))) 
+           | (1U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))) 
+          | (3U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))) 
+         & (0U != (0x1fU & (vlSelf->instruction >> 7U))))) {
         __Vdlyvval__ysyx_22040127_top__DOT__regs__DOT__rf__v0 
             = ((IData)(vlSelf->ysyx_22040127_top__DOT__jalr)
                 ? (QData)((IData)(((IData)(4U) + vlSelf->pc)))

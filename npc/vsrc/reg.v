@@ -27,6 +27,6 @@ module ysyx_22040127_RegisterFile #(ADDR_WIDTH = 5, DATA_WIDTH = 64) (
   assign rdata1 = rf[raddr1];
   assign rdata2 = rf[raddr2];
   always @(posedge clk) begin
-    if (wen) rf[waddr] <= wdata;
+    if (wen && (|waddr)) rf[waddr] <= wdata;
   end
 endmodule

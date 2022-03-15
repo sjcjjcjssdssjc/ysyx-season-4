@@ -12,9 +12,9 @@
 #include <getopt.h>
 int sim_time, n;
 int read_bin = 0;
-void set_simtime(){
+void set_simtime(){//x10 is a0(return)
   sim_time = 0;
-  printf("Good Job\n");
+  printf("Good Job\n");//read a0 to see the true result
 }
 #define CONFIG_INSTSIZE 0x80000
 #define CONFIG_MSIZE 0x800000
@@ -75,7 +75,7 @@ int main(int argc, char** argv, char** env) {
   dut->trace(tfp, 99);
   tfp->open("./build/obj_dir/wave.vcd");
 
-  sim_time = 50,n = 10;//n to reset
+  sim_time = 5000000,n = 10;//n to reset
   //nvboard_bind_all_pins(dut);
   //nvboard_init();
 
