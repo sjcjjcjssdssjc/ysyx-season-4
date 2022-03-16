@@ -4,46 +4,18 @@
 #include <stdarg.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
+char out[5000];//to be changed
 int printf(const char *fmt, ...) {
-  putch('1');
-  /*
+  
+  int ret;
   va_list ap;
   va_start(ap, fmt);
-  int now;
-  for(now = 0;*fmt != 0;fmt++){
-    if(*fmt != '%'){
-      putch(*fmt);
-      now++;
-    }
-    else{
-      fmt++;
-      if(*fmt == 'd'){
-        int num = va_arg(ap, int);
-        int rev = 0,len = 0;
-        while(num){
-          rev *= 10;
-          rev += num % 10;
-          num /= 10;
-          len++;
-        }
-        while(len--){
-          putch(rev % 10 + '0');
-          rev /= 10;
-        }
-      }
-      else if(*fmt == 's'){//s
-        char *tmp = va_arg(ap, char *);
-        int l = strlen(tmp);
-        while(l--){
-          putch(*tmp++);
-          now++;
-        }
-      }
-    }
-  }
+  ret = vsprintf(out, fmt, ap);
   va_end(ap);
-  return now;//return the length of the string
-  */
+  for(int i = 0; i < ret; i++);
+    //putch(out[i]);
+  return ret;
+  
  return 0;
 }
 
