@@ -28,7 +28,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     else{
       fmt++;
       if(*fmt == 'd'){
-        int num = va_arg(ap, int);
+        int num = 0;//va_arg(ap, int);
         int rev = 0,len = 0;
         while(num){
           rev *= 10;
@@ -45,6 +45,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         char *tmp = va_arg(ap, char *);
         int l = strlen(tmp);
         while(l--)*now++ = *tmp++;
+      }
+      else if(*fmt >= '0' && *fmt <= '9'){
+        fmt++;
       }
     }
   }
