@@ -4,10 +4,9 @@
 #include <stdarg.h>
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
-
+char out[5000];//to be changed
 int printf(const char *fmt, ...) {
-  /*
-  char out[5000];//to be changed
+  
   int ret;
   va_list ap;
   va_start(ap, fmt);
@@ -16,7 +15,7 @@ int printf(const char *fmt, ...) {
   for(int i = 0; i < ret; i++)
     putch(out[i]);
   return ret;
-  */
+  
  return 0;
 }
 
