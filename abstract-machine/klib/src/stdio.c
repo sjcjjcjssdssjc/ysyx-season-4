@@ -6,6 +6,7 @@
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 
 int printf(const char *fmt, ...) {
+  /*
   char out[5000];//to be changed
   int ret;
   va_list ap;
@@ -15,6 +16,8 @@ int printf(const char *fmt, ...) {
   for(int i = 0; i < ret; i++)
     putch(out[i]);
   return ret;
+  */
+ return 0;
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
