@@ -5,7 +5,8 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 int printf(const char *fmt, ...) {
-  
+  putch('1');
+  /*
   va_list ap;
   va_start(ap, fmt);
   int now;
@@ -42,6 +43,8 @@ int printf(const char *fmt, ...) {
   }
   va_end(ap);
   return now;//return the length of the string
+  */
+ return 0;
 }
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
