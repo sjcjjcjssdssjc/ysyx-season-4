@@ -11,8 +11,8 @@ int printf(const char *fmt, ...) {
   va_start(ap, fmt);
   ret = vsprintf(out, fmt, ap);
   va_end(ap);
-  for(int i = 0; i < ret; i++);
-    //putch(out[i]);
+  for(int i = 0; i < ret; i++)
+    putch(out[i]);
   return ret;
   
  return 0;
@@ -28,7 +28,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     else{
       fmt++;
       if(*fmt == 'd'){
-        int num = 0;//va_arg(ap, int);
+        int num = va_arg(ap, int);
         int rev = 0,len = 0;
         while(num){
           rev *= 10;
