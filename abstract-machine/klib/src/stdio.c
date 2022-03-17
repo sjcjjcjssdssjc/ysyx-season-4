@@ -46,6 +46,10 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         int l = strlen(tmp);
         while(l--)*now++ = *tmp++;
       }
+      else if(*fmt == 'c'){
+        int tmp = va_arg(ap, int);
+        *now++ = tmp;
+      }
       else if(*fmt >= '0' && *fmt <= '9'){
         fmt++;
       }
