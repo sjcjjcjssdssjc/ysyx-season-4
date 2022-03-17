@@ -20,13 +20,14 @@ int printf(const char *fmt, ...) {
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
   char *now;
+  int widthflag = 0,width = 0;
   for(now = out;*fmt != 0;fmt++){
-    if(*fmt != '%'){
+    if(*fmt != '%' && !widthflag){
       *now = *fmt;
       now++;
     }
     else{
-      fmt++;
+      if(!widthflag)fmt++;
       if(*fmt == 'd'){
         int num = va_arg(ap, int);
         int rev = 0,len = 0;
@@ -36,6 +37,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
           num /= 10;
           len++;
         }
+        if(widthflag)len = width;
         while(len--){
           *now++ = rev % 10 + '0';
           rev /= 10;
@@ -50,8 +52,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         int tmp = va_arg(ap, int);
         *now++ = tmp;
       }
-      else if(*fmt >= '0' && *fmt <= '9'){
-        fmt++;
+      else if(*fmt++ == '0'){
+        widthflag = 1;
+        width = *fmt++ - '0';
       }
     }
   }
