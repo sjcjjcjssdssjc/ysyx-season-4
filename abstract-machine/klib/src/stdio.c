@@ -38,6 +38,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
           len++;
         }
         if(widthflag)len = width;
+        if(len == 0)*now++ = '0';
         while(len--){
           *now++ = rev % 10 + '0';
           rev /= 10;
