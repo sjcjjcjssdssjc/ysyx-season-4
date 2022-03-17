@@ -11,6 +11,7 @@ size_t strlen(const char *s) {
 }
 
 char *strcpy(char *dst, const char *src) {
+	printf("wei\n");
   char *tmp = dst;
   int l = strlen(src);
   for(int i = 0; i < l ;i++){
