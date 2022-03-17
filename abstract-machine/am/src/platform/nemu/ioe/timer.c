@@ -1,13 +1,14 @@
 #include <am.h>
 #include <nemu.h>
+#include <time.h>
 
 void __am_timer_init() {
 }
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
-  //struct timespec now;
-  //clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
-  //uint64_t us = now.tv_sec * 1000000 + now.tv_nsec / 1000;
-  uptime->us ++;
+  struct timespec now;
+  clock_gettime(CLOCK_MONOTONIC_COARSE, &now);
+  uint64_t us = now.tv_sec * 1000000 + now.tv_nsec / 1000;
+  uptime->us = us;
   
 }
 
