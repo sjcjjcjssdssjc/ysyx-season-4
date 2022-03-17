@@ -11,7 +11,6 @@ size_t strlen(const char *s) {
 }
 
 char *strcpy(char *dst, const char *src) {
-	printf("wei\n");
   char *tmp = dst;
   int l = strlen(src);
   for(int i = 0; i < l ;i++){
@@ -74,12 +73,13 @@ void *memset(void *s, int c, size_t n) {
 
 void *memmove(void *dest, const void *src, size_t n) {//overlap?
   char *tmp;
-	const char *s;
+  const char *s;
   tmp = dest;
   s = src;
-  while (n--)
-    *tmp++ = *s++;
-	return dest;
+  for(size_t i = 0; i < n; i++){
+	tmp[i] = s[i];
+  }
+  return dest;
 }
 
 void *memcpy(void *dest, const void *src, size_t n) {
