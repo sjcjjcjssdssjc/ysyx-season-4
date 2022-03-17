@@ -79,6 +79,7 @@ void *memmove(void *dest, const void *src, size_t n) {//overlap?
   for(size_t i = 0; i < n; i++){
 	tmp[i] = s[i];
   }
+  tmp[n] = 0;
   return dest;
 }
 
