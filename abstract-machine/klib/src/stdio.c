@@ -55,6 +55,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       else if(*fmt++ == '0'){
         widthflag = 1;
         width = *fmt++ - '0';
+        putch(width + '0');
       }
     }
   }
