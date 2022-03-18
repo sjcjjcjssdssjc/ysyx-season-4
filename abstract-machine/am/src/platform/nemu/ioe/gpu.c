@@ -6,8 +6,8 @@
 #define N   32
 void __am_gpu_init() {
   int i;
-  int w = io_read(AM_GPU_CONFIG).width/2;  // TODO: get the correct width
-  int h = io_read(AM_GPU_CONFIG).height/2;  // TODO: get the correct height
+  int w = io_read(AM_GPU_CONFIG).width;  // TODO: get the correct width
+  int h = io_read(AM_GPU_CONFIG).height;  // TODO: get the correct height
   //printf("w is %d h is %d\n",w,h);
   uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;//frame_buffer
   for (i = 0; i < w * h; i ++) fb[i] = i;
@@ -17,7 +17,7 @@ void __am_gpu_init() {
 void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
   *cfg = (AM_GPU_CONFIG_T) {
     .present = true, .has_accel = false,
-    .width = 800, .height = 600,//need to change?
+    .width = 400, .height = 300,//need to change?
     .vmemsz = 0
   };
 }
