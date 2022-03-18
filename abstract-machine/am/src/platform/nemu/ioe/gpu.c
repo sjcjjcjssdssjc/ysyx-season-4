@@ -29,8 +29,8 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
   }
   else {
     
-    int y = ctl -> x;
-    int x = ctl -> y;
+    int x = ctl -> x;
+    int y = ctl -> y;
     int w = ctl -> w;
     int h = ctl -> h;
     int W = io_read(AM_GPU_CONFIG).width;//screen width
@@ -39,10 +39,15 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;//frame_buffer
     //printf("%d %d %d %d\n",x,y,w,h);
     
-    for (int i = x * W + y; i < x * W + y + w * h; i++) {
-      fb[i] = pixels[i - x * W - y];
-      printf("i is %d\n",i);
-    }
+    for(int i = 0; i < w; i++)
+      for(int j = 0; j < h; j++){
+        int X = x + i,Y = y + j;
+        fb[Y * W + X] = pixels[j * w + i];
+      }
+    //for (int i = x * W + y; i < x * W + y + w * h; i++) {
+    //  fb[i] = pixels[i - x * W - y];
+    //  printf("i is %d\n",i);
+    //}
     
   }
 }
