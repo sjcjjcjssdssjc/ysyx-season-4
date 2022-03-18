@@ -27,21 +27,21 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     outl(SYNC_ADDR, 1);
   }
   else {
-    int x = ctl -> x;
-    int y = ctl -> y;
+    int y = ctl -> x;
+    int x = ctl -> y;
     int w = ctl -> w;
     int h = ctl -> h;
-    ///int W = io_read(AM_GPU_CONFIG).width;//screen width
+    int W = io_read(AM_GPU_CONFIG).width;//screen width
     //int H = io_read(AM_GPU_CONFIG).height;
-    ///uint32_t * pixels = ctl -> pixels;
-    ///uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;//frame_buffer
+    uint32_t * pixels = ctl -> pixels;
+    uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;//frame_buffer
     printf("%d %d %d %d\n",x,y,w,h);
-    /*
+    
     for (int i = x * W + y; i < x * W + y + w*h; i++) {
       fb[i] = pixels[i - x * W - y];
       printf("%d\n",i);
     }
-    */
+    
   }
 }
 
