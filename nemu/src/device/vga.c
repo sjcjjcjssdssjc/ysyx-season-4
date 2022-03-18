@@ -41,8 +41,7 @@ static void init_screen() {
       SDL_TEXTUREACCESS_STATIC, SCREEN_W, SCREEN_H);
 }
 
-static inline void update_screen() {
-  printf("thisup\n");
+static inline void update_screen() {//this
   SDL_UpdateTexture(texture, NULL, vmem, SCREEN_W * sizeof(uint32_t));
   SDL_RenderClear(renderer);
   SDL_RenderCopy(renderer, texture, NULL, NULL);
