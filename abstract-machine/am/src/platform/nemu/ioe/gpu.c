@@ -24,21 +24,23 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
   if (ctl->sync) {
-    
+    outl(SYNC_ADDR, 1);
+  }
+  else {
     int i;
-    int x = io_read(AM_GPU_FBDRAW).x;//ctl -> x;
-    int y = io_read(AM_GPU_FBDRAW).y;
-    int w = io_read(AM_GPU_FBDRAW).w;//ctl -> w;
-    int h = io_read(AM_GPU_FBDRAW).h;//ctl -> h;
-    uint32_t * pixels = io_read(AM_GPU_FBDRAW).pixels;
+    int x = ctl -> x;
+    int y = ctl -> y;
+    int w = ctl -> w;
+    int h = ctl -> h;
+    int W = io_read(AM_GPU_CONFIG).width;//screen width
+    //int H = io_read(AM_GPU_CONFIG).height;
+    uint32_t * pixels = ctl -> pixels;
     //printf("w is %d h is %d\n",w,h);
     uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;//frame_buffer
     printf("%d %d %d %d\n",x,y,w,h);
-    for (i = x * w + y; i < x * w + y + w*h; i ++) {
-      fb[i] = pixels[i - x * w - y];
+    for (i = x * W + y; i < x * W + y + w*h; i++) {
+      fb[i] = pixels[i - x * W - y];
     }
-    
-    outl(SYNC_ADDR, 1);
   }
 }
 
