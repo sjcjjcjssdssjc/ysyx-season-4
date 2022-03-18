@@ -11,6 +11,7 @@ void __am_gpu_init() {
   printf("w is %d h is %d\n",w,h);
   uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;//frame_buffer
   for (i = 0; i < w * h; i ++) fb[i] = i;
+  printf("%d\n",w*h);
   outl(SYNC_ADDR, 1);
 }
 
@@ -27,7 +28,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     outl(SYNC_ADDR, 1);
   }
   else {
-    /*
+    
     int y = ctl -> x;
     int x = ctl -> y;
     int w = ctl -> w;
@@ -40,9 +41,9 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     
     for (int i = x * W + y; i < x * W + y + w * h; i++) {
       fb[i] = pixels[i - x * W - y];
-      //printf("%d\n",i);
+      printf("i is %d\n",i);
     }
-    */
+    
   }
 }
 
