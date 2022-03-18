@@ -57,11 +57,11 @@ static inline void update_screen() {
 #endif
 
 void vga_update_screen() {
-  //int sync = io_read(0xa0000104);
-  //if(sync){
+  int sync = vgactl_port_base[1];
+  if(sync){
     update_screen();
-  //  io_write(0xa0000104, 0);
-  //}
+    vgactl_port_base[1] = 0;
+  }
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
 }
