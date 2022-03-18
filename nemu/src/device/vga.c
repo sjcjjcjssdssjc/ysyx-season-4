@@ -3,6 +3,7 @@
 
 #define SCREEN_W (MUXDEF(CONFIG_VGA_SIZE_800x600, 800, 400))
 #define SCREEN_H (MUXDEF(CONFIG_VGA_SIZE_800x600, 600, 300))
+//#define SYNC_ADDR (0xa0000000 + 4)//not good
 
 static uint32_t screen_width() {
   return MUXDEF(CONFIG_TARGET_AM, io_read(AM_GPU_CONFIG).width, SCREEN_W);
@@ -56,6 +57,11 @@ static inline void update_screen() {
 #endif
 
 void vga_update_screen() {
+  //int sync = io_read(0xa0000104);
+  //if(sync){
+    update_screen();
+  //  io_write(0xa0000104, 0);
+  //}
   // TODO: call `update_screen()` when the sync register is non-zero,
   // then zero out the sync register
 }
