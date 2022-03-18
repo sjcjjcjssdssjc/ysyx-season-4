@@ -29,7 +29,7 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
     //int H = io_read(AM_GPU_CONFIG).height;
     uint32_t * pixels = ctl -> pixels;
     uint32_t *fb = (uint32_t *)(uintptr_t)FB_ADDR;//frame_buffer
-    //printf("%d %d %d %d\n",x,y,w,h);
+    printf("%d %d %d %d\n",x,y,w,h);
     
     for(int i = 0; i < w; i++)
       for(int j = 0; j < h; j++){
