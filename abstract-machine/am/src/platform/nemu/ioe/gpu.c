@@ -17,9 +17,7 @@ void __am_gpu_config(AM_GPU_CONFIG_T *cfg) {
 }
 
 void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
-  if (ctl->sync) {
-    outl(SYNC_ADDR, 1);
-  }
+
   int x = ctl -> x;
   int y = ctl -> y;
   int w = ctl -> w;
@@ -35,6 +33,9 @@ void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *ctl) {
       int X = x + i,Y = y + j;
       fb[Y * W + X] = pixels[j * w + i];
     }
+  if (ctl->sync) {
+    outl(SYNC_ADDR, 1);
+  }
 }
 
 void __am_gpu_status(AM_GPU_STATUS_T *status) {
