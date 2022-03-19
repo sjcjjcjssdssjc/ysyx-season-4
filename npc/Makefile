@@ -26,7 +26,8 @@ CSRCS += $(SRC_AUTO_BIND)
 # rules for verilator
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
-LDFLAGS += -lSDL2 -lSDL2_image -lreadline
+CFLAGS += $(shell llvm-config-11 --cxxflags) -fPIE
+LDFLAGS += -lSDL2 -lSDL2_image -lreadline $(shell llvm-config-11 --libs)
 
 $(BIN): $(VSRCS) $(CSRCS) $(NVBOARD_ARCHIVE)
 	@rm -rf $(OBJ_DIR)

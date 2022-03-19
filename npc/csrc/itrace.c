@@ -1,30 +1,26 @@
 #include "itrace.h"
 #include "paddr.h"
+char iringbuf[IRINGBUF_SIZE][100];
+char logbuf[100];
+int iring_tail = 0;
+int first_inst = 1;
 void itrace(uint32_t pc){
   //uint32_t tmp = pc;
-  
-  char p = logbuf;
+  char* p = logbuf;
   p += sprintf(p, "%x: ", pc);
+  printf("1 %s\n",logbuf);
   int ilen = 4;
   int i;
   uint32_t inst = inst_read(pc);
-  for (i = 0; i < ilen; i++){//ilen is 4
-    p += sprintf(p, " %x ", inst);//big endian xianshi
-  }
-  /*
-  int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
-  int space_len = ilen_max - ilen;
-  if (space_len < 0) space_len = 0;
-  space_len = space_len * 3 + 1;
-  memset(p, ' ', space_len);
-  p += space_len;
-  */
-
+  p += sprintf(p, " %08x ", inst);//big endian xianshi
+  printf("2 %s\n",logbuf);
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+  //printf("%x\n",p);
   disassemble(p, logbuf + sizeof(logbuf) - p,
       pc, (uint8_t *)&inst, 4);
 
-  printf("%s\n",p);
+  printf("3 %s\n",logbuf);
+  
   /*
   int ind = 0;
   ind += sprintf(iringbuf[iring_tail], "%lx: ",tmp);

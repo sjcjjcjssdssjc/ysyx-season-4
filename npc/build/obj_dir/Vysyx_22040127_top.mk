@@ -36,15 +36,25 @@ VM_MODPREFIX = Vysyx_22040127_top
 # User CFLAGS (from -CFLAGS on Verilator command line)
 VM_USER_CFLAGS = \
 	-DTOP_NAME="Vysyx_22040127_top" \
+	-I/usr/lib/llvm-11/include \
+	-std=c++14 \
+	-fno-exceptions \
+	-D_GNU_SOURCE \
+	-D__STDC_CONSTANT_MACROS \
+	-D__STDC_FORMAT_MACROS \
+	-D__STDC_LIMIT_MACROS \
+	-fPIE \
 
 # User LDLIBS (from -LDFLAGS on Verilator command line)
 VM_USER_LDLIBS = \
 	-lSDL2 \
 	-lSDL2_image \
 	-lreadline \
+	-lLLVM-11 \
 
 # User .cpp files (from .cpp's on Verilator command line)
 VM_USER_CLASSES = \
+	disasm \
 	itrace \
 	main \
 	paddr \
@@ -64,6 +74,8 @@ include $(VERILATOR_ROOT)/include/verilated.mk
 ### Executable rules... (from --exe)
 VPATH += $(VM_USER_DIR)
 
+disasm.o: /home/heisenberg/ysyx-workbench/npc/csrc/disasm.cc
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 itrace.o: /home/heisenberg/ysyx-workbench/npc/csrc/itrace.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 main.o: /home/heisenberg/ysyx-workbench/npc/csrc/main.cpp
