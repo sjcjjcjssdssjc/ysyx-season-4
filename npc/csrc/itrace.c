@@ -8,19 +8,24 @@ void itrace(uint32_t pc){
   int ilen = 4;
   int i;
   uint32_t inst = inst_read(pc);
-  for (i = 0; i < ilen; i ++) {//ilen is 4
-    p += snprintf(p, 4, " %02x", inst[i]);
+  for (i = 0; i < ilen; i++){//ilen is 4
+    p += sprintf(p, " %x ", inst);//big endian xianshi
   }
+  /*
   int ilen_max = MUXDEF(CONFIG_ISA_x86, 8, 4);
   int space_len = ilen_max - ilen;
   if (space_len < 0) space_len = 0;
   space_len = space_len * 3 + 1;
   memset(p, ' ', space_len);
   p += space_len;
+  */
 
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-  disassemble(p, s->logbuf + sizeof(s->logbuf) - p,
-      MUXDEF(CONFIG_ISA_x86, s->snpc, s->pc), (uint8_t *)&s->isa.inst.val, ilen);
+  disassemble(p, logbuf + sizeof(logbuf) - p,
+      pc, (uint8_t *)&inst, 4);
+
+  printf("%s\n",p);
+  /*
   int ind = 0;
   ind += sprintf(iringbuf[iring_tail], "%lx: ",tmp);
   for (i = 0; i < ilen; i ++) {
@@ -30,6 +35,7 @@ void itrace(uint32_t pc){
   if(!iring_tail && !first_inst)overburden = 1;
   first_inst = 0;
   iring_tail = (iring_tail + 1) % IRINGBUF_SIZE;
+  */
   //print_surrounding_inst();
   //printf("%lx: %02x %02x %02x %02x %s\n",tmp,inst[0],p);
   //printf("")
