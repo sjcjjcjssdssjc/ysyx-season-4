@@ -29,6 +29,7 @@ module ysyx_22040127_top(
   assign ebreak = (inst_type == 3'b110) & instruction[20]
       & !(|{instruction[31:21],instruction[19:7]});
   import "DPI-C" function void set_simtime();
+  import "DPI-C" function void set_pc(input bit[31:0] pc);
   always @(*)begin
     if(jalr) reg_wdata = {32'b0, pc + 4};
     else reg_wdata = alu_output;
@@ -46,6 +47,7 @@ module ysyx_22040127_top(
       pc <= pc + src0[31:0];
     else if(jalr) pc <= alu_output[31:0] & (~1);
     else pc <= pc + 4;
+    set_pc(pc);
   end
   ysyx_22040127_decode dec(instruction, clk, rst, reg_wen, rd, rs1, rs2, inst_type, imm);
   ysyx_22040127_execute exe(instruction, clk, rst, pc, src0, src1, imm, inst_type, alu_output);

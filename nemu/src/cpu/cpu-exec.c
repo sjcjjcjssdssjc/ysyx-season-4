@@ -107,6 +107,8 @@ void parse_elf(char *elf_file){
     panic("elf file err");
   }
 }
+
+#ifdef CONFIG_ITRACE
 static void print_surrounding_inst(){
   
   int i = 0;
@@ -118,6 +120,8 @@ static void print_surrounding_inst(){
   printf("--> %s\n",iringbuf[i]);
   
 }
+#endif
+
 static void trace_and_difftest(Decode *_this, vaddr_t dnpc) {
 #ifdef CONFIG_ITRACE_COND
   if (ITRACE_COND) { log_write("%s\n", _this->logbuf); }
@@ -220,7 +224,9 @@ static void statistic() {
 void assert_fail_msg() {
   isa_reg_display();
   statistic();
+  #ifdef CONFIG_ITRACE
   print_surrounding_inst();
+  #endif
 }
 
 /* Simulate how the CPU works. */

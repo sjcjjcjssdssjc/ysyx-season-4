@@ -8,6 +8,7 @@
 #include "Vysyx_22040127_top___024root.h"
 
 void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__set_simtime_TOP();
+void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__set_pc_TOP(IData/*31:0*/ pc);
 
 VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127_top___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
@@ -37,6 +38,7 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
                        : ((IData)(vlSelf->ysyx_22040127_top__DOT__jalr)
                            ? (0xfffffffeU & (IData)(vlSelf->ysyx_22040127_top__DOT__alu_output))
                            : ((IData)(4U) + vlSelf->pc))));
+    Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__set_pc_TOP(vlSelf->pc);
     if (((((~ (IData)((0U != (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)))) 
            | (1U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))) 
           | (3U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))) 

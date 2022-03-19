@@ -16,6 +16,16 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top_
     set_simtime();
 }
 
+extern "C" void set_pc(const svBitVecVal* pc);
+
+VL_INLINE_OPT void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__set_pc_TOP(IData/*31:0*/ pc) {
+    VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__set_pc_TOP\n"); );
+    // Body
+    svBitVecVal pc__Vcvt[1];
+    for (size_t pc__Vidx = 0; pc__Vidx < 1; ++pc__Vidx) VL_SET_SVBV_I(32, pc__Vcvt + 1 * pc__Vidx, pc);
+    set_pc(pc__Vcvt);
+}
+
 extern "C" void set_gpr_ptr(const svOpenArrayHandle a);
 
 VL_INLINE_OPT void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__regs__DOT__set_gpr_ptr__Vdpioc2_TOP(const VlUnpacked<QData/*63:0*/, 32> &a) {

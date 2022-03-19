@@ -1,25 +1,26 @@
-#include <isa.h>
-#include <cpu/cpu.h>
+//#include <isa.h>
+//#include <cpu/cpu.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <readline/readline.h>
-#include <readline/history.h>
-#include <memory/paddr.h>
-#include "sdb.h"
+#include "paddr.h" //to be changed
 
 static int is_batch_mode = false;
+int display_size = 5;
+void npc_exec_once();
+void dump_gpr();//main.c
+extern u_int32_t cpu_pc;//main.c
 
-void init_regex();
-void init_wp_pool();
-void info_wp();
-void free_wp(char *arg);
-typedef struct watchpoint {
-  int NO;
-  struct watchpoint *next;
-
-  /* TODO: Add more members if necessary */
-  char *expr;
-  word_t val;//val of expr
-} WP;
-extern WP* new_wp();
+void cpu_exec(unsigned x){
+  int y = x;
+  while(y--){
+    npc_exec_once();
+    printf("%x\n",cpu_pc);
+    
+  }
+  
+}
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -30,11 +31,8 @@ static char* rl_gets() {
     line_read = NULL;
   }
 
-  line_read = readline("(nemu) ");
+  line_read = readline("(npc) ");
 
-  if (line_read && *line_read) {
-    add_history(line_read);
-  }
 
   return line_read;
 }
@@ -42,11 +40,13 @@ static int cmd_c(char *args) {
   cpu_exec(-1);
   return 0;
 }
+/*
 static int cmd_d(char *args){
   char *arg = strtok(NULL, "\"");//first
   free_wp(arg);
   return 0;
 }
+*/
 
 static int cmd_q(char *args) {
   exit(0);
@@ -56,28 +56,33 @@ static int cmd_x(char * args){
   char *arg = strtok(NULL, " ");//first
 
   unsigned int len;
-  vaddr_t base;
-  
+  u_int64_t base;
   len = atoi(arg);
+
   arg = strtok(NULL, " ");//first
-  sscanf(arg,"%lx",&base);
-  for(int i=0;i<len;i++){//long is 64bit
-    word_t x = paddr_read(base + i*4, 4);
+  //sscanf(arg,"%lx",&base);
+  printf("len:%x base:%lx\n",len,base);
+  for(int i = 0;i < len; i++){//long is 64bit
+    u_int64_t x = paddr_read(base + i*4, 4);
     printf("addr 0x%lx: 0x%lx\n",base + i*4, x);
   }
   return 0;
 }
 
 static int cmd_p(char * args){
+  /*
   char *arg = strtok(NULL, "\"");//second (there is no "")
   bool success;
-  word_t val = expr(arg, &success);
+  u_int64_t val = expr(arg, &success);
   printf("the value is %lu (0x%lx)\n", val, val);
   if(success)printf("valid.\n");
   else printf("invalid.\n");
   return success;
+  */
+  return 0;
 }
 
+/*
 static int cmd_watch(char * args){
   char *arg = strtok(NULL, "\"");//second (there is no "")
   bool success;
@@ -92,15 +97,13 @@ static int cmd_watch(char * args){
   if(success == 0)assert(0);
   return success;
 }
+*/
 
 static int cmd_info(char *args) {
   char *arg = strtok(NULL, " ");
   if(arg[0] == 'r'){
-    isa_reg_display();
-  }
-  else if(arg[0] == 'w'){//and delete,menuconfig
-    info_wp();
-  }else printf("unknown instruction\n");
+    dump_gpr();
+  } else printf("unknown instruction\n");
   return 0;
 }
 
@@ -118,53 +121,31 @@ static struct {
   const char *description;
   int (*handler) (char *);
 } cmd_table [] = {
-  { "help", "Display informations about all supported commands", cmd_help },
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
   { "si","single step the program", cmd_si},
   { "info","print program status(regs/supervise node)", cmd_info},
   { "x","scan the memory", cmd_x},
   { "p", "Value of expression", cmd_p },
-  { "watch", "watch variable and see when it changes", cmd_watch },
-  { "d", "delete the watchpoint", cmd_d },
+  //{ "watch", "watch variable and see when it changes", cmd_watch },
+  //{ "d", "delete the watchpoint", cmd_d },
   /* TODO: Add more commands */
 
 };
-
+#define ARRLEN(arr) (int)(sizeof(arr) / sizeof(arr[0]))
 #define NR_CMD ARRLEN(cmd_table)
-
-static int cmd_help(char *args) {
-  /* extract the first argument */
-  char *arg = strtok(NULL, " ");
-  int i;
-
-  if (arg == NULL) {
-    /* no argument given */
-    for (i = 0; i < NR_CMD; i ++) {
-      printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
-    }
-  }
-  else {
-    for (i = 0; i < NR_CMD; i ++) {
-      if (strcmp(arg, cmd_table[i].name) == 0) {
-        printf("%s - %s\n", cmd_table[i].name, cmd_table[i].description);
-        return 0;
-      }
-    }
-    printf("Unknown command '%s'\n", arg);
-  }
-  return 0;
-}
 
 void sdb_set_batch_mode() {
   is_batch_mode = true;
 }
 
 void sdb_mainloop() {
+  /*
   if (is_batch_mode) {
     cmd_c(NULL);
     return;
   }
+  */
 
   for (char *str; (str = rl_gets()) != NULL; ) {
     char *str_end = str + strlen(str);
@@ -181,10 +162,6 @@ void sdb_mainloop() {
       args = NULL;
     }
 
-#ifdef CONFIG_DEVICE
-    extern void sdl_clear_event_queue();
-    sdl_clear_event_queue();
-#endif
 
     int i;
     for (i = 0; i < NR_CMD; i ++) {
@@ -196,12 +173,4 @@ void sdb_mainloop() {
 
     if (i == NR_CMD) { printf("Unknown command '%s'\n", cmd); }
   }
-}
-
-void init_sdb() {
-  /* Compile the regular expressions. */
-  init_regex();
-
-  /* Initialize the watchpoint pool. */
-  init_wp_pool();
 }
