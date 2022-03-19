@@ -2,19 +2,36 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <memory>
+#include <getopt.h>
+
 #include "Vysyx_22040127_top.h"
 #include "Vysyx_22040127_top__Dpi.h"
 #include "verilated.h"
 #include "verilated_vcd_c.h"
+#include "verilated_dpi.h"
 
 #define INST_SIZE 4
-//#ifndef CONFIG_TARGET_AM
-#include <getopt.h>
+
 int sim_time, n;
 int read_bin = 0;
+uint64_t *cpu_gpr = NULL;
+
+extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
+  cpu_gpr = (uint64_t *)(((VerilatedDpiOpenVar*)r)->datap());
+}
+
+// 一个输出RTL中通用寄存器的值的示例
+void dump_gpr() {
+  int i;
+  for (i = 0; i < 32; i++) {
+    printf("gpr[%d] = 0x%lx\n", i, cpu_gpr[i]);
+  }
+}
+
 void set_simtime(){//x10 is a0(return)
   sim_time = 0;
-  printf("Good Job\n");//read a0 to see the true result
+  if(cpu_gpr[10] == 0)printf("Hit Good Trap\n");//read a0 to see the true result
+  else printf("Hit Bad Trap\n");
 }
 #define CONFIG_INSTSIZE 0x80000
 #define CONFIG_MSIZE 0x800000
@@ -67,6 +84,7 @@ int main(int argc, char** argv, char** env) {
     uint32_t inst,cnt = 0;
     while(fread(&inst, INST_SIZE, 1, fp)){
       rom[cnt++] = inst;
+      printf("%d\n",cnt);
     }
   }
   Vysyx_22040127_top* dut = new Vysyx_22040127_top{contextp};
@@ -75,7 +93,7 @@ int main(int argc, char** argv, char** env) {
   dut->trace(tfp, 99);
   tfp->open("./build/obj_dir/wave.vcd");
 
-  sim_time = 5000000,n = 10;//n to reset
+  sim_time = 50000,n = 10;//n to reset
   //nvboard_bind_all_pins(dut);
   //nvboard_init();
 
@@ -95,12 +113,13 @@ int main(int argc, char** argv, char** env) {
     contextp->timeInc(1);
     dut->clk = !dut->clk;
     dut->eval();
-    tfp->dump(contextp->time());
     
     if(contextp->time() >= sim_time)break;
     dut->instruction = rom[((dut->pc)-0x80000000)>>2];
     dut->rst = 0;//to fix the sample bug
     tfp->dump(contextp->time());
+    printf("%x\n",dut->pc);
+    //if(dut->clk)dump_gpr();
   }
   tfp->close();
   //nvboard_quit();
