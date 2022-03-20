@@ -23,6 +23,7 @@ VL_MODULE(Vysyx_22040127_top___024root) {
     QData/*63:0*/ ysyx_22040127_top__DOT__alu_output;
     QData/*63:0*/ ysyx_22040127_top__DOT__imm;
     QData/*63:0*/ ysyx_22040127_top__DOT__src0;
+    QData/*63:0*/ __Vtask_ysyx_22040127_top__DOT__pmem_read__0__rdata;
     VlUnpacked<QData/*63:0*/, 32> ysyx_22040127_top__DOT__regs__DOT__rf;
     VlUnpacked<CData/*0:0*/, 2> __Vm_traceActivity;
 

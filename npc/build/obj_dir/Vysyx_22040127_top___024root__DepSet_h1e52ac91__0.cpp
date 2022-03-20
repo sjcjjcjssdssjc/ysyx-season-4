@@ -7,31 +7,28 @@
 
 #include "Vysyx_22040127_top___024root.h"
 
-void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__pmem_read_TOP(QData/*63:0*/ raddr, QData/*63:0*/ &rdata);
 void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__set_simtime_TOP();
 void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__set_pc_TOP(IData/*31:0*/ pc);
+void Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__pmem_read_TOP(QData/*63:0*/ raddr, QData/*63:0*/ &rdata);
 
 VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127_top___024root* vlSelf) {
     if (false && vlSelf) {}  // Prevent unused
     Vysyx_22040127_top__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vysyx_22040127_top___024root___sequent__TOP__0\n"); );
     // Init
-    QData/*63:0*/ __Vtask_ysyx_22040127_top__DOT__pmem_read__0__rdata;
     IData/*31:0*/ __Vdly__pc;
     CData/*4:0*/ __Vdlyvdim0__ysyx_22040127_top__DOT__regs__DOT__rf__v0;
     QData/*63:0*/ __Vdlyvval__ysyx_22040127_top__DOT__regs__DOT__rf__v0;
     CData/*0:0*/ __Vdlyvset__ysyx_22040127_top__DOT__regs__DOT__rf__v0;
     // Body
     __Vdlyvset__ysyx_22040127_top__DOT__regs__DOT__rf__v0 = 0U;
-    __Vdly__pc = vlSelf->pc;
-    Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__pmem_read_TOP((QData)((IData)(vlSelf->pc)), __Vtask_ysyx_22040127_top__DOT__pmem_read__0__rdata);
-    vlSelf->ysyx_22040127_top__DOT__pcdata = __Vtask_ysyx_22040127_top__DOT__pmem_read__0__rdata;
     if ((((6U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)) 
           & (vlSelf->ysyx_22040127_top__DOT__instruction 
              >> 0x14U)) & (~ (IData)((0U != (0xffefff80U 
                                              & vlSelf->ysyx_22040127_top__DOT__instruction)))))) {
         Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__set_simtime_TOP();
     }
+    __Vdly__pc = vlSelf->pc;
     if (((((~ (IData)((0U != (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)))) 
            | (1U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))) 
           | (3U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))) 
@@ -60,6 +57,8 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
             = __Vdlyvval__ysyx_22040127_top__DOT__regs__DOT__rf__v0;
     }
     vlSelf->pc = __Vdly__pc;
+    Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__pmem_read_TOP((QData)((IData)(vlSelf->pc)), vlSelf->__Vtask_ysyx_22040127_top__DOT__pmem_read__0__rdata);
+    vlSelf->ysyx_22040127_top__DOT__pcdata = vlSelf->__Vtask_ysyx_22040127_top__DOT__pmem_read__0__rdata;
     vlSelf->ysyx_22040127_top__DOT__instruction = (
                                                    (4U 
                                                     & vlSelf->pc)

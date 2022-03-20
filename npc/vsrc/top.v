@@ -36,12 +36,12 @@ module ysyx_22040127_top(
   import "DPI-C" function void pmem_read(
   input longint raddr, output longint rdata);
   always @(*)begin
+    pmem_read({32'b0, pc}, pcdata);
     if(jalr) reg_wdata = {32'b0, pc + 4};
     else reg_wdata = alu_output;
   end
 
   always @(posedge clk) begin
-    pmem_read({32'b0, pc}, pcdata);
     if(ebreak)//TYPE_N
       set_simtime();
   end
