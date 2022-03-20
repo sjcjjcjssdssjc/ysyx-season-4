@@ -15,6 +15,23 @@ uint64_t paddr_read(uint64_t addr, uint64_t len){//big endian
   }
   return res;
 }
+
+extern "C" void pmem_read(long long raddr, long long *rdata) {
+  // 总是读取地址为`raddr & ~0x7ull`的8字节返回给`rdata`
+  raddr &= ~(0x7ull);
+  long long res = 0;
+  for(long long i = addr + len - 1; (int64_t)i >= (int64_t)addr; i--){
+    res <<= 8;
+    res += pmem[i];
+  }
+}
+extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
+  // 总是往地址为`waddr & ~0x7ull`的8字节按写掩码`wmask`写入`wdata`
+  // `wmask`中每比特表示`wdata`中1个字节的掩码,
+  // 如`wmask = 0x3`代表只写入最低2个字节, 内存中的其它字节保持不变
+}
+
+/*
 void paddr_write(uint64_t addr, uint64_t len, uint64_t val){//big endian
   addr -= 0x80000000;
   for(uint64_t i = addr; (int64_t)i <= (int64_t)(addr + len - 1); i++){
@@ -22,3 +39,4 @@ void paddr_write(uint64_t addr, uint64_t len, uint64_t val){//big endian
     val >>= 8;
   }
 }
+*/

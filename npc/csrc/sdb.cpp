@@ -9,7 +9,7 @@
 #include "itrace.h"
 #endif
 #include "paddr.h" //to be changed
-
+ 
 static int is_batch_mode = false;
 int display_size = 5;
 void npc_exec_once();
@@ -23,7 +23,7 @@ void cpu_exec(unsigned x){
     #ifdef ITRACE
     itrace(cpu_pc);
     #endif
-    printf("%x\n",cpu_pc);
+    //printf("%x\n",cpu_pc);
     
   }
   

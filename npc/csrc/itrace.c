@@ -1,3 +1,5 @@
+#include "defs.h"
+#ifdef ITRACE
 #include "itrace.h"
 #include "paddr.h"
 char iringbuf[IRINGBUF_SIZE][100];
@@ -18,21 +20,19 @@ void print_surrounding_inst(){
 }
 void itrace(uint32_t pc){
   //uint32_t tmp = pc;
-  char* p = logbuf;
+  char* p = logbuf; 
   p += sprintf(p, "%x: ", pc);
   int ilen = 4;
   int i;
   uint32_t inst = inst_read(pc);
   p += sprintf(p, " %08x ", inst);//big endian xianshi
-  printf("%s %x\n",logbuf,((uint8_t *)&inst)[0]);
+  //printf("%s %x\n",logbuf,((uint8_t *)&inst)[0]);
 
   
-  void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
-  //printf("%x\n",p);
-  disassemble(p, logbuf + sizeof(logbuf) - p,
-      pc, (uint8_t *)&inst, 4);
+  // void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+  // disassemble(p, logbuf + sizeof(logbuf) - p,
+  //     pc, (uint8_t *)&inst, 4);
 
-  printf("3 %s\n",logbuf);
   
   
   /*
@@ -52,3 +52,4 @@ void itrace(uint32_t pc){
   //printf("")
   
 }
+#endif

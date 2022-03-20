@@ -89,7 +89,6 @@ void npc_exec_once(){
 }
 
 int main(int argc, char** argv, char** env) { 
-  paddr_write(0x80000000,4,3000);
   contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
   parse_args(argc, argv);

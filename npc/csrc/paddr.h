@@ -7,5 +7,5 @@
 uint32_t inst_read(uint32_t addr);
 void inst_writebyindex(uint32_t ind,uint32_t inst);
 uint64_t paddr_read(uint64_t addr, uint64_t len);
-void paddr_write(uint64_t addr, uint64_t len, uint64_t val);
+//void paddr_write(uint64_t addr, uint64_t len, uint64_t val);
 #endif
