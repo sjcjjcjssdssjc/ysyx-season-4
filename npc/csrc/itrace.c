@@ -1,5 +1,5 @@
 #include "defs.h"
-#ifdef ITRACE
+#ifdef ITRACE 
 #include "itrace.h"
 #include "paddr.h"
 char iringbuf[IRINGBUF_SIZE][100];
@@ -24,7 +24,7 @@ void itrace(uint32_t pc){
   p += sprintf(p, "%x: ", pc);
   int ilen = 4;
   int i;
-  uint32_t inst = inst_read(pc);
+  uint32_t inst = paddr_read(pc, 4);
   p += sprintf(p, " %08x ", inst);//big endian xianshi
   //printf("%s %x\n",logbuf,((uint8_t *)&inst)[0]);
 

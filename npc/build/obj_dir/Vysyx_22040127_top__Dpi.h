@@ -16,11 +16,13 @@ extern "C" {
 
 
     // DPI IMPORTS
+    // DPI import at /home/heisenberg/ysyx-workbench/npc/vsrc/top.v:36:32
+    extern void pmem_read(long long raddr, long long* rdata);
     // DPI import at /home/heisenberg/ysyx-workbench/npc/vsrc/reg.v:29:32
     extern void set_gpr_ptr(const svOpenArrayHandle a);
-    // DPI import at /home/heisenberg/ysyx-workbench/npc/vsrc/top.v:32:32
+    // DPI import at /home/heisenberg/ysyx-workbench/npc/vsrc/top.v:35:32
     extern void set_pc(const svBitVecVal* pc);
-    // DPI import at /home/heisenberg/ysyx-workbench/npc/vsrc/top.v:31:32
+    // DPI import at /home/heisenberg/ysyx-workbench/npc/vsrc/top.v:34:32
     extern void set_simtime();
 
 #ifdef __cplusplus

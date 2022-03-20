@@ -42,11 +42,16 @@ void set_simtime(){//x10 is a0(return)
   sim_time = 0;
   if(cpu_gpr[10] == 0){//a0
     printf("\033[1;32m Hit Good Trap \033[0m\n");//read a0 to see the true result
+    tfp->close();
+    dut->final();
     exit(0);
   }
   else {
+    tfp->close();
+    //nvboard_quit();
+    dut->final();
+    printf("\033[1;31m Hit Bad Trap \033[0m\n"); 
     exit(1);
-    printf("\033[1;31m Hit Bad Trap \033[0m\n");
   }
 }
 
@@ -80,7 +85,7 @@ void npc_exec_once(){
     contextp->timeInc(1);
     dut->clk = !dut->clk;
     dut->eval();
-    dut->instruction = inst_read(dut->pc);
+    //dut->instruction = paddr_read(dut->pc, 4);
     dut->rst = 0;//to fix the sample bug
     tfp->dump(contextp->time());
     //printf("%x\n",dut->pc);
@@ -95,9 +100,12 @@ int main(int argc, char** argv, char** env) {
   if(read_bin){
     FILE *fp;
     fp = fopen(bin_file, "rb");
-    uint32_t inst,cnt = 0;
+    uint32_t inst,addr = 0x80000000;
     while(fread(&inst, INST_SIZE, 1, fp)){
-      inst_writebyindex(cnt++,inst);
+      printf("addr %x inst %x\n",addr,inst);
+      if(addr % 8 == 4)pmem_write(addr,(long long)inst << 32,0xF0);
+      else pmem_write(addr,inst,0x0F);
+      addr += 4;
     }
   }
   dut = new Vysyx_22040127_top{contextp};

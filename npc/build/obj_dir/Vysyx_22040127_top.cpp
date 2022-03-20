@@ -13,7 +13,6 @@ Vysyx_22040127_top::Vysyx_22040127_top(VerilatedContext* _vcontextp__, const cha
     : vlSymsp{new Vysyx_22040127_top__Syms(_vcontextp__, _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
     , rst{vlSymsp->TOP.rst}
-    , instruction{vlSymsp->TOP.instruction}
     , pc{vlSymsp->TOP.pc}
     , rootp{&(vlSymsp->TOP)}
 {

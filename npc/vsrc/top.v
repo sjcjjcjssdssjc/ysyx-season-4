@@ -1,9 +1,11 @@
 module ysyx_22040127_top(
   input clk,
   input rst,
-  input  [31:0] instruction,
   output reg[31:0] pc
 );
+  reg [63:0] pcdata;
+  wire[31:0] instruction;
+
   reg [63:0] reg_wdata;
   wire [63:0] alu_output;
   wire reg_wen;
@@ -28,14 +30,18 @@ module ysyx_22040127_top(
   assign jalr = inst_type == 3'b000 && instruction[6:5] == 2'b11; 
   assign ebreak = (inst_type == 3'b110) & instruction[20]
       & !(|{instruction[31:21],instruction[19:7]});
-  import "DPI-C" function void set_simtime();
+  assign instruction = (pc[2]) ? pcdata[63:32] : pcdata[31:0];
+  import "DPI-C" function void set_simtime();//terminate
   import "DPI-C" function void set_pc(input bit[31:0] pc);
+  import "DPI-C" function void pmem_read(
+  input longint raddr, output longint rdata);
   always @(*)begin
     if(jalr) reg_wdata = {32'b0, pc + 4};
     else reg_wdata = alu_output;
   end
 
   always @(posedge clk) begin
+    pmem_read({32'b0, pc}, pcdata);
     if(ebreak)//TYPE_N
       set_simtime();
   end

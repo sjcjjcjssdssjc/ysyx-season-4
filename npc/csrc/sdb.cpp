@@ -23,7 +23,7 @@ void cpu_exec(unsigned x){
     #ifdef ITRACE
     itrace(cpu_pc);
     #endif
-    //printf("%x\n",cpu_pc);
+    printf("%x\n",cpu_pc); 
     
   }
   
