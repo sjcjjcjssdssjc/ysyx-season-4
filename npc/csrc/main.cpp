@@ -40,13 +40,13 @@ void dump_gpr() {
 
 void set_simtime(){//x10 is a0(return)
   sim_time = 0;
-  if(cpu_gpr[10] == 0){
-    printf("Hit Good Trap\n");//read a0 to see the true result
+  if(cpu_gpr[10] == 0){//a0
+    printf("\033[1;32m Hit Good Trap \033[0m\n");//read a0 to see the true result
     exit(0);
   }
   else {
     exit(1);
-    printf("Hit Bad Trap\n");
+    printf("\033[1;31m Hit Bad Trap \033[0m\n");
   }
 }
 
@@ -120,11 +120,8 @@ int main(int argc, char** argv, char** env) {
     dut->eval();
     tfp->dump(contextp->time());
   }
-
+  npc_exec_once();
   sdb_mainloop();
-  // while(1){//contextp->time() < sim_time && !contextp->gotFinish()) {//contextp->time() < sim_time && 
-  //   npc_exec_once();
-  // }
   tfp->close();
   //nvboard_quit();
   dut->final();

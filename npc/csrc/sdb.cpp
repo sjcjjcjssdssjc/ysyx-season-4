@@ -4,7 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <readline/readline.h>
+#include "defs.h"
+#ifdef ITRACE
 #include "itrace.h"
+#endif
 #include "paddr.h" //to be changed
 
 static int is_batch_mode = false;
@@ -17,8 +20,10 @@ void cpu_exec(unsigned x){
   int y = x;
   while(y--){
     npc_exec_once();
+    #ifdef ITRACE
     itrace(cpu_pc);
-    //printf("%x\n",cpu_pc);
+    #endif
+    printf("%x\n",cpu_pc);
     
   }
   
