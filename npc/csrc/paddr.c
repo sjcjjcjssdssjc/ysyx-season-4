@@ -1,7 +1,6 @@
 #include "paddr.h"
 #include "defs.h"
 #include <stdio.h>
-//uint32_t rom[CONFIG_INSTSIZE];
 uint8_t pmem[CONFIG_MSIZE];//big endian
 // void inst_writebyindex(uint32_t ind, uint32_t inst)
 // {

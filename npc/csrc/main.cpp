@@ -3,7 +3,6 @@
 #include <assert.h>
 #include <memory>
 #include <getopt.h>
-
 #include "Vysyx_22040127_top.h"
 #include "Vysyx_22040127_top__Dpi.h"
 #include "verilated.h"
