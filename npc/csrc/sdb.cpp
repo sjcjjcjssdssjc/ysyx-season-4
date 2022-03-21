@@ -25,6 +25,7 @@ extern void wrap_up_trace();
 int display_size = 5;
 void npc_exec_once();
 void dump_gpr();//main.c
+void init_disasm(const char *triple);
 
 extern u_int32_t cpu_pc;//main.c
 
@@ -173,6 +174,9 @@ void sdb_set_batch_mode() {
 }
 
 void sdb_mainloop(char *ref_so_file, long img_size, int port) {
+  #ifdef ITRACE
+    init_disasm("riscv64" "-pc-linux-gnu");
+  #endif
   init_difftest(ref_so_file, img_size, port);
   ref_difftest_exec(1);
   if(is_batch_mode){
