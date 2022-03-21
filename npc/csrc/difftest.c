@@ -1,13 +1,14 @@
 #include "difftest.h"
 #include <assert.h>
 #include <dlfcn.h>
+#include <stdio.h>
 extern uint8_t* base();
-typedef struct {
-  uint64_t gpr[32];
-  uint64_t pc;
-} riscv64_CPU_state;//nemu cpustate
 extern uint32_t cpu_pc;//main.c(cpu of npc)
 extern uint64_t *cpu_gpr;//main.c(gpr of npc)
+void (*ref_difftest_memcpy)(uint64_t addr, void *buf, size_t n, bool direction) = NULL;
+void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
+void (*ref_difftest_exec)(uint64_t n) = NULL;
+void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 void init_difftest(char *ref_so_file, long img_size, int port) {
   riscv64_CPU_state cpu;
   cpu.pc  = cpu_pc;
@@ -40,7 +41,6 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 }
 bool isa_difftest_checkregs(riscv64_CPU_state *ref_r, uint64_t pc) {
   for(int i = 0; i < 32; i++){
-    //printf("%lx %lx %x\n",ref_r -> gpr[i],cpu.gpr[i],pc);
     if(ref_r -> gpr[i] != cpu_gpr[i])
       return false;
   }

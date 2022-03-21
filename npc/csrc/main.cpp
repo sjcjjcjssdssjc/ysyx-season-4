@@ -20,7 +20,7 @@ Vysyx_22040127_top* dut;
 VerilatedVcdC* tfp;
 VerilatedContext* contextp;
 
-void sdb_mainloop();
+void sdb_mainloop(char *ref_so_file, long img_size, int port);
 void nvboard_bind_all_pins(Vysyx_22040127_top* dut);
 
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
@@ -36,19 +36,19 @@ void dump_gpr() {
     printf("gpr[%d] = 0x%lx\n", i, cpu_gpr[i]);
   }
 }
-
+void wrap_up_trace(){
+  tfp->close();
+  dut->final();
+}
 void set_simtime(){//x10 is a0(return)
   sim_time = 0;
   if(cpu_gpr[10] == 0){//a0
     printf("\033[1;32m Hit Good Trap \033[0m\n");//read a0 to see the true result
-    tfp->close();
-    dut->final();
+    wrap_up_trace();
     exit(0);
   }
   else {
-    tfp->close();
-    //nvboard_quit();
-    dut->final();
+    wrap_up_trace();
     printf("\033[1;31m Hit Bad Trap \033[0m\n"); 
     exit(1);
   }
@@ -100,10 +100,10 @@ int main(int argc, char** argv, char** env) {
   contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
   parse_args(argc, argv);
+  uint32_t inst,addr = 0x80000000;
   if(read_bin){
     FILE *fp;
     fp = fopen(bin_file, "rb");
-    uint32_t inst,addr = 0x80000000;
     while(fread(&inst, INST_SIZE, 1, fp)){
       //printf("addr %x inst %x\n",addr,inst);
       if(addr % 8 == 4)pmem_write(addr,(long long)inst << 32,0xF0);
@@ -131,9 +131,7 @@ int main(int argc, char** argv, char** env) {
     tfp->dump(contextp->time());
   }
   npc_exec_once();
-  sdb_mainloop();
-  tfp->close();
-  //nvboard_quit();
-  dut->final();
+  sdb_mainloop(diff_so_file,addr - 0x80000000,1234);
+  wrap_up_trace();
   return 0;
 }

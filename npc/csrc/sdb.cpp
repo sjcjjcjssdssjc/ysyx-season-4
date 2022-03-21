@@ -9,8 +9,19 @@
 #include "itrace.h"
 #endif
 #include "paddr.h" //to be changed
- 
+#include <assert.h>
+#ifdef DIFF
+#include "difftest.h"
+#endif
+const char *regs[] = {
+  "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
+  "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
+  "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
+  "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
+};
 static int is_batch_mode = false;
+extern uint64_t *cpu_gpr;//main.c(gpr of npc)
+extern void wrap_up_trace();
 int display_size = 5;
 void npc_exec_once();
 void dump_gpr();//main.c
@@ -25,7 +36,21 @@ void cpu_exec(unsigned x){
     itrace(cpu_pc);
     #endif
     //printf("%x\n",cpu_pc); 
-    
+    #ifdef DIFF
+    riscv64_CPU_state ref_r;
+    ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is nemu
+    ref_difftest_exec(1);
+    bool k = isa_difftest_checkregs(&ref_r, cpu_pc);
+    //printf("result %d\n",k);
+    if(!k)for(int i=0;i<32;i++){
+      if(ref_r.gpr[i] != cpu_gpr[i])
+        printf("%s nemu:%lx our processor:%lx pc:%x\n", regs[i], ref_r.gpr[i], cpu_gpr[i],cpu_pc);
+    }
+    if(k != 0){
+      wrap_up_trace();
+      exit(1);
+    }
+    #endif
   }
   
 }
@@ -147,14 +172,12 @@ void sdb_set_batch_mode() {
   is_batch_mode = true;
 }
 
-void sdb_mainloop() {
-  /*
-  if (is_batch_mode) {
-    cmd_c(NULL);
-    return;
+void sdb_mainloop(char *ref_so_file, long img_size, int port) {
+  init_difftest(ref_so_file, img_size, port);
+  ref_difftest_exec(1);
+  if(is_batch_mode){
+    cpu_exec(-1);
   }
-  */
-
   for (char *str; (str = rl_gets()) != NULL; ) {
     char *str_end = str + strlen(str);
 
