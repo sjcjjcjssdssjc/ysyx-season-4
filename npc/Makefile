@@ -26,7 +26,7 @@ CSRCS += $(SRC_AUTO_BIND)
 # rules for verilator
 INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
-LDFLAGS += -lSDL2 -lSDL2_image -lreadline 
+LDFLAGS += -lSDL2 -lSDL2_image -lreadline -ldl
 CFLAGS += $(shell llvm-config-11 --cxxflags)#3steps makefile,diasm.cc,defs.h
 LDFLAGS += $(shell llvm-config-11 --libs)
 
