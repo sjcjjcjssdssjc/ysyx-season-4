@@ -26,10 +26,10 @@ void itrace(uint32_t pc){
   int i;
   uint32_t inst = paddr_read(pc, 4);
   p += sprintf(p, " %08x ", inst);//big endian xianshi
-  //printf("%s %x\n",logbuf,((uint8_t *)&inst)[0]);
+  //printf("%s %x \n",logbuf,((uint8_t *)&inst)[0]);
 
-  
   void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
+  //printf("%s %ld %x %x %d",p,logbuf + sizeof(logbuf) - p - 1,pc,inst,4);
   disassemble(p, logbuf + sizeof(logbuf) - p,
        pc, (uint8_t *)&inst, 4);
   
