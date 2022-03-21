@@ -7,6 +7,9 @@ uint8_t pmem[CONFIG_MSIZE];//big endian
 //   rom[ind] = inst;
 // }
 // uint32_t inst_read(uint32_t addr){return rom[(addr - 0x80000000) >> 2];}
+uint8_t* base(){
+  return pmem;
+}
 uint64_t paddr_read(uint64_t addr, uint64_t len){//sdb read
   addr -= 0x80000000;
   uint64_t res = 0;

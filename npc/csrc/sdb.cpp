@@ -14,6 +14,7 @@ static int is_batch_mode = false;
 int display_size = 5;
 void npc_exec_once();
 void dump_gpr();//main.c
+
 extern u_int32_t cpu_pc;//main.c
 
 void cpu_exec(unsigned x){
@@ -23,7 +24,7 @@ void cpu_exec(unsigned x){
     #ifdef ITRACE
     itrace(cpu_pc);
     #endif
-    printf("%x\n",cpu_pc); 
+    //printf("%x\n",cpu_pc); 
     
   }
   

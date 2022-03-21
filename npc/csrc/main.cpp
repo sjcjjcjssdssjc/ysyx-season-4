@@ -56,20 +56,24 @@ void set_simtime(){//x10 is a0(return)
 
 
 static char *bin_file = NULL;
+static char *diff_so_file = NULL;
 static int parse_args(int argc, char *argv[]) {
   int o;
   const struct option table[] = {
    {"bin"      , required_argument, NULL, 'n'},
+   {"diff"     , required_argument, NULL, 'd'},
   };
-  while ( (o = getopt_long(argc, argv, "-n:", table, NULL)) != -1) {
+  while ( (o = getopt_long(argc, argv, "-n:d:", table, NULL)) != -1) {
 
-    //printf("%c %s\n",(char)o,optarg);
+    printf("%c %s\n",(char)o,optarg);
     switch (o) {
       case 'n': bin_file = optarg; read_bin = 1; break;
+      case 'd': diff_so_file = optarg; break;
       default:
         printf("you are not prepared!\n");
         exit(1);
     }
+    //printf("%s\n",diff_so_file);
   }
   return 0;
 }
@@ -101,7 +105,7 @@ int main(int argc, char** argv, char** env) {
     fp = fopen(bin_file, "rb");
     uint32_t inst,addr = 0x80000000;
     while(fread(&inst, INST_SIZE, 1, fp)){
-      printf("addr %x inst %x\n",addr,inst);
+      //printf("addr %x inst %x\n",addr,inst);
       if(addr % 8 == 4)pmem_write(addr,(long long)inst << 32,0xF0);
       else pmem_write(addr,inst,0x0F);
       addr += 4;

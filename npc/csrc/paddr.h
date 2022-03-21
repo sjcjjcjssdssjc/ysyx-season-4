@@ -4,6 +4,7 @@
 #include <stdint.h>
 #define CONFIG_MSIZE 0x8000000
 uint32_t inst_read(uint32_t addr);
+uint8_t* base();
 void inst_writebyindex(uint32_t ind,uint32_t inst);
 uint64_t paddr_read(uint64_t addr, uint64_t len);
 extern "C" void pmem_read(long long raddr, long long *rdata);

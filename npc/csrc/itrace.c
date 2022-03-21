@@ -32,8 +32,6 @@ void itrace(uint32_t pc){
   // void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   // disassemble(p, logbuf + sizeof(logbuf) - p,
   //     pc, (uint8_t *)&inst, 4);
-
-  
   
   /*
   int ind = 0;
