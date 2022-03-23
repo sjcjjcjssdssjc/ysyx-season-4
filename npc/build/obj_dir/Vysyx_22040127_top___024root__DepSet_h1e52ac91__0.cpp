@@ -39,7 +39,7 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
         __Vdlyvval__ysyx_22040127_top__DOT__regs__DOT__rf__v0 
             = ((IData)(vlSelf->ysyx_22040127_top__DOT__jalr)
                 ? (QData)((IData)(((IData)(4U) + vlSelf->pc)))
-                : ((IData)((0U == (0xf8U & vlSelf->ysyx_22040127_top__DOT__instruction)))
+                : ((IData)((0U == (0x7cU & vlSelf->ysyx_22040127_top__DOT__instruction)))
                     ? vlSelf->ysyx_22040127_top__DOT__loaded_data
                     : vlSelf->ysyx_22040127_top__DOT__alu_output));
         __Vdlyvset__ysyx_22040127_top__DOT__regs__DOT__rf__v0 = 1U;
@@ -195,6 +195,17 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
            | ((0x7fU & vlSelf->ysyx_22040127_top__DOT__instruction) 
               == vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__key_list
               [0xaU]));
+    vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__lut_out 
+        = ((IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__lut_out) 
+           | ((- (IData)(((0x7fU & vlSelf->ysyx_22040127_top__DOT__instruction) 
+                          == vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__key_list
+                          [0xbU]))) & vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__data_list
+              [0xbU]));
+    vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__hit 
+        = ((IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__hit) 
+           | ((0x7fU & vlSelf->ysyx_22040127_top__DOT__instruction) 
+              == vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__key_list
+              [0xbU]));
     vlSelf->ysyx_22040127_top__DOT__inst_type = ((IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__hit)
                                                   ? (IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__lut_out)
                                                   : 0U);
@@ -845,12 +856,17 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
                                                                                 (vlSelf->ysyx_22040127_top__DOT__mem__DOT__rdata 
                                                                                 >> 8U)))) 
                                                                           | ((- (IData)(
-                                                                                ((2U 
+                                                                                (((2U 
                                                                                 == 
                                                                                 (7U 
                                                                                 & (vlSelf->ysyx_22040127_top__DOT__instruction 
                                                                                 >> 0xcU))) 
                                                                                 | (6U 
+                                                                                == 
+                                                                                (7U 
+                                                                                & (vlSelf->ysyx_22040127_top__DOT__instruction 
+                                                                                >> 0xcU)))) 
+                                                                                | (3U 
                                                                                 == 
                                                                                 (7U 
                                                                                 & (vlSelf->ysyx_22040127_top__DOT__instruction 
@@ -887,12 +903,17 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
                                                                                 (vlSelf->ysyx_22040127_top__DOT__mem__DOT__rdata 
                                                                                 >> 0xfU))))))) 
                                                                           | ((- (IData)(
-                                                                                ((2U 
+                                                                                (((2U 
                                                                                 == 
                                                                                 (7U 
                                                                                 & (vlSelf->ysyx_22040127_top__DOT__instruction 
                                                                                 >> 0xcU))) 
                                                                                 | (6U 
+                                                                                == 
+                                                                                (7U 
+                                                                                & (vlSelf->ysyx_22040127_top__DOT__instruction 
+                                                                                >> 0xcU)))) 
+                                                                                | (3U 
                                                                                 == 
                                                                                 (7U 
                                                                                 & (vlSelf->ysyx_22040127_top__DOT__instruction 

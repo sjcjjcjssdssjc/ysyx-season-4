@@ -30,9 +30,9 @@ module ysyx_22040127_memory(
   
   assign loaded_data[7:0]  = rdata[7:0];//alu_output
   assign loaded_data[15:8] = {8{lb}} & {8{rdata[7]}} |
-  {8{lh | lhu}} & rdata[15:8]| {8{lw | lwu}}  & rdata[15:8];
+  {8{lh | lhu}} & rdata[15:8]| {8{lw | lwu | ld}}  & rdata[15:8];
   assign loaded_data[31:16] = {16{lb}} & {16{rdata[7]}} |
-  {16{lh}} & {16{rdata[15]}} | {16{lw | lwu}} & rdata[31:16];
+  {16{lh}} & {16{rdata[15]}} | {16{lw | lwu | ld}} & rdata[31:16];
   assign loaded_data[63:32] = {32{lb}} & {32{rdata[7]}} |
   {32{lh}} & {32{rdata[15]}} | {32{lw}} & {32{rdata[31]}} |
   {32{ld}} & rdata[63:32]; 
