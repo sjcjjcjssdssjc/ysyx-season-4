@@ -12,7 +12,7 @@
 #include <assert.h>
 #ifdef DIFF
 #include "difftest.h"
-#endif
+#endif 
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -23,9 +23,9 @@ static int is_batch_mode = false;
 extern uint64_t *cpu_gpr;//main.c(gpr of npc)
 extern void wrap_up_trace();
 int display_size = 5;
+int exec_cnt = -1;
 void npc_exec_once();
 void dump_gpr();//main.c
-void init_disasm(const char *triple);
 
 extern u_int32_t cpu_pc;//main.c
 
@@ -33,6 +33,7 @@ void cpu_exec(unsigned x){
   int y = x;
   while(y--){
     npc_exec_once();
+    exec_cnt++;
     #ifdef ITRACE
     itrace(cpu_pc);
     #endif
@@ -42,12 +43,14 @@ void cpu_exec(unsigned x){
     ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is nemu
     ref_difftest_exec(1);
     bool k = isa_difftest_checkregs(&ref_r, cpu_pc);
-    //printf("result %d\n",k);
     if(!k)for(int i=0;i<32;i++){
       if(ref_r.gpr[i] != cpu_gpr[i])
-        printf("%s nemu:%lx our processor:%lx pc:%x\n", regs[i], ref_r.gpr[i], cpu_gpr[i],cpu_pc);
+        printf("%s nemu:%lx our processor:%lx pc:%x after %d steps\n", 
+        regs[i], ref_r.gpr[i], cpu_gpr[i],cpu_pc,exec_cnt);
     }
-    if(k != 0){
+    if(k == 0){
+      printf("\033[1;31m Hit Bad Trap \033[0m\n"); 
+      dump_gpr();
       wrap_up_trace();
       exit(1);
     }
@@ -83,6 +86,7 @@ static int cmd_d(char *args){
 */
 
 static int cmd_q(char *args) {
+  wrap_up_trace();
   exit(0);
 }
 
@@ -174,11 +178,10 @@ void sdb_set_batch_mode() {
 }
 
 void sdb_mainloop(char *ref_so_file, long img_size, int port) {
-  #ifdef ITRACE
-    init_disasm("riscv64" "-pc-linux-gnu");
-  #endif
+  #ifdef DIFF
   init_difftest(ref_so_file, img_size, port);
   ref_difftest_exec(1);
+  #endif
   if(is_batch_mode){
     cpu_exec(-1);
   }

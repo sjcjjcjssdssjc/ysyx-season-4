@@ -71,3 +71,64 @@ module ysyx_22040127_mux21(a,b,s,y);
     1'b1, b //y = b 
   });
 endmodule
+
+module ysyx_22040127_decoder_2_4
+(
+  input [1:0]     in,
+  output[3:0]   out
+);
+
+genvar i;
+generate
+for(i=0;i<4;i=i+1)
+begin
+  assign out[i] = (in == i);
+end
+endgenerate
+endmodule
+
+module ysyx_22040127_decoder_3_8
+(
+  input [2:0]     in,
+  output[7:0]     out
+);
+
+genvar i;
+generate
+for(i=0;i<8;i=i+1)
+begin
+  assign out[i] = (in == i);
+end
+endgenerate
+endmodule
+
+
+module ysyx_22040127_decoder_5_32
+(
+  input [4:0]     in,
+  output[31:0]   out
+);
+
+genvar i;
+generate
+for(i=0;i<32;i=i+1)
+begin
+  assign out[i] = (in == i);
+end
+endgenerate
+endmodule
+
+
+module ysyx_22040127_decoder_6_64
+(
+  input [5:0]     in,
+  output[63:0]   out
+);
+genvar i;
+generate
+for(i=0;i<64;i=i+1)
+begin
+  assign out[i] = (in == i);
+end
+endgenerate
+endmodule

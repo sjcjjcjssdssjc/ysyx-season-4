@@ -9,6 +9,7 @@
 #include "verilated_vcd_c.h"
 #include "verilated_dpi.h"
 #include "paddr.h"
+#include "defs.h"
 
 #define INST_SIZE 4
 
@@ -19,7 +20,13 @@ uint32_t cpu_pc = 0;
 Vysyx_22040127_top* dut;
 VerilatedVcdC* tfp;
 VerilatedContext* contextp;
-
+const char *gpr[] = {//to be changed
+  "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
+  "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
+  "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
+  "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
+};
+extern "C" void init_disasm(const char *triple);
 void sdb_mainloop(char *ref_so_file, long img_size, int port);
 void nvboard_bind_all_pins(Vysyx_22040127_top* dut);
 
@@ -33,7 +40,7 @@ extern "C" void set_pc(const svBitVecVal* pc) {
 void dump_gpr() {
   int i;
   for (i = 0; i < 32; i++) {
-    printf("gpr[%d] = 0x%lx\n", i, cpu_gpr[i]);
+    printf("gpr[%s] = 0x%lx\n", gpr[i], cpu_gpr[i]);
   }
 }
 void wrap_up_trace(){
@@ -97,6 +104,9 @@ void npc_exec_once(){
 }
 
 int main(int argc, char** argv, char** env) { 
+  #ifdef ITRACE
+  init_disasm("riscv64-pc-linux-gnu");
+  #endif
   contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
   parse_args(argc, argv);
@@ -106,7 +116,7 @@ int main(int argc, char** argv, char** env) {
     fp = fopen(bin_file, "rb");
     while(fread(&inst, INST_SIZE, 1, fp)){
       //printf("addr %x inst %x\n",addr,inst);
-      if(addr % 8 == 4)pmem_write(addr,(long long)inst << 32,0xF0);
+      if(addr % 8 == 4)pmem_write(addr,(long long)inst,0xF0);
       else pmem_write(addr,inst,0x0F);
       addr += 4;
     }
@@ -117,7 +127,7 @@ int main(int argc, char** argv, char** env) {
   dut->trace(tfp, 99);
   tfp->open("./build/obj_dir/wave.vcd");
 
-  sim_time = 500,n = 10;//n to reset (up over)
+  sim_time = 0x7FFFFFFF,n = 10;//n to reset (up over)
   //nvboard_bind_all_pins(dut);
   //nvboard_init();
 

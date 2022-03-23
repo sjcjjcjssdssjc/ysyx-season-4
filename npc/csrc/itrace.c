@@ -4,7 +4,7 @@
 #include "paddr.h"
 char iringbuf[IRINGBUF_SIZE][100];
 char logbuf[100];
-int iring_tail = 0;
+int iring_tail = 0; 
 int first_inst = 1;
 int overburden = 0;
 void print_surrounding_inst(){
@@ -28,11 +28,10 @@ void itrace(uint32_t pc){
   p += sprintf(p, " %08x ", inst);//big endian xianshi
   //printf("%s %x \n",logbuf,((uint8_t *)&inst)[0]);
 
-  void disassemble(char *str, int size, uint64_t pc, uint8_t *code, int nbyte);
   //printf("%s %ld %x %x %d",p,logbuf + sizeof(logbuf) - p - 1,pc,inst,4);
   disassemble(p, logbuf + sizeof(logbuf) - p,
        pc, (uint8_t *)&inst, 4);
-  
+  printf("%s\n",logbuf);
   /*
   int ind = 0;
   ind += sprintf(iringbuf[iring_tail], "%lx: ",pc);

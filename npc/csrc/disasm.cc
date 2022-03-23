@@ -9,7 +9,6 @@
 #include "llvm/MC/MCInstPrinter.h"
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/Support/TargetSelect.h"
-#include <iostream>
 
 #if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop

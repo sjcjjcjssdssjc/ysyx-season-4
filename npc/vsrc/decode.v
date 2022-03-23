@@ -2,7 +2,8 @@ module ysyx_22040127_decode(
   input [31:0] instruction,
   input clk,
   input rst,
-  output r_wen,
+  output reg_wen,
+  output memread,
   output[4:0] rd,
   output[4:0] rs1,
   output[4:0] rs2,
@@ -15,39 +16,38 @@ module ysyx_22040127_decode(
   assign rs1 = instruction[19:15];
   assign rs2 = instruction[24:20];
   //assign imm = {{52{instruction[31]}},instruction[31:20]};
-  assign r_wen = (!(|inst_type)) || inst_type == TYPE_U || inst_type == TYPE_J;//typeI is first
+  assign reg_wen = !(|inst_type) || inst_type == TYPE_U || inst_type == TYPE_J
+  || inst_type == TYPE_R;//typeI is first
+  assign memread = !instruction[3] & !instruction[4] & !instruction[5]
+   & !instruction[6] & !instruction[7];//right?
   //typei,typeu writes register
   always @(*)begin
     case(inst_type)
-      3'b001:imm = {{32{instruction[31]}},instruction[31:12],12'b0};
-      3'b000:imm = {{52{instruction[31]}},instruction[31:20]};
-      3'b011:imm = {{43{instruction[31]}},instruction[31],instruction[19:12],instruction[20],instruction[30:21],1'b0};
-      3'b110:imm = {{52{instruction[31]}},instruction[31:20]};
+      3'b001:imm = {{32{instruction[31]}}, instruction[31:12], 12'b0};
+      3'b000:imm = {{52{instruction[31]}}, instruction[31:20]};
+      3'b011:imm = {{43{instruction[31]}}, instruction[31], instruction[19:12], instruction[20],
+      instruction[30:21], 1'b0};
+      3'b110:imm = {{52{instruction[31]}}, instruction[31:20]};
+      3'b010:imm = {{52{instruction[31]}}, instruction[31:25], instruction[11:7]};//might be wrong
+      3'b101:imm = {{51{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
       default:imm = 64'b0;
     endcase
   end
-  // number of keys,width of key/data (output input 
-  always @(*)begin
-    case(instruction[6:0])
-      7'b0010111:inst_type = TYPE_U;//auipc instru[5]
-      7'b0110111:inst_type = TYPE_U;//lui
-      7'b0011011:inst_type = TYPE_I;
-      7'b1100111:inst_type = TYPE_I;//jalr
-      7'b1101111:inst_type = TYPE_J;//jal
-      7'b1110011:inst_type = TYPE_N;
-      7'b0100011:inst_type = TYPE_S;
-      default:inst_type = TYPE_I;
-    endcase
-  end
-  /*
-  ysyx_22040127_MuxKey #(7, 7, 3) inst_mux (inst_type, instruction[6:0], {
-    TYPE_U,7'b0010111,
-    TYPE_I,7'b0011011,//addi
-    TYPE_S,7'b0100011,
-    TYPE_J,7'b1101111,
-    TYPE_R,7'b0111011,
-    TYPE_B,7'b1100011,
-    TYPE_N,7'b1110011
+  //number of keys,width of key/data (output input 
+  
+  ysyx_22040127_MuxKeyWithDefault #(10, 7, 3) inst_mux (inst_type, instruction[6:0], TYPE_I,{
+    7'b0010111,TYPE_U,//auipc
+    7'b0110111,TYPE_U,//lui
+    7'b0011011,TYPE_I,//addi,ebreak,lb,lh,lw,ld,lbu,lhu,lwu TODO:addiw
+    7'b0000011,TYPE_I,//loads
+    7'b1100111,TYPE_I,//jalr
+    7'b1101111,TYPE_J,//jal
+    7'b0111011,TYPE_R,//addw add sub
+    7'b1110011,TYPE_N,
+    7'b0100011,TYPE_S,//sb sh sw sd
+    7'b1100011,TYPE_B//beq bne
+    //load and store are problematic
+    //23
   });
-  */
+  
 endmodule
