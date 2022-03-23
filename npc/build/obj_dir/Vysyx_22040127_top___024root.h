@@ -30,6 +30,7 @@ VL_MODULE(Vysyx_22040127_top___024root) {
     QData/*63:0*/ ysyx_22040127_top__DOT__imm;
     QData/*63:0*/ ysyx_22040127_top__DOT__alu_input1;
     QData/*63:0*/ ysyx_22040127_top__DOT__alu_input2;
+    QData/*63:0*/ ysyx_22040127_top__DOT__reg_data1;
     QData/*63:0*/ ysyx_22040127_top__DOT__reg_data2;
     QData/*63:0*/ ysyx_22040127_top__DOT__loaded_data;
     QData/*63:0*/ ysyx_22040127_top__DOT__exe__DOT__alu_op;

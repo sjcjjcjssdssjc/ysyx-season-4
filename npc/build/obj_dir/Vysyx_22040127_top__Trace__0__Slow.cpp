@@ -286,9 +286,7 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root__trace_full_sub_0(Vysyx_22040127_
                                                             & vlSelf->ysyx_22040127_top__DOT__instruction)))))));
     tracep->fullQData(oldp+46,(vlSelf->ysyx_22040127_top__DOT__alu_input1),64);
     tracep->fullQData(oldp+48,(vlSelf->ysyx_22040127_top__DOT__alu_input2),64);
-    tracep->fullQData(oldp+50,(vlSelf->ysyx_22040127_top__DOT__regs__DOT__rf
-                               [(0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                          >> 0xfU))]),64);
+    tracep->fullQData(oldp+50,(vlSelf->ysyx_22040127_top__DOT__reg_data1),64);
     tracep->fullQData(oldp+52,(vlSelf->ysyx_22040127_top__DOT__reg_data2),64);
     tracep->fullBit(oldp+54,(vlSelf->ysyx_22040127_top__DOT__jalr));
     tracep->fullBit(oldp+55,((1U & (~ (IData)((0U != 
@@ -305,22 +303,15 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root__trace_full_sub_0(Vysyx_22040127_
     tracep->fullBit(oldp+57,((((~ (IData)((0U != (7U 
                                                   & (vlSelf->ysyx_22040127_top__DOT__instruction 
                                                      >> 0xcU))))) 
-                               & ((0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                            >> 0xfU)) 
-                                  == (0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                               >> 0x14U)))) 
+                               & (vlSelf->ysyx_22040127_top__DOT__reg_data1 
+                                  == vlSelf->ysyx_22040127_top__DOT__reg_data2)) 
                               | (((~ (IData)((0U != 
                                               (3U & 
                                                (vlSelf->ysyx_22040127_top__DOT__instruction 
                                                 >> 0xdU))))) 
                                   & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                     >> 0xcU)) & ((0x1fU 
-                                                   & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                                      >> 0xfU)) 
-                                                  != 
-                                                  (0x1fU 
-                                                   & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                                      >> 0x14U)))))));
+                                     >> 0xcU)) & (vlSelf->ysyx_22040127_top__DOT__reg_data1 
+                                                  != vlSelf->ysyx_22040127_top__DOT__reg_data2)))));
     tracep->fullBit(oldp+58,((0U == (7U & (vlSelf->ysyx_22040127_top__DOT__instruction 
                                            >> 0xcU)))));
     tracep->fullBit(oldp+59,((1U == (7U & (vlSelf->ysyx_22040127_top__DOT__instruction 
@@ -436,10 +427,8 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root__trace_full_sub_0(Vysyx_22040127_
                                                (7U 
                                                 & (vlSelf->ysyx_22040127_top__DOT__instruction 
                                                    >> 0xcU))))) 
-                                   & ((0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                                >> 0xfU)) 
-                                      == (0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                                   >> 0x14U)))) 
+                                   & (vlSelf->ysyx_22040127_top__DOT__reg_data1 
+                                      == vlSelf->ysyx_22040127_top__DOT__reg_data2)) 
                                   | (((~ (IData)((0U 
                                                   != 
                                                   (3U 
@@ -447,11 +436,8 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root__trace_full_sub_0(Vysyx_22040127_
                                                       >> 0xdU))))) 
                                       & (vlSelf->ysyx_22040127_top__DOT__instruction 
                                          >> 0xcU)) 
-                                     & ((0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                                  >> 0xfU)) 
-                                        != (0x1fU & 
-                                            (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                             >> 0x14U)))))
+                                     & (vlSelf->ysyx_22040127_top__DOT__reg_data1 
+                                        != vlSelf->ysyx_22040127_top__DOT__reg_data2)))
                                   ? (vlSelf->pc + (IData)(vlSelf->ysyx_22040127_top__DOT__imm))
                                   : ((IData)(4U) + vlSelf->pc))),32);
     tracep->fullCData(oldp+159,(0U),3);

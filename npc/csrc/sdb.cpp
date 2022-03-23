@@ -45,7 +45,7 @@ void cpu_exec(unsigned x){
     bool k = isa_difftest_checkregs(&ref_r, cpu_pc);
     if(!k)for(int i=0;i<32;i++){
       if(ref_r.gpr[i] != cpu_gpr[i])
-        printf("%s nemu:%lx our processor:%lx pc:%x after %d steps\n", 
+        printf("%s nemu:%lx our processor:%lx pc:%x after %d steps\n", //nemupc!
         regs[i], ref_r.gpr[i], cpu_gpr[i],cpu_pc,exec_cnt);
     }
     if(k == 0){

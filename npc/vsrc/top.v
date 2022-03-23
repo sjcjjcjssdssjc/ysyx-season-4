@@ -70,8 +70,8 @@ module ysyx_22040127_top(
   assign mem_waddr = alu_output;
   assign mem_raddr = alu_output;
   assign branch_result = branch_taken ? pc + imm[31:0]: pc + 4;
-  assign branch_taken = beq && (rs1 == rs2)
-  || bne && (rs1 != rs2);//for B_TYPE only
+  assign branch_taken = beq && (reg_data1 == reg_data2)
+  || bne && (reg_data1 != reg_data2);//for B_TYPE only
   
 
   import "DPI-C" function void set_simtime();//terminate

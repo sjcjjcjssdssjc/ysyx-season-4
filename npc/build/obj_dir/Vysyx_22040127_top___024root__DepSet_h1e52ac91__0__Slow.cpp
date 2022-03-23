@@ -155,6 +155,9 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
                                                               (vlSelf->ysyx_22040127_top__DOT__pcdata 
                                                                >> 0x20U))
                                                     : (IData)(vlSelf->ysyx_22040127_top__DOT__pcdata));
+    vlSelf->ysyx_22040127_top__DOT__reg_data1 = vlSelf->ysyx_22040127_top__DOT__regs__DOT__rf
+        [(0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
+                   >> 0xfU))];
     vlSelf->ysyx_22040127_top__DOT__reg_data2 = vlSelf->ysyx_22040127_top__DOT__regs__DOT__rf
         [(0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
                    >> 0x14U))];
@@ -528,18 +531,22 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
     vlSelf->ysyx_22040127_top__DOT__branch_result = 
         ((((~ (IData)((0U != (7U & (vlSelf->ysyx_22040127_top__DOT__instruction 
                                     >> 0xcU))))) & 
-           ((0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                      >> 0xfU)) == (0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                             >> 0x14U)))) 
+           (vlSelf->ysyx_22040127_top__DOT__reg_data1 
+            == vlSelf->ysyx_22040127_top__DOT__reg_data2)) 
           | (((~ (IData)((0U != (3U & (vlSelf->ysyx_22040127_top__DOT__instruction 
                                        >> 0xdU))))) 
               & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                 >> 0xcU)) & ((0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                        >> 0xfU)) != 
-                              (0x1fU & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                        >> 0x14U)))))
+                 >> 0xcU)) & (vlSelf->ysyx_22040127_top__DOT__reg_data1 
+                              != vlSelf->ysyx_22040127_top__DOT__reg_data2)))
           ? (vlSelf->pc + (IData)(vlSelf->ysyx_22040127_top__DOT__imm))
           : ((IData)(4U) + vlSelf->pc));
+    vlSelf->ysyx_22040127_top__DOT__alu_input1 = ((
+                                                   (1U 
+                                                    == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)) 
+                                                   | (3U 
+                                                      == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)))
+                                                   ? vlSelf->ysyx_22040127_top__DOT__imm
+                                                   : vlSelf->ysyx_22040127_top__DOT__reg_data1);
     vlSelf->ysyx_22040127_top__DOT__alu_input2 = ((
                                                    (0U 
                                                     == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)) 
@@ -547,18 +554,6 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
                                                       == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)))
                                                    ? vlSelf->ysyx_22040127_top__DOT__imm
                                                    : vlSelf->ysyx_22040127_top__DOT__reg_data2);
-    vlSelf->ysyx_22040127_top__DOT__alu_input1 = ((
-                                                   (1U 
-                                                    == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)) 
-                                                   | (3U 
-                                                      == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)))
-                                                   ? vlSelf->ysyx_22040127_top__DOT__imm
-                                                   : 
-                                                  vlSelf->ysyx_22040127_top__DOT__regs__DOT__rf
-                                                  [
-                                                  (0x1fU 
-                                                   & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                                                      >> 0xfU))]);
     vlSelf->ysyx_22040127_top__DOT__alu_output = ((4U 
                                                    & (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))
                                                    ? 
@@ -1080,6 +1075,7 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___ctor_var_reset(Vysyx_22040127_t
     vlSelf->ysyx_22040127_top__DOT__imm = 0;
     vlSelf->ysyx_22040127_top__DOT__alu_input1 = 0;
     vlSelf->ysyx_22040127_top__DOT__alu_input2 = 0;
+    vlSelf->ysyx_22040127_top__DOT__reg_data1 = 0;
     vlSelf->ysyx_22040127_top__DOT__reg_data2 = 0;
     vlSelf->ysyx_22040127_top__DOT__jalr = 0;
     vlSelf->ysyx_22040127_top__DOT__loaded_data = 0;
