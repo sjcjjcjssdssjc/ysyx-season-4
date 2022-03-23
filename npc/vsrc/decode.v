@@ -35,14 +35,15 @@ module ysyx_22040127_decode(
   end
   //number of keys,width of key/data (output input 
   
-  ysyx_22040127_MuxKeyWithDefault #(10, 7, 3) inst_mux (inst_type, instruction[6:0], TYPE_I,{
+  ysyx_22040127_MuxKeyWithDefault #(11, 7, 3) inst_mux (inst_type, instruction[6:0], TYPE_I,{
     7'b0010111,TYPE_U,//auipc
     7'b0110111,TYPE_U,//lui
     7'b0011011,TYPE_I,//addi,ebreak,lb,lh,lw,ld,lbu,lhu,lwu TODO:addiw
     7'b0000011,TYPE_I,//loads
     7'b1100111,TYPE_I,//jalr
     7'b1101111,TYPE_J,//jal
-    7'b0111011,TYPE_R,//addw add sub
+    7'b0111011,TYPE_R,//addw 
+    7'b0110011,TYPE_R,//add sub
     7'b1110011,TYPE_N,
     7'b0100011,TYPE_S,//sb sh sw sd
     7'b1100011,TYPE_B//beq bne

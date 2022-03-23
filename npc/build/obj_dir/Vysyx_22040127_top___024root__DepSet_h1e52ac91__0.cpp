@@ -48,9 +48,7 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
                         >> 7U));
     }
     __Vdly__pc = ((IData)(vlSelf->rst) ? 0x80000000U
-                   : ((((1U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)) 
-                        & (vlSelf->ysyx_22040127_top__DOT__instruction 
-                           >> 5U)) | (3U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type)))
+                   : ((3U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))
                        ? (vlSelf->pc + (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input1))
                        : ((5U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))
                            ? vlSelf->ysyx_22040127_top__DOT__branch_result
@@ -186,6 +184,17 @@ VL_INLINE_OPT void Vysyx_22040127_top___024root___sequent__TOP__0(Vysyx_22040127
            | ((0x7fU & vlSelf->ysyx_22040127_top__DOT__instruction) 
               == vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__key_list
               [9U]));
+    vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__lut_out 
+        = ((IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__lut_out) 
+           | ((- (IData)(((0x7fU & vlSelf->ysyx_22040127_top__DOT__instruction) 
+                          == vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__key_list
+                          [0xaU]))) & vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__data_list
+              [0xaU]));
+    vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__hit 
+        = ((IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__hit) 
+           | ((0x7fU & vlSelf->ysyx_22040127_top__DOT__instruction) 
+              == vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__key_list
+              [0xaU]));
     vlSelf->ysyx_22040127_top__DOT__inst_type = ((IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__hit)
                                                   ? (IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__lut_out)
                                                   : 0U);

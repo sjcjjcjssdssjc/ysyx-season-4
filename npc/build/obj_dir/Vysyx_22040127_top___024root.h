@@ -38,9 +38,9 @@ VL_MODULE(Vysyx_22040127_top___024root) {
     QData/*63:0*/ ysyx_22040127_top__DOT__mem__DOT__rdata;
     QData/*63:0*/ __Vtask_ysyx_22040127_top__DOT__pmem_read__0__doubly_aligned_data;
     QData/*63:0*/ __Vtask_ysyx_22040127_top__DOT__mem__DOT__pmem_read__4__doubly_aligned_data;
-    VlUnpacked<SData/*9:0*/, 10> ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__pair_list;
-    VlUnpacked<CData/*6:0*/, 10> ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__key_list;
-    VlUnpacked<CData/*2:0*/, 10> ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__data_list;
+    VlUnpacked<SData/*9:0*/, 11> ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__pair_list;
+    VlUnpacked<CData/*6:0*/, 11> ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__key_list;
+    VlUnpacked<CData/*2:0*/, 11> ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__data_list;
     VlUnpacked<QData/*63:0*/, 32> ysyx_22040127_top__DOT__regs__DOT__rf;
     VlUnpacked<CData/*0:0*/, 2> __Vm_traceActivity;
 

@@ -93,7 +93,7 @@ module ysyx_22040127_top(
   always @(posedge clk) begin
     if(rst == 1'b1)
       pc <= 32'h80000000;
-    else if(inst_type == TYPE_U && instruction[5] || inst_type == TYPE_J)//type_u:auipc,j
+    else if(inst_type == TYPE_J)//type_u:auipc,j
       pc <= pc + alu_input1[31:0];
     else if(inst_type == TYPE_B) pc <= branch_result;
     else if(jalr) pc <= alu_output[31:0] & (~1);

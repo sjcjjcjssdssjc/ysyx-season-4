@@ -15,12 +15,13 @@ module ysyx_22040127_execute(
   op_addw = 6'b000001,op_sub = 6'b100000;
   wire[63:0]calc_result;
   wire[63:0]alu_op;
+  wire[63:0]sub;
   ysyx_22040127_decoder_6_64 dec(.in({instruction[30], instruction[25], instruction[14:12], 
   instruction[3]}),.out(alu_op));
   assign calc_result = {64{alu_op[op_addw]}} & {{32{src1[31] ^ src2[31]}}, src1[31:0] + src2[31:0]}|
   {64{alu_op[op_add]}} & (src1 + src2) |
   {64{alu_op[op_sub]}} & (src1 - src2);
-
+  assign sub = src1 - src2;
   //num,out,in
   always @(*) begin
     case(inst_type)
