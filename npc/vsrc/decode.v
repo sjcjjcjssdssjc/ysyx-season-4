@@ -18,8 +18,8 @@ module ysyx_22040127_decode(
   //assign imm = {{52{instruction[31]}},instruction[31:20]};
   assign reg_wen = !(|inst_type) || inst_type == TYPE_U || inst_type == TYPE_J
   || inst_type == TYPE_R;//typeI is first
-  assign memread = !instruction[3] & !instruction[4] & !instruction[5]
-   & !instruction[6] & !instruction[7];//right?
+  assign memread = !instruction[2] & !instruction[3] & !instruction[4] 
+  & !instruction[5] & !instruction[6] ;//right?
   //typei,typeu writes register
   always @(*)begin
     case(inst_type)
