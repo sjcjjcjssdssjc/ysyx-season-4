@@ -38,18 +38,20 @@ module ysyx_22040127_decode(
   ysyx_22040127_MuxKeyWithDefault #(12, 7, 3) inst_mux (inst_type, instruction[6:0], TYPE_I,{
     7'b0010111,TYPE_U,//auipc
     7'b0110111,TYPE_U,//lui
-    7'b0011011,TYPE_I,//ebreak,addiw(X)
-    7'b0010011,TYPE_I,//addi
-    7'b0000011,TYPE_I,//lb,lh,lw,ld,lbu,lhu,lwu
+
+    7'b0011011,TYPE_I,//addiw,sraiw,srliw,slliw
+    7'b0010011,TYPE_I,//addi,andi,ori,xori,sltiu,srai,srli,slli(new)
+    7'b0000011,TYPE_I,//lb,lh,lw,ld,lbu,lhu,lwu(src1+src2)
     7'b1100111,TYPE_I,//jalr
+
     7'b1101111,TYPE_J,//jal
-    7'b0111011,TYPE_R,//addw 
-    7'b0110011,TYPE_R,//add sub
-    7'b1110011,TYPE_N,
+    7'b0111011,TYPE_R,//addw subw mulw sllw srlw sraw divw divuw remw remuw
+    7'b0110011,TYPE_R,//add mul sub sll slt sltu xor or and
+    7'b1110011,TYPE_N,//ebreak
     7'b0100011,TYPE_S,//sb sh sw sd
-    7'b1100011,TYPE_B//beq bne
+    7'b1100011,TYPE_B //beq bne
     //load and store are problematic
-    //23
+    //49
   });
   
 endmodule

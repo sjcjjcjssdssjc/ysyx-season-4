@@ -22,13 +22,14 @@ uint64_t paddr_read(uint64_t addr, uint64_t len){//sdb read
 
 extern "C" void pmem_read(long long raddr, long long *rdata) {
   // 总是读取地址为`raddr & ~0x7ull`的8字节返回给`rdata`
-  if(raddr < 0x80000000){
-    *rdata = 0;
-    return;
-  }
+  //printf("%llx\n",raddr);
   long long tmp = raddr;
   raddr &= ~(0x7ull);
   raddr -= 0x80000000;
+  if(raddr < 0 || raddr >= CONFIG_MSIZE){
+    *rdata = 0;
+    return;
+  }
   long long res = 0;
   for(long long i = raddr + 7; (int64_t)i >= (int64_t)raddr; i--){
     
@@ -48,7 +49,7 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
   waddr &= ~(0x7ull);
   waddr -= 0x80000000;
   //printf("write aft %llx %x\n",waddr,wmask);
-  if(waddr < 0 || !wmask)return;
+  if(waddr < 0 || waddr >= CONFIG_MSIZE || !wmask)return;
   long long tmp = wdata;
   for(long long i = waddr; i <= waddr + 7; i++){
     if(wmask & (1 << (i - waddr))){

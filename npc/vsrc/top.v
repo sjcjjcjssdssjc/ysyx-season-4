@@ -23,7 +23,7 @@ module ysyx_22040127_top(
   wire[63:0] reg_data1;
   wire[63:0] reg_data2;
   wire       jalr;
-  wire       beq,bne;
+  wire       beq,bne,blt,bltu,bge,bgeu;
   wire       branch_taken;
   wire       lb,lh,lw,ld,lbu,lhu,lwu;
   wire       sb,sh,sw,sd;
@@ -43,6 +43,10 @@ module ysyx_22040127_top(
   assign jalr = inst_type == 3'b000 && instruction[6:5] == 2'b11; 
   assign beq  = !(|instruction[14:12]);
   assign bne  = !(|instruction[14:13]) & instruction[12];
+  assign blt  = instruction[14:12] == 3'b100;
+  assign bltu = instruction[14:12] == 3'b110;
+  assign bge  = instruction[14:12] == 3'b101;
+  assign bgeu = instruction[14:12] == 3'b111;
 
   assign ebreak = (inst_type == 3'b110) & instruction[20]
       & !(|{instruction[31:21],instruction[19:7]});
@@ -71,8 +75,11 @@ module ysyx_22040127_top(
   assign mem_raddr = alu_output;
   assign branch_result = branch_taken ? pc + imm[31:0]: pc + 4;
   assign branch_taken = beq && (reg_data1 == reg_data2)
-  || bne && (reg_data1 != reg_data2);//for B_TYPE only
-  
+  || bne  && (reg_data1 != reg_data2)//for B_TYPE only
+  || blt  && ($signed(reg_data1) <  $signed(reg_data2))
+  || bltu && reg_data1 < reg_data2
+  || bge  && ($signed(reg_data1) >= $signed(reg_data2))
+  || bgeu && reg_data1 >= reg_data2;
 
   import "DPI-C" function void set_simtime();//terminate
   import "DPI-C" function void set_pc(input bit[31:0] pc);
@@ -102,7 +109,8 @@ module ysyx_22040127_top(
   end
   ysyx_22040127_decode dec(instruction, clk, rst, reg_wen, memread,
   rd, rs1, rs2, inst_type, imm);
-  ysyx_22040127_execute exe(instruction, clk, rst, pc, alu_input1, alu_input2, imm, inst_type, alu_output);
+  ysyx_22040127_execute exe(instruction, clk, rst, pc, alu_input1, alu_input2, imm, inst_type, 
+  memread, alu_output);
   ysyx_22040127_RegisterFile #(5, 64) regs(clk, reg_wen, reg_wdata, rd, rs1, rs2, reg_data1, reg_data2);//wb
   ysyx_22040127_memory mem(.clk(clk),.memwrite(memwrite),.wdata(mem_wdata),.waddr(mem_waddr),
   .raddr(mem_raddr),.lb(lb),.lh(lh),.lw(lw),.ld(ld),

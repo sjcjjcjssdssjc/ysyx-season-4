@@ -38,23 +38,22 @@ module ysyx_22040127_memory(
   {32{ld}} & rdata[63:32]; 
 
   assign rdata = {64{ld}} & doubly_aligned_data |
-  {32'b0, {32{addr_lowmask[3'b000] & lw}} & doubly_aligned_data[31:0]} |
-  {32'b0, {32{addr_lowmask[3'b100] & lw}} & doubly_aligned_data[63:32]}|
+  {32'b0, {32{addr_lowmask[3'b000] & (lw | lwu)}} & doubly_aligned_data[31:0]} |
+  {32'b0, {32{addr_lowmask[3'b100] & (lw | lwu)}} & doubly_aligned_data[63:32]}|
 
-  {48'b0, {16{addr_lowmask[3'b000] & lh}} & doubly_aligned_data[15:0]}|
-  {48'b0, {16{addr_lowmask[3'b010] & lh}} & doubly_aligned_data[31:16]}|
-  {48'b0, {16{addr_lowmask[3'b100] & lh}} & doubly_aligned_data[47:32]}|
-  {48'b0, {16{addr_lowmask[3'b110] & lh}} & doubly_aligned_data[63:48]}|
+  {48'b0, {16{addr_lowmask[3'b000] & (lh | lhu)}} & doubly_aligned_data[15:0]}|
+  {48'b0, {16{addr_lowmask[3'b010] & (lh | lhu)}} & doubly_aligned_data[31:16]}|
+  {48'b0, {16{addr_lowmask[3'b100] & (lh | lhu)}} & doubly_aligned_data[47:32]}|
+  {48'b0, {16{addr_lowmask[3'b110] & (lh | lhu)}} & doubly_aligned_data[63:48]}|
 
-  {56'b0, {8{addr_lowmask[3'b000] & lb}} & doubly_aligned_data[7:0]}|
-  {56'b0, {8{addr_lowmask[3'b001] & lb}} & doubly_aligned_data[15:8]}|
-  {56'b0, {8{addr_lowmask[3'b010] & lb}} & doubly_aligned_data[23:16]}|
-  {56'b0, {8{addr_lowmask[3'b011] & lb}} & doubly_aligned_data[31:24]}|
-
-  {56'b0, {8{addr_lowmask[3'b100] & lb}} & doubly_aligned_data[39:32]}|
-  {56'b0, {8{addr_lowmask[3'b101] & lb}} & doubly_aligned_data[47:40]}|
-  {56'b0, {8{addr_lowmask[3'b110] & lb}} & doubly_aligned_data[55:48]}|
-  {56'b0, {8{addr_lowmask[3'b111] & lb}} & doubly_aligned_data[63:56]};
+  {56'b0, {8{addr_lowmask[3'b000] & (lb | lbu)}} & doubly_aligned_data[7:0]}  |
+  {56'b0, {8{addr_lowmask[3'b001] & (lb | lbu)}} & doubly_aligned_data[15:8]} |
+  {56'b0, {8{addr_lowmask[3'b010] & (lb | lbu)}} & doubly_aligned_data[23:16]}|
+  {56'b0, {8{addr_lowmask[3'b011] & (lb | lbu)}} & doubly_aligned_data[31:24]}|
+  {56'b0, {8{addr_lowmask[3'b100] & (lb | lbu)}} & doubly_aligned_data[39:32]}|
+  {56'b0, {8{addr_lowmask[3'b101] & (lb | lbu)}} & doubly_aligned_data[47:40]}|
+  {56'b0, {8{addr_lowmask[3'b110] & (lb | lbu)}} & doubly_aligned_data[55:48]}|
+  {56'b0, {8{addr_lowmask[3'b111] & (lb | lbu)}} & doubly_aligned_data[63:56]};
   //sw:000 100
   //sh:000 010 100 110
   
