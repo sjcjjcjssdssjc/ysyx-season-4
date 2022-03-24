@@ -17,10 +17,12 @@ void difftest_regcpy(void *dut, bool direction) {
     for(int i = 0; i < 32; i++){
       cpu.gpr[i] = ((uint64_t *)dut)[i];
     }
+    cpu.pc = ((uint64_t *)dut)[32];
   }else{
     for(int i = 0; i < 32; i++){
      ((uint64_t *)dut)[i] = cpu.gpr[i];
     }
+    ((uint64_t *)dut)[32] = cpu.pc;
   }
   
 }

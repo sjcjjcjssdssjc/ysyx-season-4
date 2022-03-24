@@ -45,9 +45,12 @@ void cpu_exec(unsigned x){
     bool k = isa_difftest_checkregs(&ref_r, cpu_pc);
     if(!k)for(int i=0;i<32;i++){
       if(ref_r.gpr[i] != cpu_gpr[i])
-        printf("%s nemu:%lx our processor:%lx pc:%x after %d steps\n", //nemupc!
-        regs[i], ref_r.gpr[i], cpu_gpr[i],cpu_pc,exec_cnt);
+        printf("%s nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\n", //nemupc!
+        regs[i], ref_r.gpr[i], cpu_gpr[i],ref_r.pc,cpu_pc,exec_cnt);
     }
+    if(ref_r.pc != cpu_pc)printf("nemu pc:%lx our pc:%x after %d steps\n",
+    ref_r.pc,cpu_pc,exec_cnt);
+    
     if(k == 0){
       printf("\033[1;31m Hit Bad Trap \033[0m\n"); 
       dump_gpr();
@@ -180,7 +183,6 @@ void sdb_set_batch_mode() {
 void sdb_mainloop(char *ref_so_file, long img_size, int port) {
   #ifdef DIFF
   init_difftest(ref_so_file, img_size, port);
-  ref_difftest_exec(1);
   #endif
   if(is_batch_mode){
     cpu_exec(-1);
