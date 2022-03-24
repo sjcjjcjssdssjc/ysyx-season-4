@@ -45,6 +45,5 @@ bool isa_difftest_checkregs(riscv64_CPU_state *ref_r, uint64_t pc) {
       return false;
   }
   if(ref_r -> pc != pc)return false;
-  printf("same\n");
   return true;
 }

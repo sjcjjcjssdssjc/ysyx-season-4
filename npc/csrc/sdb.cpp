@@ -183,6 +183,7 @@ void sdb_set_batch_mode() {
 void sdb_mainloop(char *ref_so_file, long img_size, int port) {
   #ifdef DIFF
   init_difftest(ref_so_file, img_size, port);
+  //ref_difftest_exec(1);
   #endif
   if(is_batch_mode){
     cpu_exec(-1);
