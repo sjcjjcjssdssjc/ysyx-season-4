@@ -706,10 +706,10 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
                              ? (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input2)
                              : (0x1fU & (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input2)))))) {
         vlSelf->ysyx_22040127_top__DOT__exe__DOT__src1_sraw 
-            = ((IData)(vlSelf->ysyx_22040127_top__DOT__alu_input1) 
-               >> (0x3fU & ((0U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))
-                             ? (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input2)
-                             : (0x1fU & (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input2)))));
+            = VL_SHIFTRS_III(32,32,6, (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input1), 
+                             (0x3fU & ((0U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))
+                                        ? (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input2)
+                                        : (0x1fU & (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input2)))));
         vlSelf->ysyx_22040127_top__DOT__exe__DOT__src1_srlw 
             = ((IData)(vlSelf->ysyx_22040127_top__DOT__alu_input1) 
                >> (0x3fU & ((0U == (IData)(vlSelf->ysyx_22040127_top__DOT__inst_type))
@@ -721,7 +721,9 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
                              ? (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input2)
                              : (0x1fU & (IData)(vlSelf->ysyx_22040127_top__DOT__alu_input2)))));
     } else {
-        vlSelf->ysyx_22040127_top__DOT__exe__DOT__src1_sraw = 0U;
+        vlSelf->ysyx_22040127_top__DOT__exe__DOT__src1_sraw 
+            = (- ((IData)(vlSelf->ysyx_22040127_top__DOT__alu_input1) 
+                  >> 0x1fU));
         vlSelf->ysyx_22040127_top__DOT__exe__DOT__src1_srlw = 0U;
         vlSelf->ysyx_22040127_top__DOT__exe__DOT__src1_sllw = 0U;
     }
@@ -911,7 +913,7 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
                                                     >> 0x2bU)))))) 
                   & vlSelf->ysyx_22040127_top__DOT__exe__DOT__sext_src1_sraw)) 
               | ((- (QData)((IData)((1U & (IData)((vlSelf->ysyx_22040127_top__DOT__exe__DOT__rtype_alu_op 
-                                                   >> 0x11U)))))) 
+                                                   >> 0x19U)))))) 
                  & (((QData)((IData)((- (IData)((vlSelf->ysyx_22040127_top__DOT__exe__DOT__divw_result 
                                                  >> 0x1fU))))) 
                      << 0x20U) | (QData)((IData)(vlSelf->ysyx_22040127_top__DOT__exe__DOT__divw_result))))) 

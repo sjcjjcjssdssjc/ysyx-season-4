@@ -50,7 +50,7 @@ module ysyx_22040127_execute(
   op_and  = 6'b001110, op_div  = 6'b011000, op_divu = 6'b011010,
   op_remu = 6'b011110, op_rem  = 6'b011100, 
   op_subw = 6'b100001, op_mulw = 6'b010001, op_sllw = 6'b000011,
-  op_divw = 6'b010001, op_srlw = 6'b001011, op_sraw = 6'b101011,
+  op_divw = 6'b011001, op_srlw = 6'b001011, op_sraw = 6'b101011,
   op_divuw= 6'b011011, op_remw = 6'b011101, op_remuw= 6'b011111;
   localparam op_addi = 5'b10000,op_andi = 5'b10111,op_ori = 5'b10110,
   op_xori  = 5'b10100,op_sltiu = 5'b10011,op_sri = 5'b10101,op_slli = 5'b10001,
@@ -64,7 +64,7 @@ module ysyx_22040127_execute(
   assign remw_result  = $signed(src1[31:0]) % $signed(src2[31:0]);
   assign remuw_result = src1[31:0] % src2[31:0];
 
-  assign src1_sraw   = $signed(src1[31:0]) >> (inst_type == TYPE_I ? src2[5:0] : {1'b0, src2[4:0]});
+  assign src1_sraw   = $signed(src1[31:0]) >>> (inst_type == TYPE_I ? src2[5:0] : {1'b0, src2[4:0]});
   assign src1_srlw   = src1[31:0] >> (inst_type == TYPE_I ? src2[5:0] : {1'b0, src2[4:0]});
   assign src1_sllw   = src1[31:0] << (inst_type == TYPE_I ? src2[5:0] : {1'b0, src2[4:0]});
   assign sext_src1_sraw    = {{32{src1_sraw[31]}}, src1_sraw[31:0]};
@@ -111,7 +111,7 @@ module ysyx_22040127_execute(
   {64{itype_alu_op[op_ori]}}  & (src1 | src2 ) | //ori
   {64{itype_alu_op[op_xori]}} & (src1 ^ src2 ) | //xori
   {64{itype_alu_op[op_sltiu]}}& (src1 < src2 ? 64'b1 : 64'b0)|//sltiu
-  {64{itype_alu_op[op_sri] & instruction[30] }} & ($signed(src1) >> src2[5:0]) |//srai
+  {64{itype_alu_op[op_sri] & instruction[30] }} & ($signed(src1) >>> src2[5:0]) |//srai
   {64{itype_alu_op[op_sri] & !instruction[30]}} & (src1 >> src2[5:0])          |//srli
   {64{itype_alu_op[op_slli]}} & (src1 << src2[5:0]) | //slli
   {64{itype_alu_op[op_addiw]}}  & sext_addw_result  | //addiw
