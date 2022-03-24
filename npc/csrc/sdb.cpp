@@ -40,8 +40,8 @@ void cpu_exec(unsigned x){
     //printf("%x\n",cpu_pc); 
     #ifdef DIFF
     riscv64_CPU_state ref_r;
-    ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is nemu
     ref_difftest_exec(1);
+    ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is nemu
     bool k = isa_difftest_checkregs(&ref_r, cpu_pc);
     if(!k)for(int i=0;i<32;i++){
       if(ref_r.gpr[i] != cpu_gpr[i])
