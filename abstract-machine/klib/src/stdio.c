@@ -28,7 +28,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     }
     else{
       if(!widthflag)fmt++;
-      if(*fmt == 'd'){
+      if(*fmt == 'd' || *fmt == 'x'){
+        int hex = (*(fmt + 1) == 'x');
+        if(hex)fmt++,base=16;
         int num = va_arg(ap, int);
         int rev = 0,len = 0;
         while(num){
