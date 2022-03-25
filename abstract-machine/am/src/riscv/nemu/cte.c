@@ -3,9 +3,9 @@
 #include <klib.h>
 static Context* (*user_handler)(Event, Context*) = NULL;
 
-Context* __am_irq_handle(Context *c) {
+Context* __am_irq_handle(Context *c) {//handler function(hui diao)
 
-  printf("handle %lx %lx %lx\n",c->mepc, c->mcause, c->mstatus);//no mtvec
+  printf("handle mepc %lx mcause%lx mstatus%lx\n",c->mepc, c->mcause, c->mstatus);//no mtvec
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
