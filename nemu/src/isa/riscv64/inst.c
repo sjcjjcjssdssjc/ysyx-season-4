@@ -84,6 +84,15 @@ static void csrrws_op(word_t dest, word_t src1, word_t src2, Decode *s,word_t is
     case(MEPC)   : t = cpu.mepc;    cpu.mepc    = is_read * t | src1; R(dest) = t; break;
   }
 }
+#define MIE  (1 << 3)
+#define MPIE (1 << 7)
+static void mret_op(word_t dest, word_t src1, word_t src2, Decode *s){
+  s->dnpc = cpu.mepc + 4;//for now
+  //cpu.mstatus & MPP = NO supervisor/machine/user mode
+  if(cpu.mstatus & MPIE)cpu.mstatus |= MIE;
+  cpu.mstatus |= MPIE;
+
+}
 static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, int type) {
   uint32_t i = s->isa.inst.val;
   int rd  = BITS(i, 11, 7);
@@ -189,6 +198,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(R(17), s->pc));
   INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , N, csrrws_op(dest, src1, src2, s, 0));
   INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , N, csrrws_op(dest, src1, src2, s, 1));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", csrrs  , N, mret_op(dest, src1, src2, s));
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();
 
