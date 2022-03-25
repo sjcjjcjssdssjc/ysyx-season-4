@@ -230,5 +230,9 @@ config FTRACE
 config DTRACE
   bool "Enable device tracing"
   default n
+  
+config ETRACE
+  bool "Enable exception tracing"
+  default n
 
 endmenu

@@ -5,7 +5,9 @@ static Context* (*user_handler)(Event, Context*) = NULL;
 
 Context* __am_irq_handle(Context *c) {//handler function(hui diao)
 
+  #ifdef CONFIG_ETRACE
   printf("handle mepc %lx mcause%lx mstatus%lx\n",c->mepc, c->mcause, c->mstatus);//no mtvec
+  #endif
   if (user_handler) {
     Event ev = {0};
     switch (c->mcause) {
