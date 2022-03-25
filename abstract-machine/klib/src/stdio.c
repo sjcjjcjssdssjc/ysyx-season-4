@@ -20,7 +20,7 @@ int printf(const char *fmt, ...) {
 
 int vsprintf(char *out, const char *fmt, va_list ap) {
   char *now;
-  int widthflag = 0,width = 0;
+  int widthflag = 0,width = 0,base = 10;
   for(now = out;*fmt != 0;fmt++){
     if(*fmt != '%' && !widthflag){
       *now = *fmt;
@@ -32,33 +32,38 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         int num = va_arg(ap, int);
         int rev = 0,len = 0;
         while(num){
-          rev *= 10;
-          rev += num % 10;
-          num /= 10;
+          rev *= base;
+          rev += num % base;
+          num /= base;
           len++;
         }
         if(widthflag)len = width;
         if(len == 0)*now++ = '0';
         while(len--){
-          *now++ = rev % 10 + '0';
-          rev /= 10;
+          *now++ = rev % base + '0';
+          rev /= base;
         }
-      }
+      }//x is not implemented
       else if(*fmt == 'l'){
+        int hex = (*(fmt + 1) == 'x');
+        if(hex)fmt++,base=16;
         uint64_t num = va_arg(ap, uint64_t);
         uint64_t rev = 0,len = 0;
         while(num){
-          rev *= 10;
-          rev += num % 10;
-          num /= 10;
+          rev *= base;
+          rev += num % base;
+          num /= base;
           len++;
         }
         if(widthflag)len = width;
         if(len == 0)*now++ = '0';
         while(len--){
-          *now++ = rev % 10 + '0';
-          rev /= 10;
+          if(rev % base <10){
+            *now++ = rev % base + '0';
+          }else *now++ = rev % base - 10 + 'A';
+          rev /= base;
         }
+        base = 10;
       }
       else if(*fmt == 's'){//s
         char *tmp = va_arg(ap, char *);
