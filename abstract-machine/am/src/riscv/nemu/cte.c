@@ -19,7 +19,7 @@ Context* __am_irq_handle(Context *c) {//handler function(hui diao)
   return c;
 }
 
-extern void __am_asm_trap(void);
+extern void __am_asm_trap(void);//trap.S
 
 //os.main->init_irq(hascte)->this
 bool cte_init(Context*(*handler)(Event, Context*)) {
