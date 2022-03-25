@@ -34,7 +34,6 @@ static word_t immJ(uint32_t i) { return (SEXT(BITS(i, 31, 31), 1) << 20) | BITS(
 
 static void jal_op(word_t dest, word_t src1, Decode *s){
   R(dest) = s->snpc; 
-  //printf("%lu\n",src1);
   s->dnpc += src1 - 4;
 }
 static void jalr_op(word_t dest, word_t src1, word_t src2, Decode *s){
