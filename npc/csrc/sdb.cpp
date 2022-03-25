@@ -19,11 +19,13 @@ const char *regs[] = {
   "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
-static int is_batch_mode = false;
+static int is_batch_mode = true;
 extern uint64_t *cpu_gpr;//main.c(gpr of npc)
 extern void wrap_up_trace();
 int display_size = 5;
 int exec_cnt = -1;
+riscv64_CPU_state ref_r;
+uint64_t pc_before_exec;
 void npc_exec_once();
 void dump_gpr();//main.c
 
@@ -39,9 +41,11 @@ void cpu_exec(unsigned x){
     #endif
     //printf("%x\n",cpu_pc); 
     #ifdef DIFF
-    riscv64_CPU_state ref_r;
     ref_difftest_exec(1);
     ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is nemu
+    uint64_t tmp = pc_before_exec;
+    pc_before_exec = ref_r.pc;
+    ref_r.pc = tmp;
     bool k = isa_difftest_checkregs(&ref_r, cpu_pc);
     if(!k)for(int i=0;i<32;i++){
       if(ref_r.gpr[i] != cpu_gpr[i])
@@ -183,6 +187,7 @@ void sdb_set_batch_mode() {
 void sdb_mainloop(char *ref_so_file, long img_size, int port) {
   #ifdef DIFF
   init_difftest(ref_so_file, img_size, port);
+  pc_before_exec = cpu_pc;//also part of init
   //ref_difftest_exec(1);
   #endif
   if(is_batch_mode){
