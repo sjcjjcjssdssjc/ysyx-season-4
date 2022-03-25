@@ -6,6 +6,10 @@
 #define R(i) gpr(i)
 #define Mr vaddr_read
 #define Mw vaddr_write
+#define MTVEC   0x305
+#define MCAUSE  0x342
+#define MSTATUS 0x300
+#define MEPC    0x341
 
 enum {
   TYPE_I, TYPE_U, TYPE_S,
@@ -72,11 +76,13 @@ static void bltu_op(word_t dest, word_t src1, word_t src2, Decode *s){
   if(src1 < src2) 
     s->dnpc += dest - 4;
 }
-static void csrrw_op(word_t dest, word_t src1, word_t src2, Decode *s){
-  if(src2 == 0x305){//mtvec
-    word_t t = cpu.mtvec;
-    cpu.mtvec = src1;
-    R(dest) = t;
+static void csrrws_op(word_t dest, word_t src1, word_t src2, Decode *s,word_t is_read){
+  word_t t;
+  switch (src2) {
+    case(MTVEC)  : t = cpu.mtvec;   cpu.mtvec   = is_read * t | src1; R(dest) = t; break;
+    case(MCAUSE) : t = cpu.mcause;  cpu.mcause  = is_read * t | src1; R(dest) = t; break;
+    case(MSTATUS): t = cpu.mstatus; cpu.mstatus = is_read * t | src1; R(dest) = t; break;
+    case(MEPC)   : t = cpu.mepc;    cpu.mepc    = is_read * t | src1; R(dest) = t; break;
   }
 }
 static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, int type) {
@@ -182,7 +188,8 @@ static int decode_exec(Decode *s) {
 
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
   INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(R(17), s->pc));
-  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , N, csrrw_op(dest, src1, src2, s));
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , N, csrrws_op(dest, src1, src2, s, 0));
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , N, csrrws_op(dest, src1, src2, s, 1));
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();
 
