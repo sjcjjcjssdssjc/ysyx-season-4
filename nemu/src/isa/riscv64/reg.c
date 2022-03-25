@@ -11,4 +11,8 @@ void isa_reg_display() {
   for(int i = 0;i < 32; i++){
     printf("%s: %lx\n",regs[i],cpu.gpr[i]);
   }
+  printf("mepc: %lx\n",cpu.mepc);
+  printf("mcause: %lx\n",cpu.mcause);
+  printf("mtvec: %lx\n",cpu.mtvec);
+  printf("mstatus: %lx\n",cpu.mstatus);
 }
