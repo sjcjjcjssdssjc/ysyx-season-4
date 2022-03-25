@@ -11,7 +11,7 @@
  * This is useful when you use the `si' command.
  * You can modify this value as you want.
  */
-#define MAX_INST_TO_PRINT 5000
+#define MAX_INST_TO_PRINT 500
 #define IRINGBUF_SIZE 8 //must be >= 3
 
 CPU_state cpu = {};
