@@ -44,6 +44,22 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
           rev /= 10;
         }
       }
+      else if(*fmt == 'l'){
+        uint64_t num = va_arg(ap, uint64_t);
+        uint64_t rev = 0,len = 0;
+        while(num){
+          rev *= 10;
+          rev += num % 10;
+          num /= 10;
+          len++;
+        }
+        if(widthflag)len = width;
+        if(len == 0)*now++ = '0';
+        while(len--){
+          *now++ = rev % 10 + '0';
+          rev /= 10;
+        }
+      }
       else if(*fmt == 's'){//s
         char *tmp = va_arg(ap, char *);
         int l = strlen(tmp);
