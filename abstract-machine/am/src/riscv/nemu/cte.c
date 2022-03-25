@@ -20,10 +20,15 @@ Context* __am_irq_handle(Context *c) {
 
 extern void __am_asm_trap(void);
 
+//os.main->init_irq(hascte)->this
 bool cte_init(Context*(*handler)(Event, Context*)) {
   // initialize exception entry
   asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));//异常入口地址
-
+  /*
+    SR[mepc] <- PC
+    SR[mcause] <- 一个描述失败原因的号码
+    PC <- SR[mtvec]
+  */
   // register event handler
   user_handler = handler;
 
