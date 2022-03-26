@@ -15,15 +15,15 @@ size_t get_ramdisk_size();
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
   size_t offset = 0;
-  Elf_Ehdr header; //elf header
-  offset += ramdisk_read(&header, offset, sizeof(header));
-  if(header.e_type == ET_EXEC  &&
-       header.e_ident[1] == 'E' &&
-       header.e_ident[2] == 'L' &&
-       header.e_ident[3] == 'F') {
-       printf("ok\n");
+  Elf_Ehdr  header;  //elf header
+  Elf_Phdr* pheader; //program header
+  ramdisk_read(&header, offset, sizeof(header));
+  if(header.e_type == ET_EXEC && header.e_ident[1] == 'E' &&
+     header.e_ident[2] == 'L' && header.e_ident[3] == 'F') {
+    printf("ok\n");
   }
-  else printf("%d %c %c %c\n",header.e_type,header.e_ident[1],header.e_ident[2],header.e_ident[3]);
+  pheader = malloc(sizeof(*pheader) * header.e_phnum);
+  //ramdisk_read(, header.e_phoff, sizeof(pheader));
   return 0;
 }
 
