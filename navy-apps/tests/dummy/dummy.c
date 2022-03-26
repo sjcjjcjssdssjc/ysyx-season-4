@@ -9,6 +9,5 @@
 extern int _syscall_(int, uintptr_t, uintptr_t, uintptr_t);
 extern void _exit(int status);
 int main() {
-  //_exit();
-  return _syscall_(SYS_yield, 0, 0, 0);
+  _exit(_syscall_(SYS_yield, 0, 0, 0));
 }
