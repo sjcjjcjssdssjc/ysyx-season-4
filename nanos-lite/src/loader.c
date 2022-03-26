@@ -41,9 +41,12 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     }
   }
   for(int i = 0; i < header.e_shnum; i++){
-    if(sheader[i].sh_flags & PF_X)ret = sheader[i].sh_addr;
+    if(sheader[i].sh_flags & PF_X){
+      ret = sheader[i].sh_addr;
+      printf("%lx\n",ret);
+    }
   }
-  printf("%lx\n",ret);
+  
   return ret;
 }
 
