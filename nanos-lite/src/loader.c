@@ -23,7 +23,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   ramdisk_read(&header, offset, sizeof(header));
   if(header.e_type == ET_EXEC && header.e_ident[1] == 'E' &&
      header.e_ident[2] == 'L' && header.e_ident[3] == 'F') {
-    printf("ok\n");
+    //printf("ok\n");
   }
   pheader = malloc(sizeof(Elf_Phdr) * header.e_phnum);
   sheader = malloc(sizeof(Elf_Shdr) * header.e_shnum);
@@ -34,7 +34,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
     //Elf_Phdr tmp = pheader[i];
     if(pheader[i].p_type == PT_LOAD){
       ramdisk_read((char *)(pheader[i].p_vaddr), pheader[i].p_offset, pheader[i].p_filesz);
-      printf("%lx\n",*(long unsigned int *)(pheader[i].p_vaddr));
+      //printf("%lx\n",*(long unsigned int *)(pheader[i].p_vaddr));
       memset((char *)(pheader[i].p_vaddr + pheader[i].p_filesz), 0, 
       pheader[i].p_memsz - pheader[i].p_filesz);//bss
       //if(pheader[i].p_flags & PF_X)ret = pheader[i].p_vaddr;
