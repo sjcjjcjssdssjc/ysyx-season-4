@@ -1,5 +1,6 @@
 #include <proc.h>
 #include <elf.h>
+//#include <stdio.h>
 
 #ifdef __LP64__
 # define Elf_Ehdr Elf64_Ehdr
@@ -10,7 +11,7 @@
 #endif
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
-  TODO();
+ 
   return 0;
 }
 
