@@ -22,8 +22,14 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
      header.e_ident[2] == 'L' && header.e_ident[3] == 'F') {
     printf("ok\n");
   }
-  pheader = malloc(sizeof(*pheader) * header.e_phnum);
-  //ramdisk_read(, header.e_phoff, sizeof(pheader));
+  pheader = malloc(sizeof(Elf_Phdr) * header.e_phnum);
+  ramdisk_read(pheader, header.e_phoff, sizeof(Elf_Phdr) * header.e_phnum);
+  for(int i = 0; i < header.e_phnum; i++){
+    //Elf_Phdr tmp = pheader[i];
+    if(pheader[i].p_type == PT_LOAD){
+      return pheader[i].p_paddr;
+    }
+  }
   return 0;
 }
 
