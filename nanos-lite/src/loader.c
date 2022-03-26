@@ -31,8 +31,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       ramdisk_read((char *)(pheader[i].p_vaddr), pheader[i].p_offset, pheader[i].p_filesz);
       printf("%lx\n",*(long unsigned int *)(pheader[i].p_vaddr));
       memset((char *)(pheader[i].p_vaddr + pheader[i].p_filesz), 0, pheader[i].p_memsz - pheader[i].p_filesz);//bss
-      
-      ret = pheader[i].p_vaddr;
+      if(pheader[i].p_flags & PF_X)ret = pheader[i].p_vaddr;
     }
   }
   return ret;
