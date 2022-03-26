@@ -9,6 +9,7 @@ void do_syscall(Context *c) {
   a[3] = c->GPR4;//a2 reg
   switch (a[0]) {
     case(SYS_yield): yield(); c->GPRx = 0; break;//register intptr_t ret asm (GPRx);
+    case(SYS_exit):  halt(a[1]); break;
     default: panic("Unhandled syscall ID = %lx", a[0]);
   }
 }
