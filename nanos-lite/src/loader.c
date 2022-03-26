@@ -27,10 +27,10 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   for(int i = 0; i < header.e_phnum; i++){
     //Elf_Phdr tmp = pheader[i];
     if(pheader[i].p_type == PT_LOAD){
-      ramdisk_read((char *)(pheader[i].p_vaddr), pheader[i].p_offset, pheader[i].p_filesz);
-      printf("%lx\n",*(long unsigned int *)(pheader[i].p_vaddr));
-      memset((char *)(pheader[i].p_vaddr + pheader[i].p_filesz), 0, pheader[i].p_memsz - pheader[i].p_filesz);//bss
-      return pheader[i].p_vaddr;
+      ramdisk_read((char *)(pheader[i].p_paddr), pheader[i].p_offset, pheader[i].p_filesz);
+      printf("%lx\n",*(long unsigned int *)(pheader[i].p_paddr));
+      memset((char *)(pheader[i].p_paddr + pheader[i].p_filesz), 0, pheader[i].p_memsz - pheader[i].p_filesz);//bss
+      return pheader[i].p_paddr;
     }
   }
   return 0;
