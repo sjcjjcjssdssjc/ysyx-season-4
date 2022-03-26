@@ -58,10 +58,10 @@ void _exit(int status) {
   while (1);
 }
 
-int _yield(){
-  _exit(SYS_yield);
-  return 0;
-}
+// int _yield(){
+//   _exit(SYS_yield);
+//   return 0;
+// }
 
 int _open(const char *path, int flags, mode_t mode) {
   _exit(SYS_open);
