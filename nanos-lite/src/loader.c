@@ -23,6 +23,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
        header.e_ident[3] == 'F') {
        printf("ok\n");
   }
+  else printf("%d %c %c %c\n",header.e_type,header.e_ident[1],header.e_ident[2],header.e_ident[3]);
   return 0;
 }
 
