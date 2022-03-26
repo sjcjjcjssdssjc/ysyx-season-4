@@ -1,10 +1,5 @@
 #include <common.h>
 #include "syscall.h"
-int sys_yield()
-{
-  yield();
-  return 0;
-}
 void do_syscall(Context *c) {
   printf("do syscall\n");
   uintptr_t a[4];
@@ -13,7 +8,7 @@ void do_syscall(Context *c) {
   a[2] = c->GPR3;//a1 reg
   a[3] = c->GPR4;//a2 reg
   switch (a[0]) {
-    case(SYS_yield): sys_yield(); break;
+    case(SYS_yield): yield(); c->GPRx = 0; break;//register intptr_t ret asm (GPRx);
     default: panic("Unhandled syscall ID = %lx", a[0]);
   }
 }
