@@ -9,6 +9,8 @@
 # define Elf_Ehdr Elf32_Ehdr
 # define Elf_Phdr Elf32_Phdr
 #endif
+extern uint8_t ramdisk_start;
+extern uint8_t ramdisk_end;
 size_t ramdisk_read(void *buf, size_t offset, size_t len);
 size_t ramdisk_write(const void *buf, size_t offset, size_t len);
 size_t get_ramdisk_size();
@@ -24,14 +26,14 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   }
   pheader = malloc(sizeof(Elf_Phdr) * header.e_phnum);
   ramdisk_read(pheader, header.e_phoff, sizeof(Elf_Phdr) * header.e_phnum);
-  uintptr_t ret = 0;
+  uintptr_t ret = (uintptr_t)&ramdisk_start;
   for(int i = 0; i < header.e_phnum; i++){
     //Elf_Phdr tmp = pheader[i];
     if(pheader[i].p_type == PT_LOAD){
       ramdisk_read((char *)(pheader[i].p_vaddr), pheader[i].p_offset, pheader[i].p_filesz);
       printf("%lx\n",*(long unsigned int *)(pheader[i].p_vaddr));
       memset((char *)(pheader[i].p_vaddr + pheader[i].p_filesz), 0, pheader[i].p_memsz - pheader[i].p_filesz);//bss
-      if(pheader[i].p_flags & PF_X)ret = pheader[i].p_vaddr;
+      //if(pheader[i].p_flags & PF_X)ret = pheader[i].p_vaddr;
     }
   }
   return ret;
