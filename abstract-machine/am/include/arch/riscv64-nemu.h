@@ -2,7 +2,7 @@
 #define ARCH_H__
 
 struct Context {
-  // TODO: fix the order of these members to match trap.S
+  // I have fixed the order of these members to match trap.S.
   uintptr_t gpr[32], mcause, mstatus, mepc;
   void *pdir;//handle it so PA4 will not WA
 };
