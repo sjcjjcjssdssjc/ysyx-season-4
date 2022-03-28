@@ -28,8 +28,8 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
     }
     else{
       if(!widthflag)fmt++;
-      if(*fmt == 'd' || *fmt == 'x' || *fmt == 'p'){
-        int hex = (*fmt == 'x' || *fmt == 'p');
+      if(*fmt == 'd' || *fmt == 'x'){
+        int hex = (*fmt == 'x');
         if(hex)base=16;
         int num = va_arg(ap, int);
         int rev = 0,len = 0;
@@ -48,9 +48,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
           rev /= base;
         }
       }//x is not implemented
-      else if(*fmt == 'l'){
-        int hex = (*(fmt + 1) == 'x');
-        if(hex)fmt++,base=16;
+      else if(*fmt == 'l' || *fmt == 'p'){
+        int hex = (*fmt == 'p') || (*(fmt + 1) == 'x');
+        if(*fmt != 'p' && hex)fmt++,base=16;
         uint64_t num = va_arg(ap, uint64_t);
         uint64_t rev = 0,len = 0;
         while(num){
