@@ -7,9 +7,9 @@ uintptr_t sys_write(uintptr_t a[4]){
     for(size_t i = 0;i < count; i++){
       putch(buf[i]);
     }
-    return 0;
+    return count;
   }
-  return 1;
+  return -1;
 }
 void do_syscall(Context *c) {
   //printf("do syscall\n");
