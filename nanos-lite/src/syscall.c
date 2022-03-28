@@ -21,8 +21,8 @@ void do_syscall(Context *c) {
   a[2] = c->GPR3;//a1 reg
   a[3] = c->GPR4;//a2 reg
   switch (a[0]) {//ssize_t write(int fd, const void *buf, size_t count);
-    case(SYS_yield): if(strace)printf("call sys_yield\n"); c->GPRx = sys_write(a); break;//register intptr_t ret asm (GPRx);
-    case(SYS_write): if(strace)printf("call sys_write\n"); yield(); c->GPRx = 0; break;
+    case(SYS_yield): if(strace)printf("call sys_yield\n"); yield(); c->GPRx = 0; break;
+    case(SYS_write): if(strace)printf("call sys_write\n"); c->GPRx = sys_write(a); break;//register intptr_t ret asm (GPRx);
     case(SYS_exit):  if(strace)printf("call sys_exit\n");  halt(a[1]); break;
     default: panic("Unhandled syscall ID = %lx", a[0]);
   }
