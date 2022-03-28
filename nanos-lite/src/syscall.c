@@ -10,7 +10,7 @@ uintptr_t sys_write(uintptr_t a[4]){
       putch(buf[i]);
     }
     printf("%d\n",count);
-    return 1;
+    return count;
   }
   return -1;
 }
