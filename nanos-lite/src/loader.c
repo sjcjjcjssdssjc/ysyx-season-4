@@ -16,6 +16,7 @@ size_t ramdisk_write(const void *buf, size_t offset, size_t len);
 size_t get_ramdisk_size();
 
 static uintptr_t loader(PCB *pcb, const char *filename) {
+  /*
   size_t offset = 0;
   Elf_Ehdr  header;  //elf header
   Elf_Phdr* pheader; //program header
@@ -48,6 +49,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   }
   
   return ret;
+  */
+ return 0;
 }
 
 void naive_uload(PCB *pcb, const char *filename) {
