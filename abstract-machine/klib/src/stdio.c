@@ -42,7 +42,9 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
         if(widthflag)len = width;
         if(len == 0)*now++ = '0';
         while(len--){
-          *now++ = rev % base + '0';
+          if(rev % base <10){
+            *now++ = rev % base + '0';
+          }else *now++ = rev % base - 10 + 'A';
           rev /= base;
         }
       }//x is not implemented
