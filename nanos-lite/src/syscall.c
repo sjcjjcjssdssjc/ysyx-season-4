@@ -1,6 +1,6 @@
 #include <common.h>
 #include "syscall.h"
-int strace = 0;
+int strace = 1;
 uintptr_t sys_write(uintptr_t a[4]){
   //printf("%d %d\n",a[1],a[3]);
   if(a[1] == 1 || a[1] == 2){
