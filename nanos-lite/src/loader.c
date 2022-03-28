@@ -6,10 +6,12 @@
 # define Elf_Ehdr Elf64_Ehdr
 # define Elf_Shdr Elf64_Shdr
 # define Elf_Phdr Elf64_Phdr
+# define Elf_Sym  Elf64_Sym
 #else
 # define Elf_Ehdr Elf32_Ehdr
 # define Elf_Shdr Elf32_Shdr
 # define Elf_Phdr Elf32_Phdr
+# define Elf_Sym  Elf32_Sym
 #endif
 size_t ramdisk_read(void *buf, size_t offset, size_t len);
 size_t ramdisk_write(const void *buf, size_t offset, size_t len);
@@ -40,10 +42,26 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       //if(pheader[i].p_flags & PF_X)ret = pheader[i].p_vaddr;
     }
   }
+  char* symstrtab = 0;
+  char* secstrtab = (char *)malloc(sheader[header.e_shstrndx].sh_size);//section name string table
+  ramdisk_read(secstrtab, sheader[header.e_shstrndx].sh_offset, sheader[header.e_shstrndx].sh_size);
+  
   for(int i = 0; i < header.e_shnum; i++){
-    if(sheader[i].sh_flags & SHF_EXECINSTR){
-      ret = sheader[i].sh_addr;
-      //printf("%lx %lx %lx\n",ret, sheader[i].sh_flags,SHF_EXECINSTR);
+    char *now = secstrtab + sheader[i].sh_name;
+    if(strcmp(now,".strtab") == 0){
+      symstrtab = malloc(sheader[i].sh_size);
+      ramdisk_read(symstrtab, sheader[i].sh_offset, sheader[i].sh_size);
+    }
+  }
+  for(int i = 0; i < header.e_shnum; i++){
+    char *now = secstrtab + sheader[i].sh_name;
+    if(strcmp(now,".symtab") == 0){
+      Elf_Sym *symtab = malloc(sheader[i].sh_size);
+      ramdisk_read(symtab, sheader[i].sh_offset, sheader[i].sh_size);
+      int symtab_len = sheader[i].sh_size / sizeof(Elf_Sym);
+      for(int j = 0;j < symtab_len; j++){
+        printf("%lx:%s\n",symtab[j].st_value, symstrtab + symtab[j].st_name);
+      }
     }
   }
   
