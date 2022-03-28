@@ -15,9 +15,9 @@ uintptr_t sys_write(uintptr_t a[4]){
   return -1;
 }
 uintptr_t sys_brk(uintptr_t a[4]){
-  char *addr = (char *)a[2];
+  uintptr_t *addr = (uintptr_t *)a[2];
   printf("program break1 %p %p\n",*addr,a[1]);
-  *addr += a[1];
+  *addr = *addr + a[1];
   printf("program break2 %p %p\n",*addr,a[1]);
   return 0;
 }
