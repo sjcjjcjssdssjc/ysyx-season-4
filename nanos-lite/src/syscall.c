@@ -15,9 +15,9 @@ uintptr_t sys_write(uintptr_t a[4]){
   return -1;
 }
 uintptr_t sys_brk(uintptr_t a[4]){
-  intptr_t *addr = (intptr_t *)a[2];
+  char *addr = (char *)a[2];
   *addr += a[1];
-  printf("%p\n",addr);
+  printf("%p\n",*addr);
   return 0;
 }
 void do_syscall(Context *c) {
