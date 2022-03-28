@@ -1,15 +1,15 @@
 #include <common.h>
 #include "syscall.h"
-int strace = 1;
+int strace = 0;
 uintptr_t sys_write(uintptr_t a[4]){
-  printf("%d %d\n",a[1],a[3]);
+  //printf("%d %d\n",a[1],a[3]);
   if(a[1] == 1 || a[1] == 2){
     char   *buf  = (char *)a[2];
     size_t count = a[3];
     for(size_t i = 0;i < count; i++){
       putch(buf[i]);
     }
-    printf("%d\n",count);
+    //printf("%d\n",count);
     return count;
   }
   return -1;
