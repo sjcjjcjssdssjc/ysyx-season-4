@@ -10,8 +10,9 @@ Context* __am_irq_handle(Context *c) {//handler function(hui diao)
     Event ev = {0};
     switch (c->mcause) {
       case(-1): ev.event = EVENT_YIELD;  break;
-      case(0):  ev.event = EVENT_SYSCALL;break;
-      case(1):  ev.event = EVENT_SYSCALL;break;
+      case(0):  ev.event = EVENT_SYSCALL;break;//sys_exit
+      case(1):  ev.event = EVENT_SYSCALL;break;//sys_yield
+      case(4):  ev.event = EVENT_SYSCALL;break;
       default:  ev.event = EVENT_ERROR;  break;
     }
 
