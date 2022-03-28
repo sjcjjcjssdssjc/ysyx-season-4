@@ -8,7 +8,6 @@ uintptr_t sys_write(uintptr_t a[4]){
     size_t count = a[3];
     for(size_t i = 0;i < count; i++){
       putch(buf[i]);
-      printf("buf %s\n",buf);
     }
     return count;
   }
