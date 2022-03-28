@@ -60,7 +60,6 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       ramdisk_read(symtab, sheader[i].sh_offset, sheader[i].sh_size);
       int symtab_len = sheader[i].sh_size / sizeof(Elf_Sym);
       for(int j = 0;j < symtab_len; j++){
-        printf("%lx:%s\n",symtab[j].st_value, symstrtab + symtab[j].st_name);
         if(strcmp(symstrtab + symtab[j].st_name,"_start") == 0)ret = symtab[j].st_value;
       }
     }
