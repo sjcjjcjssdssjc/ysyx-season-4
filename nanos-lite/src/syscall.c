@@ -17,7 +17,7 @@ uintptr_t sys_write(uintptr_t a[4]){
 uintptr_t sys_brk(uintptr_t a[4]){
   char *addr = (char *)a[2];
   *addr += a[1];
-  printf("%p\n",*addr);
+  printf("program break %p\n",*addr);
   return 0;
 }
 void do_syscall(Context *c) {
