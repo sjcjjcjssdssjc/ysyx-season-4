@@ -14,6 +14,12 @@ uintptr_t sys_write(uintptr_t a[4]){
   }
   return -1;
 }
+uintptr_t sys_brk(uintptr_t a[4]){
+  intptr_t *addr = (intptr_t *)a[2];
+  *addr += a[1];
+  printf("%p\n",addr);
+  return 0;
+}
 void do_syscall(Context *c) {
   //printf("do syscall\n");
   uintptr_t a[4];
@@ -25,6 +31,7 @@ void do_syscall(Context *c) {
     case(SYS_yield): if(strace)printf("call sys_yield\n"); yield(); c->GPRx = 0; break;
     case(SYS_write): if(strace)printf("call sys_write\n"); c->GPRx = sys_write(a); break;//register intptr_t ret asm (GPRx);
     case(SYS_exit):  if(strace)printf("call sys_exit\n");  halt(a[1]); break;
+    case(SYS_brk):   if(strace)printf("call sys_yield\n"); c->GPRx = sys_brk(a); break;
     default: panic("Unhandled syscall ID = %lx", a[0]);
   }
 }
