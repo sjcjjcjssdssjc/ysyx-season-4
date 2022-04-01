@@ -4,8 +4,16 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
   /* TODO: Trigger an interrupt/exception with ``NO''.
    * Then return the address of the interrupt/exception vector.
    */
-
-  return 0;
+  word_t mtvec;
+  cpu.mepc   = epc;
+  cpu.mcause = NO;
+  mtvec      = cpu.mtvec;
+  #ifdef CONFIG_ETRACE
+  printf("handle mepc %lx mcause %lx mstatus %lx\n",cpu.mepc, cpu.mcause, cpu.mstatus);//no mtvec
+  #endif
+  //1:将当前PC值保存到mepc寄存器
+  //2:在mcause寄存器中设置异常号
+  return mtvec;//从mtvec寄存器中取出异常入口地址,跳转到异常入口地址(nemu dnpc = mtvec)
 }
 
 word_t isa_query_intr() {

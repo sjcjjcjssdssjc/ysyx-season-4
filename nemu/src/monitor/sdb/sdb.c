@@ -9,6 +9,17 @@ static int is_batch_mode = false;
 
 void init_regex();
 void init_wp_pool();
+void info_wp();
+void free_wp(char *arg);
+typedef struct watchpoint {
+  int NO;
+  struct watchpoint *next;
+
+  /* TODO: Add more members if necessary */
+  char *expr;
+  word_t val;//val of expr
+} WP;
+extern WP* new_wp();
 
 /* We use the `readline' library to provide more flexibility to read from stdin. */
 static char* rl_gets() {
@@ -31,10 +42,14 @@ static int cmd_c(char *args) {
   cpu_exec(-1);
   return 0;
 }
-
+static int cmd_d(char *args){
+  char *arg = strtok(NULL, "\"");//first
+  free_wp(arg);
+  return 0;
+}
 
 static int cmd_q(char *args) {
-  return -1;//exit(0)
+  exit(0);
 }
 
 static int cmd_x(char * args){
@@ -42,8 +57,9 @@ static int cmd_x(char * args){
 
   unsigned int len;
   vaddr_t base;
-  len = atoi(arg);
   
+  len = atoi(arg);
+  arg = strtok(NULL, " ");//first
   sscanf(arg,"%lx",&base);
   for(int i=0;i<len;i++){//long is 64bit
     word_t x = paddr_read(base + i*4, 4);
@@ -55,10 +71,25 @@ static int cmd_x(char * args){
 static int cmd_p(char * args){
   char *arg = strtok(NULL, "\"");//second (there is no "")
   bool success;
-
-  printf("the value is %lu \n", expr(arg, &success));
+  word_t val = expr(arg, &success);
+  printf("the value is %lu (0x%lx)\n", val, val);
   if(success)printf("valid.\n");
   else printf("invalid.\n");
+  return success;
+}
+
+static int cmd_watch(char * args){
+  char *arg = strtok(NULL, "\"");//second (there is no "")
+  bool success;
+  
+  WP* wp = new_wp();
+  if(wp == 0)assert(0);
+  int l = strlen(arg);
+  wp -> expr = (char *)malloc(l);
+  memcpy(wp -> expr, arg, l);
+  wp -> expr[l] = 0;
+  wp -> val = expr(wp -> expr , &success);
+  if(success == 0)assert(0);
   return success;
 }
 
@@ -67,7 +98,9 @@ static int cmd_info(char *args) {
   if(arg[0] == 'r'){
     isa_reg_display();
   }
-  else printf("unknown instruction\n");
+  else if(arg[0] == 'w'){//and delete,menuconfig
+    info_wp();
+  }else printf("unknown instruction\n");
   return 0;
 }
 
@@ -92,6 +125,8 @@ static struct {
   { "info","print program status(regs/supervise node)", cmd_info},
   { "x","scan the memory", cmd_x},
   { "p", "Value of expression", cmd_p },
+  { "watch", "watch variable and see when it changes", cmd_watch },
+  { "d", "delete the watchpoint", cmd_d },
   /* TODO: Add more commands */
 
 };

@@ -214,5 +214,25 @@ endchoice
 config RT_CHECK
   bool "Enable runtime checking"
   default y
+config BATCH
+  bool "Enable batch processing"
+  default y
+config WATCHPOINT
+  bool "Enable watchpoint"
+  default y
+config MTRACE
+  bool "Enable memory tracing"
+  default n
+config FTRACE
+  bool "Enable function tracing"
+  default n
+  
+config DTRACE
+  bool "Enable device tracing"
+  default n
+  
+config ETRACE
+  bool "Enable exception tracing"
+  default n
 
 endmenu

@@ -1,6 +1,7 @@
 #include <isa.h>
 #include <memory/paddr.h>
-
+#include <elf.h>
+//char symbol_list[]
 void init_rand();
 void init_log(const char *log_file);
 void init_mem();
@@ -8,6 +9,7 @@ void init_difftest(char *ref_so_file, long img_size, int port);
 void init_device();
 void init_sdb();
 void init_disasm(const char *triple);
+void parse_elf(const char *elf_file);// src/cpu/cpu-exec.c(need to be changed)
 
 static void welcome() {
   Log("Trace: %s", MUXDEF(CONFIG_TRACE, ASNI_FMT("ON", ASNI_FG_GREEN), ASNI_FMT("OFF", ASNI_FG_RED)));
@@ -29,6 +31,7 @@ void sdb_set_batch_mode();
 static char *log_file = NULL;
 static char *diff_so_file = NULL;
 static char *img_file = NULL;
+static char *elf_file = NULL; // "/home/heisenberg/ysyx-workbench/am-kernels/tests/cpu-tests/build/recursion-riscv64-nemu.elf";
 static int difftest_port = 1234;
 
 static long load_img() {
@@ -60,6 +63,7 @@ static int parse_args(int argc, char *argv[]) {
     {"diff"     , required_argument, NULL, 'd'},
     {"port"     , required_argument, NULL, 'p'},
     {"help"     , no_argument      , NULL, 'h'},
+    {"elf"      , required_argument, NULL, 'e'},
     {0          , 0                , NULL,  0 },
   };
   int o;
@@ -78,11 +82,13 @@ static int parse_args(int argc, char *argv[]) {
        implementation  extensions.)   This  behavior is a GNU extension, not
        available with libraries before glibc 2.
 */
+    //printf("%c %s\n",(char)o,optarg);
     switch (o) {
       case 'b': sdb_set_batch_mode(); break;
       case 'p': sscanf(optarg, "%d", &difftest_port); break;
       case 'l': log_file = optarg; break;
       case 'd': diff_so_file = optarg; break;
+      case 'e': elf_file = optarg; break;
       case 1: img_file = optarg; return optind - 1;
       default:
         printf("Usage: %s [OPTION...] IMAGE [args]\n\n", argv[0]);
@@ -134,6 +140,9 @@ void init_monitor(int argc, char *argv[]) {
     MUXDEF(CONFIG_ISA_riscv64, "riscv64", "bad")))) "-pc-linux-gnu"
   ));
 
+#ifdef CONFIG_FTRACE
+  parse_elf(elf_file);
+#endif
   /* Display welcome message. */
   welcome();
 }

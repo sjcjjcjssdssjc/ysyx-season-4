@@ -4,6 +4,8 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 static unsigned long int next = 1;
+int first = 0;
+static char *sbrk = 0;
 
 int rand(void) {
   // RAND_MAX assumed to be 32767
@@ -34,7 +36,18 @@ void *malloc(size_t size) {
   // Therefore do not call panic() here, else it will yield a dead recursion:
   //   panic() -> putchar() -> (glibc) -> malloc() -> panic()
 #if !(defined(__ISA_NATIVE__) && defined(__NATIVE_USE_KLIB__))
-  panic("Not implemented");
+  if(!first){
+    sbrk = (void *)ROUNDUP(heap.start, 8);
+    first = 1;
+  }
+  size = (size_t)ROUNDUP(size, 8);
+  char *old = sbrk;
+  sbrk += size;//aligned too
+  assert((uintptr_t)heap.start <= (uintptr_t)sbrk && (uintptr_t)sbrk < (uintptr_t)heap.end);
+  for (uint64_t *p = (uint64_t *)old; p != (uint64_t *)sbrk; p ++) {
+    *p = 0;
+  }
+  return old;
 #endif
   return NULL;
 }
