@@ -50,7 +50,7 @@ int vsprintf(char *out, const char *fmt, va_list ap) {
       }//x is not implemented
       else if(*fmt == 'l' || *fmt == 'p'){
         int hex = (*fmt == 'p') || (*(fmt + 1) == 'x');
-        if(*fmt != 'p' && hex)fmt++;
+        if(*fmt != 'p')fmt++;
         if(hex)base=16;
         uint64_t num = va_arg(ap, uint64_t);
         uint64_t rev = 0,len = 0;

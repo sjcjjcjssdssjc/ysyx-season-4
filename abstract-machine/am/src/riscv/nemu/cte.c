@@ -1,6 +1,7 @@
 #include <am.h>
 #include <riscv/riscv.h>
 #include <klib.h>
+#include <syscall.h>//soft link to navy-apps/libs/libos/src/syscall.h
 static Context* (*user_handler)(Event, Context*) = NULL;
 
 Context* __am_irq_handle(Context *c) {//handler function(hui diao)
@@ -10,10 +11,9 @@ Context* __am_irq_handle(Context *c) {//handler function(hui diao)
     Event ev = {0};
     switch (c->mcause) {
       case(-1): ev.event = EVENT_YIELD;  break;
-      case(0):  ev.event = EVENT_SYSCALL;break;//sys_exit
-      case(1):  ev.event = EVENT_SYSCALL;break;//sys_yield
-      case(4):  ev.event = EVENT_SYSCALL;break;
-      case(9):  ev.event = EVENT_SYSCALL;break;//sys_brk
+      case(SYS_exit): case(SYS_yield): case(SYS_open): case(SYS_read): 
+      case(SYS_write):case(SYS_close): case(SYS_lseek):case(SYS_brk):  
+      ev.event = EVENT_SYSCALL;break;
       default:  ev.event = EVENT_ERROR;  break;
     }
 
