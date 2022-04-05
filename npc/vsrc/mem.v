@@ -11,33 +11,33 @@ module ysyx_22040127_memory(
   input lbu,
   input lhu,
   input lwu,
-  output[63:0] loaded_data,
+  output[63:0] sext_data,
   input sb,
   input sh,
   input sw,
   input sd
 );
   wire[63:0]doubly_aligned_data;
-  wire[63:0]rdata;//after mask
+  wire[63:0]rawdata;//after mask
   wire[7:0]addr_lowmask;
   wire[7:0]wmask;//real_wmask
 
   ysyx_22040127_decoder_3_8 dec(.in(raddr[2:0]),.out(addr_lowmask));
   import "DPI-C" function void pmem_read(
-  input longint raddr, output longint doubly_aligned_data);//not the rdata in this module
+  input longint raddr, output longint doubly_aligned_data);
   import "DPI-C" function void pmem_write(
     input longint waddr, input longint wdata, input byte wmask);
   
-  assign loaded_data[7:0]  = rdata[7:0];//alu_output
-  assign loaded_data[15:8] = {8{lb}} & {8{rdata[7]}} |
-  {8{lh | lhu}} & rdata[15:8]| {8{lw | lwu | ld}}  & rdata[15:8];
-  assign loaded_data[31:16] = {16{lb}} & {16{rdata[7]}} |
-  {16{lh}} & {16{rdata[15]}} | {16{lw | lwu | ld}} & rdata[31:16];
-  assign loaded_data[63:32] = {32{lb}} & {32{rdata[7]}} |
-  {32{lh}} & {32{rdata[15]}} | {32{lw}} & {32{rdata[31]}} |
-  {32{ld}} & rdata[63:32]; 
+  assign sext_data[7:0]  = rawdata[7:0];//alu_output
+  assign sext_data[15:8] = {8{lb}} & {8{rawdata[7]}} |
+  {8{lh | lhu}} & rawdata[15:8]| {8{lw | lwu | ld}}  & rawdata[15:8];
+  assign sext_data[31:16] = {16{lb}} & {16{rawdata[7]}} |
+  {16{lh}} & {16{rawdata[15]}} | {16{lw | lwu | ld}} & rawdata[31:16];
+  assign sext_data[63:32] = {32{lb}} & {32{rawdata[7]}} |
+  {32{lh}} & {32{rawdata[15]}} | {32{lw}} & {32{rawdata[31]}} |
+  {32{ld}} & rawdata[63:32]; 
 
-  assign rdata = {64{ld}} & doubly_aligned_data |
+  assign rawdata = {64{ld}} & doubly_aligned_data |
   {32'b0, {32{addr_lowmask[3'b000] & (lw | lwu)}} & doubly_aligned_data[31:0]} |
   {32'b0, {32{addr_lowmask[3'b100] & (lw | lwu)}} & doubly_aligned_data[63:32]}|
 

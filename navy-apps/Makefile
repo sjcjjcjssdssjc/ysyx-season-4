@@ -118,6 +118,7 @@ $(DST_DIR)/%.o: %.S
 ### Rule (recursive make): build dependent libraries (libc, libos, ...)
 libs:
 	@for t in $(LIBS); do $(MAKE) -s -C $(NAVY_HOME)/libs/$$t archive; done
+#$(info $(NAVY_HOME)/libs/$$t archive) archive the object files?
 
 ### Rule (link): objects (`*.o`) and libraries (`*.a`) -> `$(APP)`, the final ELF binary to be packed into application (ld)
 $(APP): $(OBJS) libs
@@ -167,7 +168,7 @@ $(CLEAN_ALL):
 
 ### Build fsimg and ramdisk for Nanos-lite
 APPS =
-TESTS = dummy hello file-test
+TESTS = dummy hello file-test timer-test event-test bmp-test
 
 fsimg: $(addprefix apps/, $(APPS)) $(addprefix tests/, $(TESTS))
 	-for t in $^; do $(MAKE) -s -C $(NAVY_HOME)/$$t install; done

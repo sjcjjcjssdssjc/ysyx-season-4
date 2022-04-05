@@ -39,7 +39,7 @@ char *strcat(char *dst, const char *src) {
     dst++;
     src++;
   }
-  *dst = 0;
+  //*dst = 0;
   return tmp;
 }
 
@@ -73,14 +73,20 @@ void *memset(void *s, int c, size_t n) {
 }
 
 void *memmove(void *dest, const void *src, size_t n) {//overlap?
-  char *tmp;
+  char *dst;
   const char *s;
-  tmp = dest;
+  dst = dest;
   s = src;
-  for(size_t i = 0; i < n; i++){
-	tmp[i] = s[i];
+  if(dest < src){
+    for(size_t i = 0; i < n; i++){
+      dst[i] = s[i];
+    }
   }
-  tmp[n] = 0;
+  else {
+    for(size_t i = n-1; i >= 0; i--){
+      dst[i] = s[i];
+    }
+  }
   return dest;
 }
 
@@ -89,7 +95,7 @@ void *memcpy(void *dest, const void *src, size_t n) {
 	const char *s = src;
 	while (n--)
 	  *d++ = *s++;
-	*d = 0;
+	//*d = 0;
 	return dest;
 }
 

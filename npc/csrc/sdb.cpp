@@ -12,6 +12,7 @@
 #include <assert.h>
 #ifdef DIFF
 #include "difftest.h"
+riscv64_CPU_state ref_r;
 #endif 
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -19,12 +20,12 @@ const char *regs[] = {
   "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
+
 static int is_batch_mode = true;
 extern uint64_t *cpu_gpr;//main.c(gpr of npc)
 extern void wrap_up_trace();
 int display_size = 5;
 int exec_cnt = -1;
-riscv64_CPU_state ref_r;
 uint64_t pc_before_exec;
 void npc_exec_once();
 void dump_gpr();//main.c

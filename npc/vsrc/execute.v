@@ -8,7 +8,9 @@ module ysyx_22040127_execute(
   input[63:0]imm,
   input[2:0] inst_type,
   input      memread,
-  output reg[63:0]alu_output
+  output reg[63:0]alu_output,
+  output[63:0] mem_waddr,
+  output[63:0] mem_raddr
 );
 
   wire[63:0]rtype_calc_result;
@@ -39,6 +41,10 @@ module ysyx_22040127_execute(
   wire[63:0]sext_src1_sraw;
   wire[63:0]sext_src1_sllw;
   wire[63:0]sext_src1_srlw;
+
+  assign mem_waddr = alu_output;
+  assign mem_raddr = alu_output;
+
   ysyx_22040127_decoder_6_64 dec_rtype(.in({instruction[30], instruction[25], instruction[14:12], 
   instruction[3]}),.out(rtype_alu_op));
   ysyx_22040127_decoder_5_32 dec_itype(.in({instruction[4:3], instruction[14:12]}),.out(itype_alu_op));

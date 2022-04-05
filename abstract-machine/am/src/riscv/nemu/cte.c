@@ -13,6 +13,7 @@ Context* __am_irq_handle(Context *c) {//handler function(hui diao)
       case(-1): ev.event = EVENT_YIELD;  break;
       case(SYS_exit): case(SYS_yield): case(SYS_open): case(SYS_read): 
       case(SYS_write):case(SYS_close): case(SYS_lseek):case(SYS_brk):  
+      case(SYS_gettimeofday):
       ev.event = EVENT_SYSCALL;break;
       default:  ev.event = EVENT_ERROR;  break;
     }

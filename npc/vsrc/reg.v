@@ -27,7 +27,7 @@ module ysyx_22040127_RegisterFile #(ADDR_WIDTH = 5, DATA_WIDTH = 64) (
   assign rdata1 = rf[raddr1];
   assign rdata2 = rf[raddr2];
   import "DPI-C" function void set_gpr_ptr(input logic [63:0] a []);
-  initial set_gpr_ptr(rf);  // rf为通用寄存器的二维数组变量
+  initial set_gpr_ptr(rf);
 
   always @(posedge clk) begin
     if (wen && (|waddr)) rf[waddr] <= wdata;
