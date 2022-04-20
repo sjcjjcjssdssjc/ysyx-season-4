@@ -1,39 +1,112 @@
+`include "mycpu.h"
+
 module ysyx_22040127_memory(
-  input clk,
-  input memwrite,
-  input [63:0] wdata,
-  input [63:0] waddr,
-  input [63:0] raddr,
-  input lb,
-  input lh,
-  input lw,
-  input ld,
-  input lbu,
-  input lhu,
-  input lwu,
-  output[63:0] sext_data,
-  input sb,
-  input sh,
-  input sw,
-  input sd
+  input      clk,
+  input      rst,
+  output     mem_allowin,     //for last stage
+  input      wb_allowin,      //from next stage
+  input      ex_to_mem_valid, //from last stage
+  output     mem_to_wb_valid, //for next stage
+  input [`EX_TO_MEM_WIDTH - 1:0] ex_to_mem_bus,
+  output[`MEM_TO_WB_WIDTH - 1:0] mem_to_wb_bus
 );
+  wire[63:0]mem_final_rdata;
+  wire[2:0] mem_memop;   //input from id
+  wire      mem_memwrite;//input from id
+  wire[63:0]mem_reg_wdata;
+  wire      lb;
+  wire      lh;
+  wire      lw;
+  wire      ld;
+  wire      lbu;
+  wire      lhu;
+  wire      lwu;
+  wire      sb;
+  wire      sh;
+  wire      sw;
+  wire      sd;
+  assign lb  = (mem_memop == 3'b000);
+  assign lh  = (mem_memop == 3'b001);
+  assign lw  = (mem_memop == 3'b010);
+  assign ld  = (mem_memop == 3'b011);
+  assign lbu = (mem_memop == 3'b100);
+  assign lhu = (mem_memop == 3'b101);
+  assign lwu = (mem_memop == 3'b110);
+  assign sb  = (mem_memop[1:0] == 2'b00);
+  assign sh  = (mem_memop[1:0] == 2'b01);
+  assign sw  = (mem_memop[1:0] == 2'b10);
+  assign sd  = (mem_memop[1:0] == 2'b11);
+
+  //for pipeline
+  wire       mem_ready_go;//self_willing
+  wire       mem_reg_wen;
+  wire[4:0]  mem_rd;    
+  wire[31:0] mem_pc;
+  wire       mem_jalr;
+  wire       mem_memread;
+  wire[63:0] mem_alu_output;
+  wire[63:0] mem_wdata;
+  reg[63:0]  mem_reg_wdata;
+  reg        mem_valid;
+  
+  assign mem_ready_go = 1'b1;
+  assign mem_allowin  = !mem_valid || mem_ready_go && wb_allowin;
+  assign mem_to_wb_valid = mem_ready_go && mem_valid;
+  reg[`EX_TO_MEM_WIDTH - 1:0]  ex_to_mem_bus_reg; 
+
+  assign 
+  { mem_jalr,       //171:171
+    mem_pc,        //170:139
+    mem_memop,     //138:136 unused
+    mem_reg_wen,   //135:135 toreg
+    mem_memwrite,  //134:134
+    mem_memread,   //133:133
+    mem_rd,        //132:128 toreg
+    mem_alu_output,//127:64
+    mem_wdata      //63:0    fromid
+  } = ex_to_mem_bus_reg;
+
+  assign mem_to_wb_bus =
+  { mem_reg_wen,   //69:69
+    mem_rd,        //68:64
+    mem_reg_wdata  //63:0
+  };
+
+  always @(*) begin
+    if(mem_jalr) mem_reg_wdata = {32'b0, mem_pc + 4};//id(the jalr need break down)
+    else if(mem_memread) mem_reg_wdata = mem_final_rdata;
+    else mem_reg_wdata = mem_alu_output;
+  end
+
+  always @(posedge clk) begin
+    if(rst) begin
+      mem_valid <= 1'b0;      
+    end else if(mem_allowin)begin
+      mem_valid <= ex_to_mem_valid;
+    end
+    
+    if(ex_to_mem_valid && mem_allowin) begin
+      ex_to_mem_bus_reg <= ex_to_mem_bus;
+    end
+  end
+
   wire[63:0]doubly_aligned_data;
   wire[63:0]rawdata;//after mask
   wire[7:0]addr_lowmask;
   wire[7:0]wmask;//real_wmask
 
-  ysyx_22040127_decoder_3_8 dec(.in(raddr[2:0]),.out(addr_lowmask));
+  ysyx_22040127_decoder_3_8 dec(.in(mem_alu_output[2:0]),.out(addr_lowmask));//in:mem_raddr
   import "DPI-C" function void pmem_read(
   input longint raddr, output longint doubly_aligned_data);
   import "DPI-C" function void pmem_write(
     input longint waddr, input longint wdata, input byte wmask);
   
-  assign sext_data[7:0]  = rawdata[7:0];//alu_output
-  assign sext_data[15:8] = {8{lb}} & {8{rawdata[7]}} |
+  assign mem_final_rdata[7:0]  = rawdata[7:0];//alu_output
+  assign mem_final_rdata[15:8] = {8{lb}} & {8{rawdata[7]}} |
   {8{lh | lhu}} & rawdata[15:8]| {8{lw | lwu | ld}}  & rawdata[15:8];
-  assign sext_data[31:16] = {16{lb}} & {16{rawdata[7]}} |
+  assign mem_final_rdata[31:16] = {16{lb}} & {16{rawdata[7]}} |
   {16{lh}} & {16{rawdata[15]}} | {16{lw | lwu | ld}} & rawdata[31:16];
-  assign sext_data[63:32] = {32{lb}} & {32{rawdata[7]}} |
+  assign mem_final_rdata[63:32] = {32{lb}} & {32{rawdata[7]}} |
   {32{lh}} & {32{rawdata[15]}} | {32{lw}} & {32{rawdata[31]}} |
   {32{ld}} & rawdata[63:32]; 
 
@@ -41,7 +114,7 @@ module ysyx_22040127_memory(
   {32'b0, {32{addr_lowmask[3'b000] & (lw | lwu)}} & doubly_aligned_data[31:0]} |
   {32'b0, {32{addr_lowmask[3'b100] & (lw | lwu)}} & doubly_aligned_data[63:32]}|
 
-  {48'b0, {16{addr_lowmask[3'b000] & (lh | lhu)}} & doubly_aligned_data[15:0]}|
+  {48'b0, {16{addr_lowmask[3'b000] & (lh | lhu)}} & doubly_aligned_data[15:0]} |
   {48'b0, {16{addr_lowmask[3'b010] & (lh | lhu)}} & doubly_aligned_data[31:16]}|
   {48'b0, {16{addr_lowmask[3'b100] & (lh | lhu)}} & doubly_aligned_data[47:32]}|
   {48'b0, {16{addr_lowmask[3'b110] & (lh | lhu)}} & doubly_aligned_data[63:48]}|
@@ -69,8 +142,8 @@ module ysyx_22040127_memory(
   addr_lowmask[3'b100] & sw | sd;
 
   always @(*) begin
-    pmem_read(raddr, doubly_aligned_data);
-    if(|wmask)pmem_write(waddr, wdata, wmask & {8{memwrite}});
+    pmem_read(mem_alu_output, doubly_aligned_data);//raddr
+    if(|wmask)pmem_write(mem_alu_output, mem_wdata, wmask & {8{mem_memwrite}});//waddr
   end
 
 endmodule

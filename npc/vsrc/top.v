@@ -1,70 +1,59 @@
 module ysyx_22040127_top(
   input clk,
   input rst,
-  output reg[31:0] pc
+  output reg[31:0] if_pc//if_pc
 );
-  reg [63:0] pcdata;
-  wire[31:0] instruction;
+  reg [63:0] if_pcdata;
+  wire[31:0] if_instruction;
+  wire       ebreak;
 
   reg [63:0] reg_wdata;
   wire[63:0] alu_output;
-  wire[31:0] branch_result;
-  wire       branch_taken;
-  wire reg_wen;
-  wire[4:0]  rd;
-  wire[4:0]  rs1;
-  wire[4:0]  rs2;
-  wire[2:0]  inst_type;
-  wire[63:0] imm;//output of decode
-  wire       ebreak;
-  wire[63:0] alu_input1;
-  wire[63:0] alu_input2;
-  wire[63:0] reg_data1;
-  wire[63:0] reg_data2;
-  wire       jalr;
-  wire       lb,lh,lw,ld,lbu,lhu,lwu;
-  wire       sb,sh,sw,sd;
+  wire[31:0] id_branch_result;
+  wire       id_branch_taken;
+  wire[4:0]  id_rs1;
+  wire[4:0]  id_rs2;
+  wire[2:0]  id_inst_type;
+  wire[63:0] id_regdata1;
+  wire[63:0] id_regdata2;
+  wire       id_jalr;
 
-  wire [63:0] mem_wdata;
-  wire [63:0] mem_waddr;
-  wire [63:0] mem_raddr;
-  wire [63:0] mem_rdata;
-  wire        memread;
-  wire        memwrite;
 
-  //ID
-  localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
-  TYPE_J = 3'b011, TYPE_R = 3'b100, TYPE_B = 3'b101, TYPE_N = 3'b110;
-  assign jalr = inst_type == 3'b000 && instruction[6:5] == 2'b11; 
+  wire        if_allowin;
+  wire        id_allowin;
+  wire        ex_allowin;
+  wire        mem_allowin;
+  wire        wb_allowin;//ready_go is distributed in every module.
 
-  assign ebreak = (inst_type == 3'b110) & instruction[20]
-      & !(|{instruction[31:21],instruction[19:7]});
-  assign instruction = (pc[2]) ? pcdata[63:32] : pcdata[31:0];
-  assign lb = instruction[14:12] == 3'b000;
-  assign lh = instruction[14:12] == 3'b001;
-  assign lw = instruction[14:12] == 3'b010;
-  assign lbu = instruction[14:12] == 3'b100;
-  assign lhu = instruction[14:12] == 3'b101;
-  assign lwu = instruction[14:12] == 3'b110;
-  assign ld = instruction[14:12] == 3'b011;
+  wire        if_to_id_valid;
+  wire        if_to_id_valid;
+  wire        id_to_ex_valid;
+  wire        ex_to_mem_valid;
+  wire        mem_to_wb_valid;
 
-  assign sb = instruction[13:12] == 2'b00;
-  assign sh = instruction[13:12] == 2'b01;
-  assign sw = instruction[13:12] == 2'b10;
-  assign sd = instruction[13:12] == 2'b11;
-  assign memwrite = (inst_type == TYPE_S);
-  //inst_type == 3'b001 && instruction[5]: lui
-  
+  wire[`IF_TO_ID_WIDTH - 1:0]  if_to_id_bus;
+  wire[`ID_TO_EX_WIDTH - 1:0]  id_to_ex_bus;
+  wire[`EX_TO_MEM_WIDTH - 1:0] ex_to_mem_bus;//width TBD
+  wire[`MEM_TO_WB_WIDTH - 1:0] mem_to_wb_bus;//width TBD
 
+  //bus to be added.
+  //IF
+  reg         if_valid;
+  wire        if_ready_go;
   import "DPI-C" function void set_simtime();//terminate
   import "DPI-C" function void set_pc(input bit[31:0] pc);
-  import "DPI-C" function void pmem_read(
-  input longint raddr, output longint doubly_aligned_data);
+  import "DPI-C" function void pmem_read(input longint raddr, output longint doubly_aligned_data);
+  assign if_instruction = (if_pc[2]) ? if_pcdata[63:32] : if_pcdata[31:0];
+  assign ebreak = (id_inst_type == 3'b110) & if_instruction[20]
+      & !(|{if_instruction[31:21],if_instruction[19:7]});
+  assign if_ready_go    = 1'b1;
+  assign if_allowin     = !if_valid || if_ready_go && id_allowin;
+  //once rst = 0, if_allowin is set to 1
+  assign if_to_id_valid = if_valid && if_ready_go;//always ready to go
+  assign if_to_id_bus   = {if_instruction, if_pc};
+
   always @(*)begin
-    pmem_read({32'b0, pc}, pcdata);
-    if(jalr) reg_wdata = {32'b0, pc + 4};
-    else if(memread) reg_wdata = mem_rdata;
-    else reg_wdata = alu_output;
+    pmem_read({32'b0, if_pc}, if_pcdata);
   end
 
   always @(posedge clk) begin
@@ -73,25 +62,76 @@ module ysyx_22040127_top(
   end
 
   always @(posedge clk) begin
+    if(rst) begin
+      if_valid <= 1'b0;
+    end else if(if_allowin)begin
+      if_valid <= 1'b1;
+    end
+
     if(rst == 1'b1)
-      pc <= 32'h80000000;
-    else if(inst_type == TYPE_J)//type_u:auipc,j
-      pc <= pc + alu_input1[31:0];
-    else if(inst_type == TYPE_B) pc <= branch_result;
-    else if(jalr) pc <= alu_output[31:0] & (~1);
-    else pc <= pc + 4;
-    set_pc(pc);
+      if_pc <= 32'h80000000;
+    else if(id_branch_taken && if_allowin) if_pc <= id_branch_result;//id_inst_type == TYPE_B -> id_branch_taken
+    else if(if_allowin)if_pc <= if_pc + 4;
+
+    //else if(id_inst_type == TYPE_J && if_allowin)//type_u:auipc,j (to_if_valid is deprecated)
+    //  pc <= pc + alu_input1[31:0];
+    //else if(jalr && if_allowin) pc <= alu_output[31:0] & (~1);
+    //else if(if_allowin)pc <= pc + 4;
+
+    set_pc(if_pc);
   end
-  ysyx_22040127_decode dec(instruction, reg_data1, reg_data2, pc, clk, rst, reg_wen, memread,
-  rd, rs1, rs2, inst_type, imm, alu_input1, alu_input2, mem_wdata, branch_result,
-  branch_taken);
-  ysyx_22040127_execute exe(instruction, clk, rst, pc, alu_input1, alu_input2, imm, inst_type, 
-  memread, alu_output, mem_waddr, mem_raddr);
-  ysyx_22040127_memory mem(.clk(clk),.memwrite(memwrite),.wdata(mem_wdata),.waddr(mem_waddr),
-  .raddr(mem_raddr),.lb(lb),.lh(lh),.lw(lw),.ld(ld),
-  .lbu(lbu),.lhu(lhu),.lwu(lwu),.sext_data(mem_rdata),.sb(sb),.sh(sh),.sw(sw),.sd(sd));
-  ysyx_22040127_RegisterFile #(5, 64) regs(clk, reg_wen, reg_wdata, rd, rs1, rs2,
-  reg_data1, reg_data2);//wb
+
+  //ID
+  localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
+  TYPE_J = 3'b011, TYPE_R = 3'b100, TYPE_B = 3'b101, TYPE_N = 3'b110;
+  
+  ysyx_22040127_decode dec(
+    .clk(clk), 
+    .rst(rst), 
+    .id_allowin(id_allowin),
+    .ex_allowin(ex_allowin),
+    .if_to_id_valid(if_to_id_valid),
+    .id_to_ex_valid(id_to_ex_valid),
+    .id_to_ex_bus(id_to_ex_bus),
+    .if_to_id_bus(if_to_id_bus),
+    .id_rs1(id_rs1),
+    .id_rs2(id_rs2),
+    .id_regdata1(id_regdata1), 
+    .id_regdata2(id_regdata2), 
+    .id_branch_result(id_branch_result),
+    .id_branch_taken(id_branch_taken)
+  );
+  ysyx_22040127_execute exe(
+    .clk(clk), 
+    .rst(rst), 
+    .ex_allowin(ex_allowin),
+    .mem_allowin(mem_allowin),
+    .id_to_ex_valid(id_to_ex_valid),
+    .ex_to_mem_valid(ex_to_mem_valid),
+    .id_to_ex_bus(id_to_ex_bus),
+    .ex_to_mem_bus(ex_to_mem_bus)
+  );
+  ysyx_22040127_memory mem(
+    .clk(clk),
+    .rst(rst),
+    .mem_allowin(mem_allowin),     //for last stage
+    .wb_allowin(wb_allowin),       //from next stage
+    .ex_to_mem_valid(ex_to_mem_valid),//from last stage
+    .mem_to_wb_valid(mem_to_wb_valid),//for next stage
+    .ex_to_mem_bus(ex_to_mem_bus),
+    .mem_to_wb_bus(mem_to_wb_bus)
+  );
+  ysyx_22040127_RegisterFile wb(
+    .clk(clk), 
+    .rst(rst),
+    .wb_allowin(wb_allowin),           //for last stage
+    .mem_to_wb_valid(mem_to_wb_valid), //from last stage
+    .mem_to_wb_bus(mem_to_wb_bus),
+    .raddr1(id_rs1), 
+    .raddr2(id_rs2),
+    .rdata1(id_regdata1), 
+    .rdata2(id_regdata2)
+  );//wb
   //Reg #(4, 4'b0) i1 (clk, rst, in, out, in[0]);
 endmodule
 

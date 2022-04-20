@@ -1,72 +1,142 @@
+`include "mycpu.h"
+
 module ysyx_22040127_decode(
-  input [31:0] instruction,
-  input [63:0] reg_data1,
-  input [63:0] reg_data2,
-  input [31:0] pc,
-  input clk,
-  input rst,
-  output reg_wen,
-  output memread,
-  output[4:0] rd,
-  output[4:0] rs1,
-  output[4:0] rs2,
-  output reg[2:0] inst_type,
-  output reg[63:0] imm,
-  output[63:0] alu_input1,
-  output[63:0] alu_input2,
-  output[63:0] mem_wdata,
-  output[31:0] branch_result,
-  output       branch_taken
+  input        clk,
+  input        rst,
+  output       id_allowin,    //for last stage
+  input        ex_allowin,    //from next stage
+  input        if_to_id_valid,//from last stage
+  output       id_to_ex_valid,//for next stage
+  output[`ID_TO_EX_WIDTH - 1:0]id_to_ex_bus,
+  input [`IF_TO_ID_WIDTH - 1:0]if_to_id_bus,
+  output[4:0]  id_rs1,
+  output[4:0]  id_rs2,
+  input [63:0] id_regdata1,
+  input [63:0] id_regdata2,
+  output[31:0] id_branch_result,
+  output       id_branch_taken
 );
   localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
    TYPE_J = 3'b011, TYPE_R = 3'b100, TYPE_B = 3'b101, TYPE_N = 3'b110;
-  wire   beq,bne,blt,bltu,bge,bgeu;
-  wire       imm_src1;//src1 is imm
-  wire       imm_src2;
-  assign beq  = !(|instruction[14:12]);
-  assign bne  = !(|instruction[14:13]) & instruction[12];
-  assign blt  = instruction[14:12] == 3'b100;
-  assign bltu = instruction[14:12] == 3'b110;
-  assign bge  = instruction[14:12] == 3'b101;
-  assign bgeu = instruction[14:12] == 3'b111;
+  wire       beq;
+  wire       bne;
+  wire       blt;
+  wire       bltu;
+  wire       bge;
+  wire       bgeu;
+  wire       btype_taken; 
+  wire       imm_src1;//whether src1 is imm?
+  wire       imm_src2;//whether src2 is imm?
 
-  assign rd  = instruction[11:7];
-  assign rs1 = instruction[19:15];
-  assign rs2 = instruction[24:20];
+  //outputs
+  wire[5:0]id_aluop;
+  wire[2:0]id_memop;
+  wire[4:0]id_rd;
+  wire id_reg_wen;
+  wire id_memwrite;
+  wire id_memread;
+  reg[2:0]   id_inst_type;
+  reg[63:0]  id_imm;
+  wire       id_jalr;
+  wire[63:0] id_alu_input1;
+  wire[63:0] id_alu_input2;
+  wire[63:0] id_mem_wdata;
 
-  assign imm_src1 = (inst_type == TYPE_U || inst_type == TYPE_J);//type_u,type_j
-  assign imm_src2 = (inst_type == TYPE_I || inst_type == TYPE_S);//type_i
-  assign alu_input1 = imm_src1 ? imm :reg_data1;
-  assign alu_input2 = imm_src2 ? imm :reg_data2;
-  assign mem_wdata = reg_data2;//rs2
-  assign branch_result = branch_taken ? pc + imm[31:0]: pc + 4;
-  assign branch_taken = beq && (reg_data1 == reg_data2)
-  || bne  && (reg_data1 != reg_data2)//for B_TYPE only
-  || blt  && ($signed(reg_data1) <  $signed(reg_data2))
-  || bltu && reg_data1 < reg_data2
-  || bge  && ($signed(reg_data1) >= $signed(reg_data2))
-  || bgeu && reg_data1 >= reg_data2;
-  //assign imm = {{52{instruction[31]}},instruction[31:20]};
-  assign reg_wen = !(|inst_type) || inst_type == TYPE_U || inst_type == TYPE_J
-  || inst_type == TYPE_R;//typeI is first
-  assign memread = !instruction[2] & !instruction[3] & !instruction[4] 
-  & !instruction[5] & !instruction[6] ;//right?
+  //for pipeline
+  wire       id_ready_go;
+  reg        id_valid;
+  reg[`IF_TO_ID_WIDTH - 1:0]  if_to_id_bus_reg; 
+  assign id_to_ex_bus
+  = {id_pc,          //244:213
+     id_aluop,       //212:207
+     id_memop,       //206:204
+     id_reg_wen,     //203:203
+     id_memwrite,    //202:202
+     id_memread,     //201:201
+     id_rd,          //200:196
+     id_inst_type,   //195:193
+     id_jalr,        //192:192
+     id_alu_input1,  //191:128
+     id_alu_input2,  //127:64
+     id_mem_wdata    //63:0
+    };
+
+  assign id_memop = id_instruction[14:12];
+  assign id_aluop = {id_instruction[30], id_instruction[25], id_instruction[6:5], id_instruction[4:3]};
+  assign id_memwrite = (id_inst_type == TYPE_S);//for mem
+
+  assign beq  = !(|id_instruction[14:12]);//in id only
+  assign bne  = !(|id_instruction[14:13]) & id_instruction[12];
+  assign blt  = id_instruction[14:12] == 3'b100;
+  assign bltu = id_instruction[14:12] == 3'b110;
+  assign bge  = id_instruction[14:12] == 3'b101;
+  assign bgeu = id_instruction[14:12] == 3'b111;
+
+  assign id_rd  = id_instruction[11:7];
+  assign id_rs1 = id_instruction[19:15];
+  assign id_rs2 = id_instruction[24:20];
+
+  assign imm_src1 = (id_inst_type == TYPE_U || id_inst_type == TYPE_J);//type_u,type_j
+  assign imm_src2 = (id_inst_type == TYPE_I || id_inst_type == TYPE_S);//type_i
+  assign id_alu_input1 = imm_src1 ? id_imm :id_regdata1;
+  assign id_alu_input2 = imm_src2 ? id_imm :id_regdata2;
+  assign id_mem_wdata = id_regdata2;
+
+  assign id_jalr = id_inst_type == 3'b000 && id_instruction[6:5] == 2'b11; 
+  assign id_branch_result = {32{btype_taken}} & (id_pc + id_imm[31:0]) |
+  {32{id_jalr}} & ((id_regdata1[31:0] + {{20{id_instruction[31]}}, id_instruction[31:20]}) & (~1))|
+  {32{id_inst_type == TYPE_J}} & (id_pc + id_alu_input1[31:0]);//jal
+  assign id_branch_taken = (btype_taken && (id_inst_type == TYPE_B))|| id_jalr || (id_inst_type == TYPE_J);
+  assign btype_taken  = beq && (id_regdata1 == id_regdata2)
+  || bne  && (id_regdata1 != id_regdata2)//for B_TYPE only
+  || blt  && ($signed(id_regdata1) <  $signed(id_regdata2))
+  || bltu && id_regdata1 < id_regdata2
+  || bge  && ($signed(id_regdata1) >= $signed(id_regdata2)) 
+  || bgeu && id_regdata1 >= id_regdata2;
+
+  assign id_reg_wen = !(|id_inst_type) || id_inst_type == TYPE_U || id_inst_type == TYPE_J
+  || id_inst_type == TYPE_R;//typeI is first
+  assign id_memread = !id_instruction[2] & !id_instruction[3] & !id_instruction[4] 
+  & !id_instruction[5] & !id_instruction[6] ;//right?
+
+  //pipeline
+  assign id_ready_go = 1'b1;
+  assign id_allowin  = !id_valid || id_ready_go && ex_allowin;//!id_valid is for the begining 
+  assign id_to_ex_valid = id_ready_go && id_valid;//all about id. Has nothing to do with ex
+
+  wire[31:0] id_pc;
+  wire[31:0] id_instruction;
+  assign {id_instruction, id_pc} = if_to_id_bus_reg;//data from if delayed a cycle
+
+  always @(posedge clk) begin
+    if(rst) begin
+      id_valid <= 1'b0;      
+    end else if(id_allowin)begin//the valid from last stage
+      id_valid <= if_to_id_valid;
+    end
+
+    if(if_to_id_valid && id_allowin) begin
+      if_to_id_bus_reg <= if_to_id_bus;
+    end
+  end
+
   //typei,typeu writes register
   always @(*)begin
-    case(inst_type)
-      3'b001:imm = {{32{instruction[31]}}, instruction[31:12], 12'b0};
-      3'b000:imm = {{52{instruction[31]}}, instruction[31:20]};
-      3'b011:imm = {{43{instruction[31]}}, instruction[31], instruction[19:12], instruction[20],
-      instruction[30:21], 1'b0};
-      3'b110:imm = {{52{instruction[31]}}, instruction[31:20]};
-      3'b010:imm = {{52{instruction[31]}}, instruction[31:25], instruction[11:7]};//might be wrong
-      3'b101:imm = {{51{instruction[31]}}, instruction[31], instruction[7], instruction[30:25], instruction[11:8], 1'b0};
-      default:imm = 64'b0;
+    case(id_inst_type)
+      3'b001:id_imm = {{32{id_instruction[31]}}, id_instruction[31:12], 12'b0};
+      3'b000:id_imm = {{52{id_instruction[31]}}, id_instruction[31:20]};
+      3'b011:id_imm = {{43{id_instruction[31]}}, id_instruction[31], 
+      id_instruction[19:12], id_instruction[20], id_instruction[30:21], 1'b0};
+      3'b110:id_imm = {{52{id_instruction[31]}}, id_instruction[31:20]};
+      3'b010:id_imm = {{52{id_instruction[31]}}, id_instruction[31:25], 
+      id_instruction[11:7]};//might be wrong
+      3'b101:id_imm = {{51{id_instruction[31]}}, id_instruction[31], id_instruction[7], id_instruction[30:25], id_instruction[11:8], 1'b0};
+      default:id_imm = 64'b0;
     endcase
   end
   //number of keys,width of key/data (output input 
   
-  ysyx_22040127_MuxKeyWithDefault #(12, 7, 3) inst_mux (inst_type, instruction[6:0], TYPE_I,{
+  ysyx_22040127_MuxKeyWithDefault #(12, 7, 3) inst_mux (id_inst_type, id_instruction[6:0], TYPE_I,{
     7'b0010111,TYPE_U,//auipc
     7'b0110111,TYPE_U,//lui
 
@@ -81,7 +151,6 @@ module ysyx_22040127_decode(
     7'b1110011,TYPE_N,//ebreak
     7'b0100011,TYPE_S,//sb sh sw sd
     7'b1100011,TYPE_B //beq bne
-    //load and store are problematic
     //49
   });
   

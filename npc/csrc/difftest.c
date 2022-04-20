@@ -1,3 +1,6 @@
+#include "defs.h"
+#ifdef DIFF
+
 #include "difftest.h"
 #include <assert.h>
 #include <dlfcn.h>
@@ -47,3 +50,5 @@ bool isa_difftest_checkregs(riscv64_CPU_state *ref_r, uint64_t pc) {
   //if(ref_r -> pc != pc)return false;
   return true;
 }
+
+#endif
