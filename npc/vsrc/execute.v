@@ -57,9 +57,8 @@ module ysyx_22040127_execute(
   wire       ex_jalr;
   wire[63:0] ex_alu_input1;
   wire[63:0] ex_alu_input2;
-  wire[63:0] ex_mem_wdata;
-  //wire[4:0]  ex_rs1;
-  //wire[4:0]  ex_rs2;
+  wire[4:0]  ex_rs1;
+  wire[4:0]  ex_rs2;
 
   reg        ex_valid;
   reg[`ID_TO_EX_WIDTH - 1:0]  id_to_ex_bus_reg; 
@@ -74,7 +73,9 @@ module ysyx_22040127_execute(
     ex_reg_wen,     
     ex_memwrite,    
     ex_memread,     
-    ex_rd,            
+    ex_rd,
+    ex_rs1,     
+    ex_rs2,       
     ex_inst_type,   
     ex_jalr,        
     ex_alu_input1,  
@@ -98,16 +99,16 @@ module ysyx_22040127_execute(
     ex_mem_wdata  //63:0
   };
   always @(posedge clk) begin
-  if(rst) begin
-    ex_valid <= 1'b0;      
-  end else if(ex_allowin)begin
-    ex_valid <= id_to_ex_valid;
+    if(rst) begin
+      ex_valid <= 1'b0;      
+    end else if(ex_allowin)begin
+      ex_valid <= id_to_ex_valid;
+    end
+    
+    if(id_to_ex_valid && ex_allowin) begin
+      id_to_ex_bus_reg <= id_to_ex_bus;
+    end
   end
-  
-  if(id_to_ex_valid && ex_allowin) begin
-    id_to_ex_bus_reg <= id_to_ex_bus;
-  end
-end
 
   //assign ex_mem_waddr = ex_alu_output;
   //assign ex_mem_raddr = ex_alu_output;

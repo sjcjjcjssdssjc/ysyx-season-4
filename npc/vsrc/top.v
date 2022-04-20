@@ -99,7 +99,9 @@ module ysyx_22040127_top(
     .id_regdata1(id_regdata1), 
     .id_regdata2(id_regdata2), 
     .id_branch_result(id_branch_result),
-    .id_branch_taken(id_branch_taken)
+    .id_branch_taken(id_branch_taken),
+    .ex_rd(ex_to_mem_bus[132:128]),
+    .ex_alu_output(ex_to_mem_bus[127:64])
   );
   ysyx_22040127_execute exe(
     .clk(clk), 

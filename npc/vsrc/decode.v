@@ -14,7 +14,8 @@ module ysyx_22040127_decode(
   input [63:0] id_regdata1,
   input [63:0] id_regdata2,
   output[31:0] id_branch_result,
-  output       id_branch_taken
+  output       id_branch_taken,
+  input[4:0]   ex_rd,
 );
   localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
    TYPE_J = 3'b011, TYPE_R = 3'b100, TYPE_B = 3'b101, TYPE_N = 3'b110;
@@ -42,18 +43,26 @@ module ysyx_22040127_decode(
   wire[63:0] id_alu_input2;
   wire[63:0] id_mem_wdata;
 
+  //hazard
+  wire   id_raw_hazard1;
+  wire   id_raw_hazard2;
+  assign id_raw_hazard1 = ex_rd && (ex_rd == id_rs1);
+  assign id_raw_hazard2 = ex_rd && (ex_rd == id_rs2);
+
   //for pipeline
   wire       id_ready_go;
   reg        id_valid;
   reg[`IF_TO_ID_WIDTH - 1:0]  if_to_id_bus_reg; 
   assign id_to_ex_bus
-  = {id_pc,          //244:213
-     id_aluop,       //212:207
-     id_memop,       //206:204
-     id_reg_wen,     //203:203
-     id_memwrite,    //202:202
-     id_memread,     //201:201
-     id_rd,          //200:196
+  = {id_pc,          //254:223
+     id_aluop,       //222:217
+     id_memop,       //216:214
+     id_reg_wen,     //213:213
+     id_memwrite,    //212:212
+     id_memread,     //211:211
+     id_rd,          //210:206
+     id_raw_hazard1 ? id_rs1 : ex_alu_output,         //205:201
+     id_raw_hazard2 ? id_rs2 : ex_alu_output,         //200:196
      id_inst_type,   //195:193
      id_jalr,        //192:192
      id_alu_input1,  //191:128
