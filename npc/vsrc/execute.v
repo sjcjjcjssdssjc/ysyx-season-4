@@ -48,7 +48,6 @@ module ysyx_22040127_execute(
   wire[31:0] ex_pc;
   wire[5:0]  ex_aluop;
   wire[2:0]  ex_memop;
-  wire       ex_reg_wen;  
   wire       ex_ready_go;//self_willing
   wire       ex_memwrite;
   wire       ex_memread;
@@ -59,6 +58,7 @@ module ysyx_22040127_execute(
   wire[63:0] ex_alu_input2;
   wire[4:0]  ex_rs1;
   wire[4:0]  ex_rs2;
+  wire       ex_reg_wen;
 
   reg        ex_valid;
   reg[`ID_TO_EX_WIDTH - 1:0]  id_to_ex_bus_reg; 
@@ -107,6 +107,11 @@ module ysyx_22040127_execute(
     
     if(id_to_ex_valid && ex_allowin) begin
       id_to_ex_bus_reg <= id_to_ex_bus;
+    end else begin 
+      id_to_ex_bus_reg[210:206] <= 5'b0;//ex_rd
+      id_to_ex_bus_reg[211:211] <= 1'b0;//ex_memread
+      id_to_ex_bus_reg[212:212] <= 1'b0;//ex_memwrite
+      id_to_ex_bus_reg[213:213] <= 1'b0;//ex_reg_wen
     end
   end
 
@@ -116,8 +121,7 @@ module ysyx_22040127_execute(
   ysyx_22040127_decoder_6_64 dec_rtype(.in({ex_aluop[5], ex_aluop[4], ex_memop, 
   ex_aluop[0]}),.out(rtype_alu_op));
   ysyx_22040127_decoder_5_32 dec_itype(.in({ex_aluop[1:0], ex_memop}),.out(itype_alu_op));
-  localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
-  TYPE_J = 3'b011, TYPE_R = 3'b100, TYPE_B = 3'b101, TYPE_N = 3'b110;
+
   localparam 
   op_add  = 6'b000000, op_mul  = 6'b010000, op_sub  = 6'b100000,
   op_addw = 6'b000001, op_or   = 6'b001100, op_xor  = 6'b001000,
@@ -132,7 +136,7 @@ module ysyx_22040127_execute(
   op_addi  = 5'b10000,op_andi  = 5'b10111,op_ori  = 5'b10110,
   op_xori  = 5'b10100,op_sltiu = 5'b10011,op_sri  = 5'b10101,
   op_slli = 5'b10001, op_addiw = 5'b11000,op_slliw= 5'b11001,
-  op_sriw = 5'b11101;
+  op_sriw = 5'b11101, op_slti  = 5'b10010;
 
   assign addw_result = ex_alu_input1[31:0] + ex_alu_input2[31:0];
   assign subw_result = ex_alu_input1[31:0] - ex_alu_input2[31:0];
@@ -200,6 +204,7 @@ module ysyx_22040127_execute(
   {64{itype_alu_op[op_andi]}} & (ex_alu_input1 & ex_alu_input2 ) | //andi
   {64{itype_alu_op[op_ori]}}  & (ex_alu_input1 | ex_alu_input2 ) | //ori
   {64{itype_alu_op[op_xori]}} & (ex_alu_input1 ^ ex_alu_input2 ) | //xori
+  {64{itype_alu_op[op_slti]}} & ($signed(ex_alu_input1) < $signed(ex_alu_input2) ? 64'b1 : 64'b0)|//sltiu
   {64{itype_alu_op[op_sltiu]}}& (ex_alu_input1 < ex_alu_input2 ? 64'b1 : 64'b0)|//sltiu
   {64{itype_alu_op[op_sri] & ex_aluop[5] }} & (res_sra) |//srai
   {64{itype_alu_op[op_sri] & !ex_aluop[5]}} & (res_srl) |//srli
@@ -210,14 +215,17 @@ module ysyx_22040127_execute(
   {64{itype_alu_op[op_sriw] & ex_aluop[5]  }} & sext_src1_sraw | //sraiw
   {64{itype_alu_op[op_sriw] & !ex_aluop[5] }} & sext_src1_srlw;  //srliw
 
+  localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
+  TYPE_J = 3'b011, TYPE_R = 3'b100, TYPE_B = 3'b101, TYPE_N = 3'b110;
   assign sub = ex_alu_input1 - ex_alu_input2;
   //num,out,in
   always @(*) begin
     case(ex_inst_type)
-      TYPE_I : ex_alu_output = itype_calc_result;//I_type
+      TYPE_I : ex_alu_output = ex_jalr ? ({32'b0, ex_pc + 4}) : itype_calc_result;//I_type
       TYPE_S : ex_alu_output = ex_alu_input1 + ex_alu_input2;
       TYPE_U : ex_alu_output = ex_aluop[2] ? ex_alu_input1 : ex_alu_input1 + {32'b0,ex_pc}; //auipc:lui
       TYPE_R : ex_alu_output = rtype_calc_result;
+      TYPE_J : ex_alu_output = {32'b0, ex_pc + 4};
 
       default: ex_alu_output = 0;
     endcase

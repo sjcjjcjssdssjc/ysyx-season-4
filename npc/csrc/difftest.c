@@ -47,7 +47,7 @@ bool isa_difftest_checkregs(riscv64_CPU_state *ref_r, uint64_t pc) {
     if(ref_r -> gpr[i] != cpu_gpr[i])
       return false;
   }
-  //if(ref_r -> pc != pc)return false;
+  if(ref_r -> pc != pc)return false;
   return true;
 }
 

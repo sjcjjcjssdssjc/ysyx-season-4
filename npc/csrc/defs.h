@@ -4,6 +4,6 @@
 
 #define ITRACE 1
 #define MTRACE 1
-//#define DIFF 1 //must define
+#define DIFF 1 //must define
 
 #endif

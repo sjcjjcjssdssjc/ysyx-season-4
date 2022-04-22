@@ -8,9 +8,11 @@ module ysyx_22040127_memory(
   input      ex_to_mem_valid, //from last stage
   output     mem_to_wb_valid, //for next stage
   input [`EX_TO_MEM_WIDTH - 1:0] ex_to_mem_bus,
-  output[`MEM_TO_WB_WIDTH - 1:0] mem_to_wb_bus
+  output[`MEM_TO_WB_WIDTH - 1:0] mem_to_wb_bus,
+  output[63:0] mem_alu_output,
+  output[63:0] mem_final_rdata,
+  output       mem_memread
 );
-  wire[63:0]mem_final_rdata;
   wire[2:0] mem_memop;   //input from id
   wire      mem_memwrite;//input from id
   wire[63:0]mem_reg_wdata;
@@ -43,8 +45,6 @@ module ysyx_22040127_memory(
   wire[4:0]  mem_rd;    
   wire[31:0] mem_pc;
   wire       mem_jalr;
-  wire       mem_memread;
-  wire[63:0] mem_alu_output;
   wire[63:0] mem_wdata;
   reg[63:0]  mem_reg_wdata;
   reg        mem_valid;
@@ -55,7 +55,7 @@ module ysyx_22040127_memory(
   reg[`EX_TO_MEM_WIDTH - 1:0]  ex_to_mem_bus_reg; 
 
   assign 
-  { mem_jalr,       //171:171
+  { mem_jalr,      //171:171
     mem_pc,        //170:139
     mem_memop,     //138:136 unused
     mem_reg_wen,   //135:135 toreg
@@ -67,14 +67,15 @@ module ysyx_22040127_memory(
   } = ex_to_mem_bus_reg;
 
   assign mem_to_wb_bus =
-  { mem_reg_wen,   //69:69
+  { mem_pc,        //101:70
+    mem_reg_wen,   //69:69
     mem_rd,        //68:64
     mem_reg_wdata  //63:0
   };
 
   always @(*) begin
-    if(mem_jalr) mem_reg_wdata = {32'b0, mem_pc + 4};//id(the jalr need break down)
-    else if(mem_memread) mem_reg_wdata = mem_final_rdata;
+    //if(mem_jalr) mem_reg_wdata = {32'b0, mem_pc + 4};//id(the jalr need break down)
+    if(mem_memread) mem_reg_wdata = mem_final_rdata;
     else mem_reg_wdata = mem_alu_output;
   end
 
@@ -87,7 +88,9 @@ module ysyx_22040127_memory(
     
     if(ex_to_mem_valid && mem_allowin) begin
       ex_to_mem_bus_reg <= ex_to_mem_bus;
-    end
+    end else begin
+      ex_to_mem_bus_reg[135:128] <= 8'b0;
+    end  //else ex_to_mem_bus_reg <= `EX_TO_MEM_WIDTH'b0;
   end
 
   wire[63:0]doubly_aligned_data;
@@ -96,7 +99,7 @@ module ysyx_22040127_memory(
   wire[7:0]wmask;//real_wmask
 
   ysyx_22040127_decoder_3_8 dec(.in(mem_alu_output[2:0]),.out(addr_lowmask));//in:mem_raddr
-  import "DPI-C" function void pmem_read(
+  import "DPI-C" function void pmem_read(//memread isn't working
   input longint raddr, output longint doubly_aligned_data);
   import "DPI-C" function void pmem_write(
     input longint waddr, input longint wdata, input byte wmask);

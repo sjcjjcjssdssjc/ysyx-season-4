@@ -22,7 +22,7 @@ VerilatedVcdC* tfp;
 VerilatedContext* contextp;
 const char *gpr[] = {//to be changed
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
-  "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
+  "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",//a0:10
   "a6", "a7", "s2", "s3", "s4", "s5", "s6", "s7",
   "s8", "s9", "s10", "s11", "t3", "t4", "t5", "t6"
 };
@@ -89,8 +89,9 @@ void npc_exec_once(){
   for(int i = 0;i < 2; i++){
 
     if(contextp->time() >= sim_time){
-      tfp->dump(contextp->time());
-      break;
+      wrap_up_trace();
+      printf("\033[1;31m Hit Bad Trap \033[0m\n"); 
+      exit(1);
     }
     contextp->timeInc(1);
     dut->clk = !dut->clk;
@@ -126,8 +127,8 @@ int main(int argc, char** argv, char** env) {
   contextp->traceEverOn(true);
   dut->trace(tfp, 99);
   tfp->open("./build/obj_dir/wave.vcd");
-
-  sim_time = 0x7FFFFFFF,n = 10;//n to reset (up over)
+  //0x7FFFFFFF
+  sim_time = 50000,n = 10;//n to reset (up over)
   //nvboard_bind_all_pins(dut);
   //nvboard_init();
 
