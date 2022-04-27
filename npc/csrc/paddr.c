@@ -54,8 +54,8 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
   for(long long i = waddr; i <= waddr + 7; i++){
     if(wmask & (1 << (i - waddr))){
       pmem[i] = wdata & 0xFF;
-      wdata >>= 8;
     }
+    wdata >>= 8;
   }
   #ifdef MTRACE
   long long rdata;

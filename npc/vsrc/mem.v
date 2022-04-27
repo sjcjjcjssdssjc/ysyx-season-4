@@ -45,6 +45,7 @@ module ysyx_22040127_memory(
   wire[4:0]  mem_rd;    
   wire[31:0] mem_pc;
   wire       mem_jalr;
+  wire[63:0] mem_wdata_tmp;
   wire[63:0] mem_wdata;
   reg[63:0]  mem_reg_wdata;
   reg        mem_valid;
@@ -53,6 +54,10 @@ module ysyx_22040127_memory(
   assign mem_allowin  = !mem_valid || mem_ready_go && wb_allowin;
   assign mem_to_wb_valid = mem_ready_go && mem_valid;
   reg[`EX_TO_MEM_WIDTH - 1:0]  ex_to_mem_bus_reg; 
+  assign mem_wdata = sb ? {8{mem_wdata_tmp[7:0]}} :
+  sh ? {4{mem_wdata_tmp[15:0]}} :
+  sw ? {2{mem_wdata_tmp[31:0]}} : 
+  mem_wdata_tmp[63:0];
 
   assign 
   { mem_jalr,      //171:171
@@ -63,7 +68,7 @@ module ysyx_22040127_memory(
     mem_memread,   //133:133
     mem_rd,        //132:128 toreg
     mem_alu_output,//127:64
-    mem_wdata      //63:0    fromid
+    mem_wdata_tmp      //63:0    fromid
   } = ex_to_mem_bus_reg;
 
   assign mem_to_wb_bus =

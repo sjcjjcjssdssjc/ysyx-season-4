@@ -209,7 +209,7 @@ module ysyx_22040127_decode(
 
     7'b1101111,TYPE_J,//jal
     7'b0111011,TYPE_R,//addw subw mulw sllw srlw sraw divw divuw remw remuw
-    7'b0110011,TYPE_R,//add mul sub sll slt sltu xor or and
+    7'b0110011,TYPE_R,//add mul mulh mulhu mulhsu sub sll slt sltu xor or and
     7'b1110011,TYPE_N,//ebreak
     7'b0100011,TYPE_S,//sb sh sw sd
     7'b1100011,TYPE_B //beq bne

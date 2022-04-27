@@ -5,8 +5,8 @@
 
 typedef struct {
   word_t gpr[32];
-  word_t mepc, mcause, mtvec, mstatus;
   vaddr_t pc;
+  word_t mepc, mcause, mtvec, mstatus;
 } riscv64_CPU_state;//npc to be changed
 
 // decode

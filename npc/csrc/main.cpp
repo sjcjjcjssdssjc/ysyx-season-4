@@ -117,7 +117,7 @@ int main(int argc, char** argv, char** env) {
     fp = fopen(bin_file, "rb");
     while(fread(&inst, INST_SIZE, 1, fp)){
       //printf("addr %x inst %x\n",addr,inst);
-      if(addr % 8 == 4)pmem_write(addr,(long long)inst,0xF0);
+      if(addr % 8 == 4)pmem_write(addr,((long long)inst << 32),0xF0);
       else pmem_write(addr,inst,0x0F);
       addr += 4;
     }

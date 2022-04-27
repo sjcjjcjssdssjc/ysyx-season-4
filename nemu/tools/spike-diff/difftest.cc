@@ -41,7 +41,7 @@ void sim_t::diff_step(uint64_t n) {
   step(n);
 }
 
-void sim_t::diff_get_regs(void* diff_context) {
+void sim_t::diff_get_regs(void* diff_context) {//get from spike
   struct diff_context_t* ctx = (struct diff_context_t*)diff_context;
   for (int i = 0; i < NXPR; i++) {
     ctx->gpr[i] = state->XPR[i];
@@ -55,6 +55,8 @@ void sim_t::diff_set_regs(void* diff_context) {
     state->XPR.write(i, (sword_t)ctx->gpr[i]);
   }
   state->pc = ctx->pc;
+  //state->pc = 0x80000000;//need change
+  //printf("set pc to %lx\n",ctx->pc);
 }
 
 void sim_t::diff_memcpy(reg_t dest, void* src, size_t n) {
@@ -67,6 +69,7 @@ void sim_t::diff_memcpy(reg_t dest, void* src, size_t n) {
 extern "C" {
 
 void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
+  printf("cpy %x %lx\n",addr,n);
   if (direction == DIFFTEST_TO_REF) {
     s->diff_memcpy(addr, buf, n);
   } else {
