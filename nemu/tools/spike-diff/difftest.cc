@@ -26,6 +26,7 @@ static debug_module_config_t difftest_dm_config = {
 struct diff_context_t {
   word_t gpr[32];
   word_t pc;
+  word_t mepc, mcause, mtvec, mstatus;
 };
 
 static sim_t* s = NULL;
@@ -46,7 +47,12 @@ void sim_t::diff_get_regs(void* diff_context) {//get from spike
   for (int i = 0; i < NXPR; i++) {
     ctx->gpr[i] = state->XPR[i];
   }
+  ctx->mepc   = state->mepc;
+  ctx->mcause = state->mcause;
+  ctx->mtvec  = state->mtvec;
+  ctx->mstatus= state->mstatus;
   ctx->pc = state->pc;
+  //word_t mepc, mcause, mtvec, mstatus;
 }
 
 void sim_t::diff_set_regs(void* diff_context) {
@@ -54,6 +60,10 @@ void sim_t::diff_set_regs(void* diff_context) {
   for (int i = 0; i < NXPR; i++) {
     state->XPR.write(i, (sword_t)ctx->gpr[i]);
   }
+  state->mepc   = ctx->mepc;
+  state->mcause = ctx->mcause;
+  state->mtvec  = ctx->mtvec;
+  state->mstatus= ctx->mstatus;
   state->pc = ctx->pc;
   //state->pc = 0x80000000;//need change
   //printf("set pc to %lx\n",ctx->pc);
