@@ -107,7 +107,7 @@ void parse_elf(char *elf_file){
 }
 
 #ifdef CONFIG_ITRACE
-static void print_surrounding_inst(){
+void print_surrounding_inst(){
   
   int i = 0;
   //printf("%d\n",overburden);

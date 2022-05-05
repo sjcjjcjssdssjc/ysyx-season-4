@@ -5,3 +5,8 @@ obj_dir/Vtop
 verilator -Wall --cc --exe ./csrc/main.cpp ./vsrc/top.v
 make -j -C obj_dir -f Vtop.mk Vtop
 obj_dir/Vtop
+
+
+write mem with addr 80003268, data is 2000200020002,mask is 1c,  when read, it is 0
+write mem with addr 80003268, data is 5b5b5b5b5b5b5b5b,mask is 30,  when read, it is 0
+

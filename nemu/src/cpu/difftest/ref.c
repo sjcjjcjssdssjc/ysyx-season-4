@@ -18,7 +18,7 @@ void difftest_regcpy(void *dut, bool direction) {
       cpu.gpr[i] = ((uint64_t *)dut)[i];
     }
     cpu.pc = ((uint64_t *)dut)[32];
-  }else{
+  } else {
     for(int i = 0; i < 32; i++){
      ((uint64_t *)dut)[i] = cpu.gpr[i];
     }

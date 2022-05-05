@@ -81,17 +81,22 @@ static void csrrws_op(word_t dest, word_t src1, word_t src2, Decode *s,word_t is
     case(MTVEC)  : t = cpu.mtvec;   cpu.mtvec   = is_read * t | src1; R(dest) = t; break;
     case(MCAUSE) : t = cpu.mcause;  cpu.mcause  = is_read * t | src1; R(dest) = t; break;
     case(MSTATUS): t = cpu.mstatus; cpu.mstatus = is_read * t | src1; R(dest) = t; break;
-    case(MEPC)   : t = cpu.mepc;    cpu.mepc    = is_read * t | src1; R(dest) = t; break;
+    case(MEPC)   : t = cpu.mepc;    cpu.mepc    = is_read * t | src1; R(dest) = t; 
+    //printf("csrrws %lx %lx\n",cpu.mepc,cpu.pc);
+    break;
   }
 }
 #define MIE  (1 << 3)
 #define MPIE (1 << 7)
 static void mret_op(word_t dest, word_t src1, word_t src2, Decode *s){
-  s->dnpc = cpu.mepc + 4;//for now
+  s->dnpc = cpu.mepc;//set mepc to pc+4(ecall)?
+  //printf("mstatus is %lx\n",cpu.mstatus);
+  cpu.mstatus &= (0xFFFFFFFFFFFFE7FF); //1(234 in intr.c?)
   //cpu.mstatus & MPP = NO supervisor/machine/user mode
   if(cpu.mstatus & MPIE)cpu.mstatus |= MIE;
-  cpu.mstatus |= MPIE;
-
+  else cpu.mstatus &= (~MIE);
+  cpu.mstatus |= MPIE;//0x80
+  printf("mret %lx\n",cpu.mstatus & (0xFFFFFFFFFFFFE7FF));
 }
 static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, int type) {
   uint32_t i = s->isa.inst.val;
@@ -204,7 +209,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(R(17), s->pc));
   INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , N, csrrws_op(dest, src1, src2, s, 0));
   INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , N, csrrws_op(dest, src1, src2, s, 1));
-  INSTPAT("0011000 00010 00000 000 00000 11100 11", csrrs  , N, mret_op(dest, src1, src2, s));
+  INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, mret_op(dest, src1, src2, s));
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();
 

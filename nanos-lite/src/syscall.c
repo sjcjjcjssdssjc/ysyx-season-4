@@ -32,6 +32,7 @@ void do_syscall(Context *c) {
   a[2] = c->GPR3;//a1 reg
   a[3] = c->GPR4;//a2 reg
   switch (a[0]) {//ssize_t write(int fd, const void *buf, size_t count);
+    case(-1):printf("yield\n"); break;
     case(SYS_yield): if(strace)printf("call sys_yield\n"); yield(); c->GPRx = 0; break;
     case(SYS_open):  
     c->GPRx = fs_open((const char *)a[1] , a[2], a[3]); if(strace)printf("call sys_open fname %s\n",fd2name(c->GPRx)); 

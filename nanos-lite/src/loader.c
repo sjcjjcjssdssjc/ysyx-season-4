@@ -35,6 +35,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
  
   if(header.e_type == ET_EXEC && header.e_ident[1] == 'E' &&
      header.e_ident[2] == 'L' && header.e_ident[3] == 'F') {
+       //printf("is elf\n");
   }
   else printf("not a elf\n");
   
@@ -44,8 +45,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   memcpy(sheader, buff + header.e_shoff, sizeof(Elf_Shdr) * header.e_shnum);
   for(int i = 0; i < header.e_phnum; i++){
     if(pheader[i].p_type == PT_LOAD){
+      //printf("ksksks %lx %lx\n",(long unsigned int *)(pheader[i].p_vaddr),(long unsigned int *)(pheader[i].p_paddr));
       memcpy((char *)(pheader[i].p_vaddr), buff + pheader[i].p_offset, pheader[i].p_filesz);
-      //printf("%lx\n",*(long unsigned int *)(pheader[i].p_vaddr));
       memset((char *)(pheader[i].p_vaddr + pheader[i].p_filesz), 0, 
       pheader[i].p_memsz - pheader[i].p_filesz);//bss
     }
@@ -62,6 +63,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
       break;
     }
   }
+  printf("header ok\n");
   for(int i = 0; i < header.e_shnum; i++){
     char *now = secstrtab + sheader[i].sh_name;
     if(strcmp(now,".symtab") == 0){
@@ -76,7 +78,7 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   }
   free(symstrtab);
   free(secstrtab);
-  
+  printf("load ret\n");
   return ret;
 }
 

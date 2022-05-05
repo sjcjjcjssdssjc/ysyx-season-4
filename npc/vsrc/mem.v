@@ -143,7 +143,7 @@ module ysyx_22040127_memory(
   assign wmask[2] = addr_lowmask[3'b010] | addr_lowmask[3'b000] & sw | sd;
   assign wmask[3] = addr_lowmask[3'b011] | addr_lowmask[3'b010] & sh |
   addr_lowmask[3'b000] & sw | sd;
-  assign wmask[4] = addr_lowmask[3'b100] | addr_lowmask[3'b010] & sh | sd;
+  assign wmask[4] = addr_lowmask[3'b100] | sd;
   assign wmask[5] = addr_lowmask[3'b101] | addr_lowmask[3'b100] & (sh|sw) | sd;
   assign wmask[6] = addr_lowmask[3'b110] | addr_lowmask[3'b100] & sw | sd;
   assign wmask[7] = addr_lowmask[3'b111] | addr_lowmask[3'b110] & sh | 

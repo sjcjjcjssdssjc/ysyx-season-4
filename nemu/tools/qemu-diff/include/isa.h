@@ -28,8 +28,9 @@ union isa_gdb_regs {
     uint32_t pc;
 #elif defined(CONFIG_ISA_riscv64)
     uint64_t gpr[32];
-    uint64_t fpr[32];
     uint64_t pc;
+    uint64_t mepc, mcause, mtvec, mstatus;
+    uint64_t fpr[32];
 #elif defined(CONFIG_ISA_x86)
     uint32_t eax, ecx, edx, ebx, esp, ebp, esi, edi;
     uint32_t eip, eflags;

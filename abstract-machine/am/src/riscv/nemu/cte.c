@@ -9,15 +9,22 @@ Context* __am_irq_handle(Context *c) {//handler function(hui diao)
   //printf("handle mepc %lx mcause%lx mstatus%lx\n",c->mepc, c->mcause, c->mstatus);//no mtvec
   if (user_handler) {
     Event ev = {0};
+    //printf("%d %d\n",SYS_brk,c->mcause);
     switch (c->mcause) {
-      case(-1): ev.event = EVENT_YIELD;  break;
-      case(SYS_exit): case(SYS_yield): case(SYS_open): case(SYS_read): 
-      case(SYS_write):case(SYS_close): case(SYS_lseek):case(SYS_brk):  
-      case(SYS_gettimeofday):
-      ev.event = EVENT_SYSCALL;break;
+      case(11): ev.event = EVENT_SYSCALL; break; 
+      /*
+      unsigned long long result;
+      asm volatile("csrr  %0, mepc" : "=r"(result) : ); 
+      result += 4;
+      asm volatile("csrw  mepc, %0" : :"r"(result) ); 
+      printf("%lx\n",result);
+      break;
+      */
       default:  ev.event = EVENT_ERROR;  break;
     }
-
+  
+    
+  
     c = user_handler(ev, c);
     assert(c != NULL);
   }

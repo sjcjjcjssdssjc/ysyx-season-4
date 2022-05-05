@@ -18,7 +18,9 @@ int read_bin = 0;
 uint64_t *cpu_gpr = NULL;
 uint32_t cpu_pc = 0;
 Vysyx_22040127_top* dut;
+#ifdef WAVE
 VerilatedVcdC* tfp;
+#endif
 VerilatedContext* contextp;
 const char *gpr[] = {//to be changed
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
@@ -44,7 +46,9 @@ void dump_gpr() {
   }
 }
 void wrap_up_trace(){
+  #ifdef WAVE
   tfp->close();
+  #endif
   dut->final();
 }
 void set_simtime(){//x10 is a0(return)
@@ -96,11 +100,10 @@ void npc_exec_once(){
     contextp->timeInc(1);
     dut->clk = !dut->clk;
     dut->eval();
-    //dut->instruction = paddr_read(dut->pc, 4);
     dut->rst = 0;//to fix the sample bug
+    #ifdef WAVE
     tfp->dump(contextp->time());
-    //printf("%x\n",dut->pc);
-    //if(dut->clk)dump_gpr();
+    #endif
   }
 }
 
@@ -123,12 +126,14 @@ int main(int argc, char** argv, char** env) {
     }
   }
   dut = new Vysyx_22040127_top{contextp};
+  #ifdef WAVE
   tfp = new VerilatedVcdC;
   contextp->traceEverOn(true);
   dut->trace(tfp, 99);
   tfp->open("./build/obj_dir/wave.vcd");
+  #endif
   //0x7FFFFFFF
-  sim_time = 50000,n = 10;//n to reset (up over)
+  sim_time = -1,n = 10;//n to reset (up over)
   //nvboard_bind_all_pins(dut);
   //nvboard_init();
 
@@ -139,7 +144,9 @@ int main(int argc, char** argv, char** env) {
     contextp->timeInc(1);
     dut->clk = !dut->clk; 
     dut->eval();
+    #ifdef WAVE
     tfp->dump(contextp->time());
+    #endif
   }
   npc_exec_once();
   sdb_mainloop(diff_so_file,addr - 0x80000000,1234);

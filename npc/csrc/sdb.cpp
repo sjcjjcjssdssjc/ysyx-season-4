@@ -68,7 +68,7 @@ void cpu_exec(unsigned x){
       ref_r.pc,dut->wb_pc_reg,exec_cnt);
       
       if(k == 0){
-        printf("\033[1;31m Hit Bad Trap \033[0m\n"); 
+        printf("\033[1;31m regs Not same:Hit Bad Trap \033[0m\n"); 
         dump_gpr();
         wrap_up_trace();
         exit(1);

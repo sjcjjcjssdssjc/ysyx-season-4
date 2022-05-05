@@ -27,6 +27,7 @@ extern "C" void pmem_read(long long raddr, long long *rdata) {
   raddr &= ~(0x7ull);
   raddr -= 0x80000000;
   if(raddr < 0 || raddr >= CONFIG_MSIZE){
+    //printf("%llx\n",raddr+0x80000000);
     *rdata = 0;
     return;
   }
@@ -45,11 +46,12 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
   // 总是往地址为`waddr & ~0x7ull`的8字节按写掩码`wmask`写入`wdata`
   // `wmask`中每比特表示`wdata`中1个字节的掩码,
   // 如`wmask = 0x3`代表只写入最低2个字节, 内存中的其它字节保持不变
-  //printf("write pre %llx %x\n",waddr,wmask);
   waddr &= ~(0x7ull);
   waddr -= 0x80000000;
-  //printf("write aft %llx %x\n",waddr,wmask);
-  if(waddr < 0 || waddr >= CONFIG_MSIZE || !wmask)return;
+  if(waddr < 0 || waddr >= CONFIG_MSIZE || !wmask){
+    //printf("%llx\n",waddr+0x80000000);
+    return;
+  }
   long long tmp = wdata;
   for(long long i = waddr; i <= waddr + 7; i++){
     if(wmask & (1 << (i - waddr))){
@@ -59,7 +61,7 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
   }
   #ifdef MTRACE
   long long rdata;
-  pmem_read(waddr,&rdata);
+  pmem_read(waddr + 0x80000000,&rdata);
   printf("write mem with addr %llx, data is %llx,mask is %x,\
   when read, it is %llx\n",waddr + 0x80000000,tmp,(unsigned int)(wmask & 0xFF)
   , rdata);

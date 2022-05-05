@@ -60,10 +60,32 @@ module ysyx_22040127_execute(
   wire[4:0]  ex_rs2;
   wire       ex_reg_wen;
 
+  wire mul_type;//ex1
+  wire div_type;
+  wire div_sign;
+  wire mul_stage2;
+  wire mul_ok;  //ex3
+  wire sign1;
+  wire sign2;
+  wire[63:0]mul_res_high;
+  wire[63:0]mul_res_low;
+
   reg        ex_valid;
   reg[`ID_TO_EX_WIDTH - 1:0]  id_to_ex_bus_reg; 
 
-  assign ex_ready_go = (!(mul_type || mul_stage2)) ||mul_ok;
+
+  //outputs
+  reg [63:0]  ex_alu_output;
+  //wire[63:0]  ex_mem_waddr;
+  //wire[63:0]  ex_mem_raddr;
+
+  reg div_ready;
+  wire[1:0]  div_state;
+  wire[63:0] quo;
+  wire[63:0] rem;
+
+  assign ex_ready_go = (!(mul_type || mul_stage2) && 
+  !(div_type || (div_state[0] ^ div_state[1]))) || mul_ok || div_ready;
   assign ex_allowin  = !ex_valid || ex_ready_go && mem_allowin;
   assign ex_to_mem_valid = ex_ready_go && ex_valid;
   assign 
@@ -83,10 +105,6 @@ module ysyx_22040127_execute(
     ex_mem_wdata
   } = id_to_ex_bus_reg;
 
-  //outputs
-  reg [63:0]  ex_alu_output;
-  //wire[63:0]  ex_mem_waddr;
-  //wire[63:0]  ex_mem_raddr;
   assign ex_to_mem_bus =
   { ex_jalr,      //171:171
     ex_pc,        //170:139
@@ -107,7 +125,7 @@ module ysyx_22040127_execute(
     
     if(id_to_ex_valid && ex_allowin) begin
       id_to_ex_bus_reg <= id_to_ex_bus;
-    end else if(!mul_stage2 & !mul_type)begin 
+    end else if(!mul_stage2 & !mul_type & !div_type)begin 
       //critical: we need not flush the ex stage write signals when stalled by muls
       id_to_ex_bus_reg[210:206] <= 5'b0;//ex_rd
       id_to_ex_bus_reg[211:211] <= 1'b0;//ex_memread
@@ -116,7 +134,7 @@ module ysyx_22040127_execute(
       //id_to_ex_bus_reg[195:193] <= 3'b0;//ex_inst_type
     end
   end
-
+ 
   //assign ex_mem_waddr = ex_alu_output;
   //assign ex_mem_raddr = ex_alu_output;
   //30(aluop[5]), 25(aluop[4]), 14:12(ex_memop), 6:5(aluop[3:2]), 4:3(aluop[1:0])
@@ -145,10 +163,11 @@ module ysyx_22040127_execute(
   assign addw_result = ex_alu_input1[31:0] + ex_alu_input2[31:0];
   assign subw_result = ex_alu_input1[31:0] - ex_alu_input2[31:0];
   assign mulw_result = mul_res_low[31:0];
-  assign divw_result  = $signed(ex_alu_input1[31:0]) / $signed(ex_alu_input2[31:0]);
-  assign divuw_result = ex_alu_input1[31:0] / ex_alu_input2[31:0];
-  assign remw_result  = $signed(ex_alu_input1[31:0]) % $signed(ex_alu_input2[31:0]);
-  assign remuw_result = ex_alu_input1[31:0] % ex_alu_input2[31:0];
+
+  assign divw_result  = quo[31:0];//$signed(ex_alu_input1[31:0]) / $signed(ex_alu_input2[31:0]);//to be deleted
+  assign divuw_result = quo[31:0];//ex_alu_input1[31:0] / ex_alu_input2[31:0];//to be deleted
+  assign remw_result  = rem[31:0];//$signed(ex_alu_input1[31:0]) % $signed(ex_alu_input2[31:0]);//to be deleted
+  assign remuw_result = rem[31:0];//ex_alu_input1[31:0] % ex_alu_input2[31:0];//to be deleted
 
   assign sra_mask_32    = {32'hffffffff, ~(32'hffffffff >> sft_input2)};
   assign sra_mask_64    = {~(64'hffffffffffffffff >> sft_input2)};
@@ -183,21 +202,16 @@ module ysyx_22040127_execute(
   assign ans_high = ans[127:64];
   assign ans_low  = ans[63:0];
   */
-
-  wire mul_type;//ex1
-  wire mul_stage2;
-  wire mul_ok;  //ex3
-  wire sign1;
-  wire sign2;
-  wire[63:0]mul_res_high;
-  wire[63:0]mul_res_low;
-
   assign sign1    = !(ex_memop[0] & ex_memop[1]); 
   assign sign2    = !ex_memop[1];
   assign mul_type = !(mul_stage2 || mul_ok) & (ex_inst_type == 3'b100)
-   & (rtype_alu_op[op_mul] | rtype_alu_op[op_mulw]);//to be added(2/5)
-  //type_r
-  //assign ans_low2 = ex_alu_input1 * ex_alu_input2;
+   & (rtype_alu_op[op_mul] | rtype_alu_op[op_mulw] 
+   | rtype_alu_op[op_mulh] | rtype_alu_op[op_mulhsu] | rtype_alu_op[op_mulhu]);//to be added(2/5)
+  assign div_type = !(div_ready) & (ex_inst_type == 3'b100) & (rtype_alu_op[op_rem] | rtype_alu_op[op_remu] |
+  rtype_alu_op[op_div]  | rtype_alu_op[op_remw]  | rtype_alu_op[op_remuw] | 
+  rtype_alu_op[op_divu] | rtype_alu_op[op_divuw] | rtype_alu_op[op_divw]);
+  assign div_sign = rtype_alu_op[op_div] | rtype_alu_op[op_divw] | 
+  rtype_alu_op[op_rem] | rtype_alu_op[op_remw];
 
   ysyx_22040127_mul mul(
     clk, 
@@ -212,7 +226,22 @@ module ysyx_22040127_execute(
     mul_stage2,
     mul_ok
   );
-
+  ysyx_22040127_div div(
+    clk,
+    rst,
+    (rtype_alu_op[op_divw] | rtype_alu_op[op_divuw] | rtype_alu_op[op_remw] | rtype_alu_op[op_remuw])
+     ? {{32{ex_alu_input1[31] & (rtype_alu_op[op_divw] | rtype_alu_op[op_remw])}}, ex_alu_input1[31:0]}
+     : ex_alu_input1,
+    (rtype_alu_op[op_divw] | rtype_alu_op[op_divuw] | rtype_alu_op[op_remw] | rtype_alu_op[op_remuw])
+     ? {{32{ex_alu_input2[31] & (rtype_alu_op[op_divw] | rtype_alu_op[op_remw])}}, ex_alu_input2[31:0]}
+     : ex_alu_input2,
+    div_sign,//input s,//w or y is signed
+    div_type,//input is_div,
+    div_ready,
+    div_state,
+    quo,
+    rem
+  );
   assign rtype_calc_result = 
   {64{rtype_alu_op[op_add]}}  & (ex_alu_input1 + ex_alu_input2) |
   {64{rtype_alu_op[op_mul]}}  & (mul_res_low) | //(ex_alu_input1 * ex_alu_input2) |
@@ -226,10 +255,10 @@ module ysyx_22040127_execute(
   {64{rtype_alu_op[op_and]}}  & (ex_alu_input1 & ex_alu_input2) |
   {64{rtype_alu_op[op_xor]}}  & (ex_alu_input1 ^ ex_alu_input2) |
   {64{rtype_alu_op[op_or]}}   & (ex_alu_input1 | ex_alu_input2) |
-  {64{rtype_alu_op[op_div]}}  & ($signed(ex_alu_input1) / $signed(ex_alu_input2))  |
-  {64{rtype_alu_op[op_divu]}} & ex_alu_input1 / ex_alu_input2 |
-  {64{rtype_alu_op[op_remu]}} & ex_alu_input1 % ex_alu_input2 |
-  {64{rtype_alu_op[op_rem]}}  & $signed(ex_alu_input1) % $signed(ex_alu_input2)|
+  {64{rtype_alu_op[op_div]}}  & quo  |
+  {64{rtype_alu_op[op_divu]}} & quo  |
+  {64{rtype_alu_op[op_remu]}} & rem  |
+  {64{rtype_alu_op[op_rem]}}  & rem  |
   {64{rtype_alu_op[op_addw]}} & sext_addw_result |
   {64{rtype_alu_op[op_subw]}} & sext_subw_result |
   {64{rtype_alu_op[op_mulw]}} & sext_mulw_result |

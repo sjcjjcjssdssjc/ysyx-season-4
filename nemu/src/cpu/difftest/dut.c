@@ -10,9 +10,11 @@ void (*ref_difftest_memcpy)(paddr_t addr, void *buf, size_t n, bool direction) =
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
-
+#ifdef CONFIG_ITRACE
+void print_surrounding_inst();
+#endif
 #ifdef CONFIG_DIFFTEST
-
+extern char *regs[];
 static bool is_skip_ref = false;
 static int skip_dut_nr_inst = 0;
 
@@ -45,6 +47,7 @@ void difftest_skip_dut(int nr_ref, int nr_dut) {
 }
 
 void init_difftest(char *ref_so_file, long img_size, int port) {
+  cpu.mstatus = 0xa00001800;
   assert(ref_so_file != NULL);
   void *handle;
   handle = dlopen(ref_so_file, RTLD_LAZY | MUXNDEF(CONFIG_CC_ASAN, RTLD_DEEPBIND, 0));
@@ -77,10 +80,26 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
 }
 
 static void checkregs(CPU_state *ref, vaddr_t pc) {
+  //home/heisenberg/ysyx-workbench/nemu/src/isa/riscv64/difftest/dut.c
   if (!isa_difftest_checkregs(ref, pc)) {
     nemu_state.state = NEMU_ABORT;
     nemu_state.halt_pc = pc;
-    isa_reg_display();
+    for(int i = 0;i < 32; i++){
+      if(ref->gpr[i] != cpu.gpr[i])
+        printf("%s: ref:%lx our:%lx\n",regs[i],ref->gpr[i],cpu.gpr[i]);
+    }
+    printf("ref mepc:%lx our:%lx refpc:%lx mypc:%lx\n",
+    ref->mepc, cpu.mepc, ref->pc, pc);
+    printf("ref mcause:%lx our:%lx refpc:%lx mypc:%lx\n",
+    ref->mcause, cpu.mcause, ref->pc, pc);
+    printf("ref mtvec:%lx our:%lx refpc:%lx mypc:%lx\n",
+    ref->mtvec, cpu.mtvec, ref->pc, pc);
+    printf("ref mstatus:%lx our:%lx refpc:%lx mypc:%lx\n",
+    ref->mstatus, cpu.mstatus, ref->pc, pc);
+    #ifdef CONFIG_ITRACE
+    print_surrounding_inst();
+    #endif
+    //isa_reg_display();
   }
 }
 
@@ -112,7 +131,7 @@ void difftest_step(vaddr_t pc, vaddr_t npc) {
   //printf("ref exec 1\n");
   ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is ref(spike)
 
-  checkregs(&ref_r, pc);
+  checkregs(&ref_r, npc);//pc->npc
 }
 #else
 void init_difftest(char *ref_so_file, long img_size, int port) { }
