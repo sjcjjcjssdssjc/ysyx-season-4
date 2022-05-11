@@ -26,7 +26,13 @@ module ysyx_22040127_decode(
   input[63:0]  mem_final_rdata,
   input        ex_reg_wen,
   input        mem_reg_wen,
-  input        wb_reg_wen
+  input        wb_reg_wen,
+  input        mem_mret,
+  input        ex_csr_we,
+  input        mem_csr_we,
+  input        wb_csr_we,
+  input        if_flush,
+  output reg   id_flush
 );
   localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
    TYPE_J = 3'b011, TYPE_R = 3'b100, TYPE_B = 3'b101, TYPE_N = 3'b110;
@@ -91,8 +97,39 @@ module ysyx_22040127_decode(
   wire       id_ready_go;
   reg        id_valid;
   reg[`IF_TO_ID_WIDTH - 1:0]  if_to_id_bus_reg; 
+
+  wire[31:0] id_pc;
+  wire[31:0] id_instruction;
+  assign {id_instruction, id_pc} = if_to_id_bus_reg;//data from if delayed a cycle
+
+  wire       id_mret;
+  wire       id_ecall;
+  wire       id_csrrw;
+  wire       id_csrrs;
+  wire       id_csrrc;
+  wire       id_csrrwi;
+  wire       id_csrrsi;
+  wire       id_csrrci;
+
+  assign id_mret  = (id_instruction[31:7] == 25'b0011000000100000000000000) && (id_inst_type == TYPE_N);
+  assign id_ecall = !(|id_instruction[31:7]) && (id_inst_type == TYPE_N);
+  assign id_csrrw = id_instruction[14:12] == 3'b001 && (id_inst_type == TYPE_N);
+  assign id_csrrs = id_instruction[14:12] == 3'b010 && (id_inst_type == TYPE_N);
+  assign id_csrrc = id_instruction[14:12] == 3'b011 && (id_inst_type == TYPE_N);
+  assign id_csrrwi = id_instruction[14:12] == 3'b101 && (id_inst_type == TYPE_N);
+  assign id_csrrsi = id_instruction[14:12] == 3'b110 && (id_inst_type == TYPE_N);
+  assign id_csrrci = id_instruction[14:12] == 3'b111 && (id_inst_type == TYPE_N);
   assign id_to_ex_bus
-  = {id_pc,          //254:223
+  = {id_imm[11:0],   //274:263
+     id_mret,        //262:262
+     id_ecall,       //261:261
+     id_csrrw,       //260:260
+     id_csrrs,       //259:259
+     id_csrrc,       //258:258
+     id_csrrwi,      //257:257
+     id_csrrsi,      //256:256
+     id_csrrci,      //255:255
+     id_pc,          //254:223
      id_aluop,       //222:217
      id_memop,       //216:214
      id_reg_wen,     //213:213
@@ -153,19 +190,18 @@ module ysyx_22040127_decode(
   || bgeu && id_regdata1_final >= id_regdata2_final);
 
   assign id_reg_wen = !(|id_inst_type) || id_inst_type == TYPE_U || id_inst_type == TYPE_J
-  || id_inst_type == TYPE_R;//typeI is first
-  assign id_memread = !id_instruction[2] & !id_instruction[3] & !id_instruction[4] 
-  & !id_instruction[5] & !id_instruction[6] ;//right?
+  || id_inst_type == TYPE_R || id_inst_type == TYPE_N;
+  assign id_memread = id_instruction[0] & id_instruction[1] & !id_instruction[2] 
+  & !id_instruction[3] & !id_instruction[4] & !id_instruction[5] & !id_instruction[6];
 
   //pipeline
   assign id_ready_go = !(load_use_hazard1 || load_use_hazard2
-  || mem_load_use_hazard1 || mem_load_use_hazard2);//1'b1;
+  || mem_load_use_hazard1 || mem_load_use_hazard2 || ex_csr_we  
+  && (|ex_rd)  && (ex_rd == id_rs1  || ex_rd == id_rs2) 
+  || mem_csr_we && (|mem_rd) && (mem_rd == id_rs1 || mem_rd == id_rs2));//right?
   assign id_allowin  = !id_valid || id_ready_go && ex_allowin;//!id_valid is for the begining 
   assign id_to_ex_valid = id_ready_go && id_valid;//all about id. Has nothing to do with ex
 
-  wire[31:0] id_pc;
-  wire[31:0] id_instruction;
-  assign {id_instruction, id_pc} = if_to_id_bus_reg;//data from if delayed a cycle
 
   always @(posedge clk) begin
     if(rst) begin
@@ -177,9 +213,12 @@ module ysyx_22040127_decode(
     mem_load_use_hazard2_tmp <= load_use_hazard2;
     wb_load_use_hazard1_tmp <= mem_load_use_hazard1;
     wb_load_use_hazard2_tmp <= mem_load_use_hazard2;
-    if(if_to_id_valid && id_allowin) begin
+    if(rst)begin
+      if_to_id_bus_reg <= `IF_TO_ID_WIDTH'b0;
+    end else if(if_to_id_valid && id_allowin) begin
       if_to_id_bus_reg <= if_to_id_bus;
-    end //else if_to_id_bus_reg <= `IF_TO_ID_WIDTH'b0;
+      id_flush <= mem_mret | if_flush;//otherwise stall
+    end
   end
 
   //typei,typeu writes register

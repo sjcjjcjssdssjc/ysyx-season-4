@@ -69,6 +69,7 @@ if HAS_VGA
 config FB_ADDR
   hex "Physical address of the VGA frame buffer"
   default 0xa1000000
+ 
 
 config VGA_CTL_PORT
   depends on HAS_PORT_IO
@@ -92,6 +93,16 @@ config VGA_SIZE_800x600
   bool "800 x 600"
 endchoice
 endif # HAS_VGA
+
+menuconfig HAS_CLINT
+  bool "Enable CLINT"
+  default y
+
+if HAS_CLINT
+config CLINT_MMIO
+  hex "mmio clint"
+  default 0x02000000
+endif # HAS_CLINT
 
 if !TARGET_AM
 menuconfig HAS_AUDIO

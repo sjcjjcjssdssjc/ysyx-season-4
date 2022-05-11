@@ -10,6 +10,7 @@ void (*ref_difftest_memcpy)(paddr_t addr, void *buf, size_t n, bool direction) =
 void (*ref_difftest_regcpy)(void *dut, bool direction) = NULL;
 void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
+void (*ref_difftest_skip)(uint64_t n) = NULL;
 #ifdef CONFIG_ITRACE
 void print_surrounding_inst();
 #endif
@@ -65,6 +66,9 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   ref_difftest_raise_intr = dlsym(handle, "difftest_raise_intr");
   assert(ref_difftest_raise_intr);
 
+  ref_difftest_skip = dlsym(handle, "difftest_skip");
+  assert(ref_difftest_skip);
+
   void (*ref_difftest_init)(int) = dlsym(handle, "difftest_init");
   assert(ref_difftest_init);
 
@@ -86,7 +90,8 @@ static void checkregs(CPU_state *ref, vaddr_t pc) {
     nemu_state.halt_pc = pc;
     for(int i = 0;i < 32; i++){
       if(ref->gpr[i] != cpu.gpr[i])
-        printf("%s: ref:%lx our:%lx\n",regs[i],ref->gpr[i],cpu.gpr[i]);
+        printf("\033[1;31m %s: ref:%lx our:%lx \033[0m\n",regs[i],ref->gpr[i],cpu.gpr[i]);
+      else printf("\033[1;32m %s: ref:%lx our:%lx \033[0m\n",regs[i],ref->gpr[i],cpu.gpr[i]);
     }
     printf("ref mepc:%lx our:%lx refpc:%lx mypc:%lx\n",
     ref->mepc, cpu.mepc, ref->pc, pc);
@@ -96,6 +101,14 @@ static void checkregs(CPU_state *ref, vaddr_t pc) {
     ref->mtvec, cpu.mtvec, ref->pc, pc);
     printf("ref mstatus:%lx our:%lx refpc:%lx mypc:%lx\n",
     ref->mstatus, cpu.mstatus, ref->pc, pc);
+    printf("ref mie:%lx our:%lx refpc:%lx mypc:%lx\n",
+    ref->mie, cpu.mie, ref->pc, pc);
+    printf("ref mip:%lx our:%lx refpc:%lx mypc:%lx\n",
+    ref->mip, cpu.mip, ref->pc, pc);
+    printf("ref mtval:%lx our:%lx refpc:%lx mypc:%lx\n",
+    ref->mtval, cpu.mtval, ref->pc, pc);
+    printf("ref mscratch:%lx our:%lx refpc:%lx mypc:%lx\n",
+    ref->mscratch, cpu.mscratch, ref->pc, pc);
     #ifdef CONFIG_ITRACE
     print_surrounding_inst();
     #endif

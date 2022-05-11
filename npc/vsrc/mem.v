@@ -11,7 +11,9 @@ module ysyx_22040127_memory(
   output[`MEM_TO_WB_WIDTH - 1:0] mem_to_wb_bus,
   output[63:0] mem_alu_output,
   output[63:0] mem_final_rdata,
-  output       mem_memread
+  output       mem_memread,
+  input        ex_flush,
+  output reg   mem_flush
 );
   wire[2:0] mem_memop;   //input from id
   wire      mem_memwrite;//input from id
@@ -27,6 +29,31 @@ module ysyx_22040127_memory(
   wire      sh;
   wire      sw;
   wire      sd;
+
+  //for pipeline
+  wire       mem_ready_go;//self_willing
+  wire       mem_reg_wen;
+  wire[4:0]  mem_rs1;
+  wire[63:0] mem_alu_input1;
+  wire[11:0] mem_des_csr;
+  wire[4:0]  mem_rd;    
+  wire[31:0] mem_pc;
+  wire       mem_jalr;
+  wire[63:0] mem_wdata_tmp;
+  wire[63:0] mem_wdata;
+  reg[63:0]  mem_reg_wdata;
+  reg        mem_valid;
+
+  wire       mem_mret;
+  wire       mem_ecall;
+  wire       mem_csrrw;
+  wire       mem_csrrs;
+  wire       mem_csrrc;
+  wire       mem_csrrwi;
+  wire       mem_csrrsi;
+  wire       mem_csrrci;
+  wire       mem_csr_we;
+
   assign lb  = (mem_memop == 3'b000);
   assign lh  = (mem_memop == 3'b001);
   assign lw  = (mem_memop == 3'b010);
@@ -39,17 +66,6 @@ module ysyx_22040127_memory(
   assign sw  = (mem_memop[1:0] == 2'b10);
   assign sd  = (mem_memop[1:0] == 2'b11);
 
-  //for pipeline
-  wire       mem_ready_go;//self_willing
-  wire       mem_reg_wen;
-  wire[4:0]  mem_rd;    
-  wire[31:0] mem_pc;
-  wire       mem_jalr;
-  wire[63:0] mem_wdata_tmp;
-  wire[63:0] mem_wdata;
-  reg[63:0]  mem_reg_wdata;
-  reg        mem_valid;
-  
   assign mem_ready_go = 1'b1;
   assign mem_allowin  = !mem_valid || mem_ready_go && wb_allowin;
   assign mem_to_wb_valid = mem_ready_go && mem_valid;
@@ -58,9 +74,20 @@ module ysyx_22040127_memory(
   sh ? {4{mem_wdata_tmp[15:0]}} :
   sw ? {2{mem_wdata_tmp[31:0]}} : 
   mem_wdata_tmp[63:0];
-
   assign 
-  { mem_jalr,      //171:171
+  { mem_des_csr,
+    mem_alu_input1,//249:186
+    mem_rs1,       //185:181
+    mem_csr_we,    //180:180
+    mem_mret,      //179:179
+    mem_ecall,     //178:178
+    mem_csrrw,     //177:177
+    mem_csrrs,     //176:176
+    mem_csrrc,     //175:175
+    mem_csrrwi,    //174:174
+    mem_csrrsi,    //173:173
+    mem_csrrci,    //172:172  
+    mem_jalr,      //171:171
     mem_pc,        //170:139
     mem_memop,     //138:136 unused
     mem_reg_wen,   //135:135 toreg
@@ -72,7 +99,19 @@ module ysyx_22040127_memory(
   } = ex_to_mem_bus_reg;
 
   assign mem_to_wb_bus =
-  { mem_pc,        //101:70
+  { mem_des_csr,   //191:180
+    mem_alu_input1,//179:116
+    mem_rs1,       //115:111
+    mem_csr_we,    //110:110
+    mem_mret,      //109:109
+    mem_ecall,     //108:108
+    mem_csrrw,     //107:107
+    mem_csrrs,     //106:106
+    mem_csrrc,     //105:105
+    mem_csrrwi,    //104:104
+    mem_csrrsi,    //103:103
+    mem_csrrci,    //102:102  
+    mem_pc,        //101:70
     mem_reg_wen,   //69:69
     mem_rd,        //68:64
     mem_reg_wdata  //63:0
@@ -90,12 +129,16 @@ module ysyx_22040127_memory(
     end else if(mem_allowin)begin
       mem_valid <= ex_to_mem_valid;
     end
-    
-    if(ex_to_mem_valid && mem_allowin) begin
+    if(rst)begin
+      ex_to_mem_bus_reg <= `EX_TO_MEM_WIDTH'b0;
+    end else if(ex_to_mem_valid && mem_allowin) begin
       ex_to_mem_bus_reg <= ex_to_mem_bus;
+      mem_flush <= mem_mret | ex_flush;
     end else begin
+     
+      ex_to_mem_bus_reg[179:179] <= 1'b0;
       ex_to_mem_bus_reg[135:128] <= 8'b0;
-    end  //else ex_to_mem_bus_reg <= `EX_TO_MEM_WIDTH'b0;
+    end
   end
 
   wire[63:0]doubly_aligned_data;
@@ -148,10 +191,11 @@ module ysyx_22040127_memory(
   assign wmask[6] = addr_lowmask[3'b110] | addr_lowmask[3'b100] & sw | sd;
   assign wmask[7] = addr_lowmask[3'b111] | addr_lowmask[3'b110] & sh | 
   addr_lowmask[3'b100] & sw | sd;
-
-  always @(*) begin
-    pmem_read(mem_alu_output, doubly_aligned_data);//raddr
-    if(|wmask)pmem_write(mem_alu_output, mem_wdata, wmask & {8{mem_memwrite}});//waddr
+  /* verilator lint_off LATCH */
+  always @(*) begin //need change to posedge clock
+    if(mem_memread)pmem_read(mem_alu_output, doubly_aligned_data);
+    if(mem_memwrite & !mem_flush)pmem_write(mem_alu_output, mem_wdata, wmask);//waddr
+    /* verilator lint_on LATCH */
   end
 
 endmodule

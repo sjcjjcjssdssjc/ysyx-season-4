@@ -18,11 +18,29 @@ void difftest_regcpy(void *dut, bool direction) {
       cpu.gpr[i] = ((uint64_t *)dut)[i];
     }
     cpu.pc = ((uint64_t *)dut)[32];
+    //mepc, mcause, mtvec, mstatus;
+    //uint64_t mie, mip, mscratch, mtval;
+    cpu.mepc = ((uint64_t *)dut)[33];
+    cpu.mcause = ((uint64_t *)dut)[34];
+    cpu.mtvec = ((uint64_t *)dut)[35];
+    cpu.mstatus = ((uint64_t *)dut)[36];
+    cpu.mie = ((uint64_t *)dut)[37];
+    cpu.mip = ((uint64_t *)dut)[38];
+    cpu.mscratch = ((uint64_t *)dut)[39];
+    cpu.mtval = ((uint64_t *)dut)[40];
   } else {
     for(int i = 0; i < 32; i++){
      ((uint64_t *)dut)[i] = cpu.gpr[i];
     }
     ((uint64_t *)dut)[32] = cpu.pc;
+    ((uint64_t *)dut)[33] = cpu.mepc;
+    ((uint64_t *)dut)[34] = cpu.mcause;
+    ((uint64_t *)dut)[35] = cpu.mtvec;
+    ((uint64_t *)dut)[36] = cpu.mstatus;
+    ((uint64_t *)dut)[37] = cpu.mie;
+    ((uint64_t *)dut)[38] = cpu.mip;
+    ((uint64_t *)dut)[39] = cpu.mscratch;
+    ((uint64_t *)dut)[40] = cpu.mtval;
   }
   
 }

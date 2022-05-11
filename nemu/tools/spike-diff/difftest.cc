@@ -27,6 +27,7 @@ struct diff_context_t {
   word_t gpr[32];
   word_t pc;
   word_t mepc, mcause, mtvec, mstatus;
+  word_t mie, mip, mscratch, mtval;
 };
 
 static sim_t* s = NULL;
@@ -47,12 +48,15 @@ void sim_t::diff_get_regs(void* diff_context) {//get from spike
   for (int i = 0; i < NXPR; i++) {
     ctx->gpr[i] = state->XPR[i];
   }
-  ctx->mepc   = state->mepc;
-  ctx->mcause = state->mcause;
-  ctx->mtvec  = state->mtvec;
-  ctx->mstatus= state->mstatus;
+  ctx->mepc     = state->mepc;
+  ctx->mcause   = state->mcause;
+  ctx->mtvec    = state->mtvec;
+  ctx->mstatus  = state->mstatus;
+  ctx->mie      = state->mie;
+  ctx->mip      = state->mip;
+  ctx->mtval    = state->mtval;
+  ctx->mscratch = state->mscratch;
   ctx->pc = state->pc;
-  //word_t mepc, mcause, mtvec, mstatus;
 }
 
 void sim_t::diff_set_regs(void* diff_context) {
@@ -60,10 +64,14 @@ void sim_t::diff_set_regs(void* diff_context) {
   for (int i = 0; i < NXPR; i++) {
     state->XPR.write(i, (sword_t)ctx->gpr[i]);
   }
-  state->mepc   = ctx->mepc;
-  state->mcause = ctx->mcause;
-  state->mtvec  = ctx->mtvec;
-  state->mstatus= ctx->mstatus;
+  state->mepc     = ctx->mepc;
+  state->mcause   = ctx->mcause;
+  state->mtvec    = ctx->mtvec;
+  state->mstatus  = ctx->mstatus;
+  state->mie      = ctx->mie;
+  state->mip      = ctx->mip;
+  state->mtval    = ctx->mtval;
+  state->mscratch = ctx->mscratch;
   state->pc = ctx->pc;
 }
 
@@ -73,8 +81,14 @@ void sim_t::diff_memcpy(reg_t dest, void* src, size_t n) {
     mmu->store_uint8(dest+i, *((uint8_t*)src+i));
   }
 }
-
+int skip = 0;
 extern "C" {
+
+void difftest_skip(uint64_t n){//skip step must be equal to exec step
+  printf("skiped %lx steps at pc %lx\n",n, state->pc);
+  state->pc += 4 * n;
+  skip = 1;
+}
 
 void difftest_memcpy(paddr_t addr, void *buf, size_t n, bool direction) {
   printf("cpy %x %lx\n",addr,n);
@@ -94,7 +108,8 @@ void difftest_regcpy(void* dut, bool direction) {
 }
 
 void difftest_exec(uint64_t n) {
-  s->diff_step(n);
+  if(skip == 0)s->diff_step(n);
+  else skip = 0;
 }
 
 void difftest_init(int port) {

@@ -3,12 +3,24 @@ module ysyx_22040127_top(
   input rst,
   output reg[31:0] if_pc,
   output           wb_valid,
-  output    [31:0] wb_pc_reg
+  output    [31:0] wb_pc,
+  output wire[63:0] mepc,
+  output wire[63:0] mtvec,
+  output wire[63:0] mstatus,
+  output wire[63:0] mcause,
+  output wire[63:0] mie,
+  output wire[63:0] mip,
+  output wire[63:0] mscratch,
+  output wire[63:0] mtval
 );
+  //TODO: add difftest to mhartid between nemu and npc, nemu and spike
+  wire[63:0] mhartid;
+  assign mtval = 64'b0;
   //todo: branchstall, load-use
   reg [63:0] if_pcdata;
   wire[31:0] if_instruction;
   wire       if_ebreak;
+  wire       if_uart;//temporary(dpic is also)
   reg        id_ebreak;
   reg        ex_ebreak;
   reg        mem_ebreak;
@@ -37,6 +49,12 @@ module ysyx_22040127_top(
   wire        ex_to_mem_valid;
   wire        mem_to_wb_valid;
 
+  wire        if_flush;
+  wire        id_flush;
+  wire        ex_flush;
+  wire        mem_flush;
+ // wire        wb_flush;
+
   wire[`IF_TO_ID_WIDTH - 1:0]  if_to_id_bus;
   wire[`ID_TO_EX_WIDTH - 1:0]  id_to_ex_bus;
   wire[`EX_TO_MEM_WIDTH - 1:0] ex_to_mem_bus;//width TBD
@@ -45,6 +63,10 @@ module ysyx_22040127_top(
   wire       mem_memread;
   wire[63:0] mem_final_rdata;
   wire[63:0] wb_reg_wdata;
+  wire[63:0] wb_csrwdata;
+  wire[63:0] wb_csrrdata;
+  wire       wb_mret;
+  wire       wb_csr_we;
   wire[4:0]  wb_rd;
   wire       wb_reg_wen;
   //bus to be added.
@@ -54,17 +76,20 @@ module ysyx_22040127_top(
   import "DPI-C" function void set_simtime();//terminate
   import "DPI-C" function void set_pc(input bit[31:0] pc);
   import "DPI-C" function void pmem_read(input longint raddr, output longint doubly_aligned_data);
+  assign if_flush  = wb_mret;
   assign if_instruction = (if_pc[2]) ? if_pcdata[63:32] : if_pcdata[31:0];
   assign if_ebreak = (if_instruction[6:0] == 7'b1110011) & if_instruction[20]
       & !(|{if_instruction[31:21],if_instruction[19:7]});
+  assign if_uart   = if_instruction[6:0] == 7'b1111011;
   assign if_ready_go    = 1'b1;
   assign if_allowin     = !if_valid || if_ready_go && id_allowin;
   //once rst = 0, if_allowin is set to 1
   assign if_to_id_valid = if_valid && if_ready_go;//always ready to go
-  assign if_to_id_bus   = {(id_branch_taken ? 32'b0 : if_instruction), if_pc};
+  assign if_to_id_bus   = {(id_branch_taken | wb_mret | if_uart ? 32'b0 : if_instruction), if_pc};
 
-  always @(*)begin
-    pmem_read({32'b0, if_pc}, if_pcdata);
+  always @(*)begin //need change to posedge clock
+    if(if_pc >= 32'h80000000)pmem_read({32'b0, if_pc}, if_pcdata);
+    else pmem_read({64'h80000000}, if_pcdata);
   end
 
   always @(posedge clk) begin
@@ -86,6 +111,7 @@ module ysyx_22040127_top(
     if(rst == 1'b1)
       if_pc <= 32'h80000000;
     else if(id_branch_taken && if_allowin) if_pc <= id_branch_result;//id_inst_type == TYPE_B -> id_branch_taken
+    else if(wb_mret)if_pc <= mepc[31:0];
     else if(if_allowin)if_pc <= if_pc + 4;
 
     //else if(id_inst_type == TYPE_J && if_allowin)//type_u:auipc,j (to_if_valid is deprecated)
@@ -126,7 +152,13 @@ module ysyx_22040127_top(
     .mem_final_rdata(mem_final_rdata),
     .ex_reg_wen(ex_to_mem_bus[135:135]),
     .mem_reg_wen(mem_to_wb_bus[69:69]),
-    .wb_reg_wen(wb_reg_wen)
+    .wb_reg_wen(wb_reg_wen),
+    .mem_mret(mem_to_wb_bus[109:109]),
+    .ex_csr_we(ex_to_mem_bus[180:180]),
+    .mem_csr_we(mem_to_wb_bus[110:110]),
+    .wb_csr_we(wb_csr_we),
+    .if_flush(if_flush),
+    .id_flush(id_flush)
   );
   ysyx_22040127_execute exe(
     .clk(clk), 
@@ -136,7 +168,10 @@ module ysyx_22040127_top(
     .id_to_ex_valid(id_to_ex_valid),
     .ex_to_mem_valid(ex_to_mem_valid),
     .id_to_ex_bus(id_to_ex_bus),
-    .ex_to_mem_bus(ex_to_mem_bus)
+    .ex_to_mem_bus(ex_to_mem_bus),
+    .mem_mret(mem_to_wb_bus[109:109]),
+    .id_flush(id_flush),
+    .ex_flush(ex_flush)
   );
   ysyx_22040127_memory mem(
     .clk(clk),
@@ -149,7 +184,9 @@ module ysyx_22040127_top(
     .mem_to_wb_bus(mem_to_wb_bus),
     .mem_alu_output(mem_alu_output),
     .mem_final_rdata(mem_final_rdata),
-    .mem_memread(mem_memread)
+    .mem_memread(mem_memread),
+    .ex_flush(ex_flush),
+    .mem_flush(mem_flush)
   );
   ysyx_22040127_RegisterFile wb(
     .clk(clk), 
@@ -164,8 +201,21 @@ module ysyx_22040127_top(
     .wb_rd(wb_rd),
     .wb_reg_wdata(wb_reg_wdata),
     .wb_valid(wb_valid),
-    .wb_pc_reg(wb_pc_reg),
-    .wb_reg_wen(wb_reg_wen)
+    .wb_pc(wb_pc),
+    .wb_reg_wen(wb_reg_wen),
+    .wb_csrwdata(wb_csrwdata),
+    .wb_csrrdata(wb_csrrdata),
+    .wb_mret(wb_mret),
+    .wb_csr_we(wb_csr_we),
+    .csr_mepc(mepc),
+    .csr_mtvec(mtvec),
+    .csr_mstatus(mstatus),
+    .csr_mcause(mcause),
+    .csr_mie(mie),
+    .csr_mip(mip),
+    .csr_mscratch(mscratch),
+    .csr_mhartid(mhartid),
+    .mem_flush(mem_flush)
   );//wb
   //Reg #(4, 4'b0) i1 (clk, rst, in, out, in[0]);
 endmodule

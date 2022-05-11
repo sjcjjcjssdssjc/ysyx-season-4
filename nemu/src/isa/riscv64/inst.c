@@ -10,6 +10,10 @@
 #define MCAUSE  0x342
 #define MSTATUS 0x300
 #define MEPC    0x341
+#define CSRMIE   0x304
+#define MIP      0x344
+#define MSCRATCH 0x340
+
 
 enum {
   TYPE_I, TYPE_U, TYPE_S,
@@ -75,28 +79,52 @@ static void bltu_op(word_t dest, word_t src1, word_t src2, Decode *s){
   if(src1 < src2) 
     s->dnpc += dest - 4;
 }
-static void csrrws_op(word_t dest, word_t src1, word_t src2, Decode *s,word_t is_read){
+static void csrrws_op(word_t dest, word_t src1, word_t src2, Decode *s,word_t is_read,int is_imm){
   word_t t;
+  if(is_imm){
+    word_t i = s->isa.inst.val;
+    src1 = BITS(i, 19, 15);
+  }//csrw:csrrw x0,csr,rs1
   switch (src2) {
-    case(MTVEC)  : t = cpu.mtvec;   cpu.mtvec   = is_read * t | src1; R(dest) = t; break;
-    case(MCAUSE) : t = cpu.mcause;  cpu.mcause  = is_read * t | src1; R(dest) = t; break;
-    case(MSTATUS): t = cpu.mstatus; cpu.mstatus = is_read * t | src1; R(dest) = t; break;
-    case(MEPC)   : t = cpu.mepc;    cpu.mepc    = is_read * t | src1; R(dest) = t; 
+    case(MTVEC)  : t = cpu.mtvec;   cpu.mtvec    = is_read * t | src1; R(dest) = t; break;
+    case(MCAUSE) : t = cpu.mcause;  cpu.mcause   = is_read * t | src1; R(dest) = t; break;
+    case(MSTATUS): t = cpu.mstatus; cpu.mstatus  = is_read * t | src1; R(dest) = t; break;
+    case(CSRMIE) : t = cpu.mie;     cpu.mie      = is_read * t | src1; R(dest) = t; break;
+    case(MEPC)   : t = cpu.mepc;    cpu.mepc     = is_read * t | src1; R(dest) = t; break;
+    case(MIP)    : t = cpu.mip;     cpu.mip      = is_read * t | src1; R(dest) = t; break;
+    case(MSCRATCH):t = cpu.mscratch;cpu.mscratch = is_read * t | src1; R(dest) = t; break;
     //printf("csrrws %lx %lx\n",cpu.mepc,cpu.pc);
-    break;
   }
 }
+//dest:rd src1:x[rs1] src2:csr
+static void csrrc_op(word_t dest, word_t src1, word_t src2, Decode *s,int is_imm){
+  word_t t;
+  if(is_imm){
+    word_t i = s->isa.inst.val;
+    src1 = BITS(i, 19, 15);
+  }
+  switch (src2) {
+    case(MTVEC)  : t = cpu.mtvec;    cpu.mtvec    = t & (~src1); R(dest) = t; break;
+    case(MCAUSE) : t = cpu.mcause;   cpu.mcause   = t & (~src1); R(dest) = t; break;
+    case(MSTATUS): t = cpu.mstatus;  cpu.mstatus  = t & (~src1); R(dest) = t; break;
+    case(CSRMIE) : t = cpu.mie;      cpu.mie      = t & (~src1); R(dest) = t; break;
+    case(MIP)    : t = cpu.mip;      cpu.mip      = t & (~src1); R(dest) = t; break;
+    case(MSCRATCH):t = cpu.mscratch; cpu.mscratch = t & (~src1); R(dest) = t; break;
+    case(MEPC)   : t = cpu.mepc;     cpu.mepc     = t & (~src1); R(dest) = t; break;
+  }
+}
+
 #define MIE  (1 << 3)
 #define MPIE (1 << 7)
+#define SD   ((word_t)1 << 63)
 static void mret_op(word_t dest, word_t src1, word_t src2, Decode *s){
   s->dnpc = cpu.mepc;//set mepc to pc+4(ecall)?
   //printf("mstatus is %lx\n",cpu.mstatus);
-  cpu.mstatus &= (0xFFFFFFFFFFFFE7FF); //1(234 in intr.c?)
-  //cpu.mstatus & MPP = NO supervisor/machine/user mode
+  //cpu.mstatus &= (0xFFFFFFFFFFFFE7FF); //TBC
   if(cpu.mstatus & MPIE)cpu.mstatus |= MIE;
   else cpu.mstatus &= (~MIE);
   cpu.mstatus |= MPIE;//0x80
-  printf("mret %lx\n",cpu.mstatus & (0xFFFFFFFFFFFFE7FF));
+  //printf("mret %lx\n",cpu.mstatus & (0xFFFFFFFFFFFFE7FF));
 }
 static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, int type) {
   uint32_t i = s->isa.inst.val;
@@ -114,7 +142,7 @@ static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, 
     case TYPE_B: src1R(rs1); src2R(rs2); destR(immB(i)); break;
   }
 }
-
+void (*ref_difftest_skip)(uint64_t n);
 
 static int decode_exec(Decode *s) {
   word_t dest = 0, src1 = 0, src2 = 0;
@@ -207,14 +235,27 @@ static int decode_exec(Decode *s) {
 
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
   INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(R(17), s->pc));
-  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , N, csrrws_op(dest, src1, src2, s, 0));
-  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , N, csrrws_op(dest, src1, src2, s, 1));
+  INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , N, csrrws_op(dest, src1, src2, s, 0, 0));
+  INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , N, csrrws_op(dest, src1, src2, s, 0, 1));
+  INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , N, csrrws_op(dest, src1, src2, s, 1, 0));
+  INSTPAT("??????? ????? ????? 110 ????? 11100 11", csrrsi , N, csrrws_op(dest, src1, src2, s, 1, 1));
+  INSTPAT("??????? ????? ????? 011 ????? 11100 11", csrrc  , N, csrrc_op(dest, src1, src2, s, 0));
+  INSTPAT("??????? ????? ????? 111 ????? 11100 11", csrrci , N, csrrc_op(dest, src1, src2, s, 1));
   INSTPAT("0011000 00010 00000 000 00000 11100 11", mret   , N, mret_op(dest, src1, src2, s));
+
+  INSTPAT("??????? ????? ????? ??? ????? 11110 11", noo    , N, ;);//ref_difftest_skip(1)
   INSTPAT("??????? ????? ????? ??? ????? ????? ??", inv    , N, INV(s->pc));
   INSTPAT_END();
-
+  //if(((cpu.mstatus >> 13) & 0x3) == 0x3)cpu.mstatus |= (SD);
+  //else cpu.mstatus &= (~SD);
+  cpu.mstatus |= (0x1800LL);
+  cpu.mstatus &= (0x7FFFFFF000001888LL);
+  //hard wired value:
+  //1:MPP(12:11)
+  //0:uie(0),sie(1),WPRI(2),upie(4),spie(5),WPRI(6),SPP(8),WPRI(10:9),(35:13) 
+  //XSL[1](35) UXL[1](33) XS(16:15) FS(14:13)
   R(0) = 0; // reset $zero to 0
-
+  //printf("%lx\n",cpu.pc);
   return 0;
 }
 

@@ -1,6 +1,7 @@
 #include "paddr.h"
 #include "defs.h"
 #include <stdio.h>
+extern void set_simtime();
 uint8_t pmem[CONFIG_MSIZE];//big endian
 // void inst_writebyindex(uint32_t ind, uint32_t inst)
 // {
@@ -26,11 +27,16 @@ extern "C" void pmem_read(long long raddr, long long *rdata) {
   long long tmp = raddr;
   raddr &= ~(0x7ull);
   raddr -= 0x80000000;
-  if(raddr < 0 || raddr >= CONFIG_MSIZE){
-    //printf("%llx\n",raddr+0x80000000);
+  if(raddr + 0x80000000 >= 0x02000000 && raddr + 0x80000000 <= 0x0200ffff){
     *rdata = 0;
-    return;
+    return;//plic
   }
+  if(raddr < 0 || raddr >= CONFIG_MSIZE){
+    printf("R %llx\n",raddr+0x80000000);
+    //*rdata = 0;
+    //return;
+  }
+  
   long long res = 0;
   for(long long i = raddr + 7; (int64_t)i >= (int64_t)raddr; i--){
     
@@ -48,10 +54,12 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
   // 如`wmask = 0x3`代表只写入最低2个字节, 内存中的其它字节保持不变
   waddr &= ~(0x7ull);
   waddr -= 0x80000000;
+  if(waddr + 0x80000000 >= 0x02000000 && waddr + 0x80000000 <= 0x0200ffff)return;//plic
   if(waddr < 0 || waddr >= CONFIG_MSIZE || !wmask){
-    //printf("%llx\n",waddr+0x80000000);
-    return;
+     printf("W %llx\n",waddr+0x80000000);
+  //   return;
   }
+  
   long long tmp = wdata;
   for(long long i = waddr; i <= waddr + 7; i++){
     if(wmask & (1 << (i - waddr))){

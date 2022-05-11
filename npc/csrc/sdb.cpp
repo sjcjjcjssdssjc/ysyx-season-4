@@ -35,7 +35,6 @@ extern Vysyx_22040127_top* dut;
 extern void wrap_up_trace();
 int display_size = 5;
 int exec_cnt = 0;
-uint64_t pc_before_exec;
 void npc_exec_once();
 void dump_gpr();//main.c
 
@@ -52,20 +51,49 @@ void cpu_exec(unsigned x){
     if(dut -> wb_valid){
       ref_difftest_exec(1);
       exec_cnt++;
-      if(exec_cnt == 1)dut->wb_pc_reg = 0x80000000;
+      //if(exec_cnt == 1)dut->wb_pc = 0x80000000;
       ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is nemu
-      uint64_t tmp = pc_before_exec;
-      pc_before_exec = ref_r.pc;
-      ref_r.pc = tmp;
-      bool k = isa_difftest_checkregs(&ref_r, dut->wb_pc_reg);
+      bool k = isa_difftest_checkregs(&ref_r, dut->wb_pc);
       if(!k)for(int i=0;i<32;i++){
         if(ref_r.gpr[i] != cpu_gpr[i])
           printf("\033[1;31m%s nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          regs[i], ref_r.gpr[i], cpu_gpr[i],ref_r.pc,dut->wb_pc_reg,exec_cnt);
+          regs[i], ref_r.gpr[i], cpu_gpr[i],ref_r.pc,dut->wb_pc,exec_cnt);
       }
-      //printf("wb pc is %x\n",dut->wb_pc_reg);
-      if(ref_r.pc != dut->wb_pc_reg)printf("\033[1;31m nemu pc:%lx our pc:%x after %d steps\033[0m\n",
-      ref_r.pc,dut->wb_pc_reg,exec_cnt);
+      if(ref_r.mcause != dut->mcause){
+          printf("\033[1;31m mcause: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+          ref_r.mcause, dut->mcause,ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+        if(ref_r.mepc != dut->mepc){
+          printf("\033[1;31m mepc: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+          ref_r.mepc, dut->mepc,ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+        if(ref_r.mie != dut->mie){
+          printf("\033[1;31m mie: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+          ref_r.mie, dut->mie,ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+        if(ref_r.mip != dut->mip){
+          printf("\033[1;31m mip: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+          ref_r.mip, dut->mip,ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+        if(ref_r.mscratch != dut->mscratch){
+          printf("\033[1;31m mscratch: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+          ref_r.mscratch, dut->mscratch,ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+        if(ref_r.mstatus != dut->mstatus){
+          printf("\033[1;31m mstatus: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+          ref_r.mstatus, dut->mstatus,ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+        if(ref_r.mtval != dut->mtval){
+          printf("\033[1;31m mtval: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+          ref_r.mtval, dut->mtval,ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+        if(ref_r.mtvec != dut->mtvec){
+          printf("\033[1;31m mtvec: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+          ref_r.mtvec, dut->mtvec,ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+      //printf("wb pc is %x\n",dut->wb_pc);
+      if(ref_r.pc != dut->wb_pc)printf("\033[1;31m nemu pc:%lx our pc:%x after %d steps\033[0m\n",
+      ref_r.pc,dut->wb_pc,exec_cnt);
       
       if(k == 0){
         printf("\033[1;31m regs Not same:Hit Bad Trap \033[0m\n"); 
@@ -200,7 +228,6 @@ void sdb_set_batch_mode() {
 void sdb_mainloop(char *ref_so_file, long img_size, int port) {//14
   #ifdef DIFF
   init_difftest(ref_so_file, img_size, port);
-  pc_before_exec = cpu_pc;//also part of init
   //ref_difftest_exec(1);
   #endif
   if(is_batch_mode){

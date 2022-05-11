@@ -15,10 +15,9 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
     else cpu.mcause = 11;//why is spike still 11
   }
   mtvec      = cpu.mtvec;
-  cpu.mstatus |= 0x1800;//2
-  if(cpu.mstatus & MIE)cpu.mstatus |= MPIE;//3
-  else cpu.mstatus &= (~MPIE);//4
-  printf("after ecall %lx\n",cpu.mstatus);
+  if(cpu.mstatus & MIE)cpu.mstatus |= MPIE;
+  else cpu.mstatus &= (~MPIE);
+  cpu.mstatus &= (~MIE);
   #ifdef CONFIG_ETRACE
   printf("handle mepc %lx mcause %lx mstatus %lx\n",cpu.mepc, cpu.mcause, cpu.mstatus);//no mtvec
   #endif

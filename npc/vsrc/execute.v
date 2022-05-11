@@ -8,7 +8,10 @@ module ysyx_22040127_execute(
   input  id_to_ex_valid, //from last stage
   output ex_to_mem_valid,//for next stage
   input [`ID_TO_EX_WIDTH  - 1:0]id_to_ex_bus,
-  output[`EX_TO_MEM_WIDTH - 1:0]ex_to_mem_bus
+  output[`EX_TO_MEM_WIDTH - 1:0]ex_to_mem_bus,
+  input  mem_mret,
+  input  id_flush,
+  output reg ex_flush
 );
 
   wire[63:0]rtype_calc_result;
@@ -84,12 +87,35 @@ module ysyx_22040127_execute(
   wire[63:0] quo;
   wire[63:0] rem;
 
+  wire       ex_mret;
+  wire       ex_ecall;
+  wire       ex_csrrw;
+  wire       ex_csrrs;
+  wire       ex_csrrc;
+  wire       ex_csrrwi;
+  wire       ex_csrrsi;
+  wire       ex_csrrci;
+  wire       ex_csr_we;
+  wire[11:0] ex_des_csr;
+
+  assign ex_csr_we = (ex_csrrs | ex_csrrw | ex_csrrc | ex_csrrwi | ex_csrrsi | ex_csrrci
+   | ex_mret | ex_ecall);//id_to_ex_valid_reg
+
   assign ex_ready_go = (!(mul_type || mul_stage2) && 
   !(div_type || (div_state[0] ^ div_state[1]))) || mul_ok || div_ready;
   assign ex_allowin  = !ex_valid || ex_ready_go && mem_allowin;
   assign ex_to_mem_valid = ex_ready_go && ex_valid;
   assign 
-  { ex_pc,          
+  { ex_des_csr,
+    ex_mret,        
+    ex_ecall,       
+    ex_csrrw,       
+    ex_csrrs,       
+    ex_csrrc,       
+    ex_csrrwi,      
+    ex_csrrsi,      
+    ex_csrrci,      
+    ex_pc,          
     ex_aluop,       
     ex_memop,       
     ex_reg_wen,     
@@ -105,8 +131,20 @@ module ysyx_22040127_execute(
     ex_mem_wdata
   } = id_to_ex_bus_reg;
 
-  assign ex_to_mem_bus =
-  { ex_jalr,      //171:171
+  assign ex_to_mem_bus = 
+  { ex_des_csr,   //261:250
+    ex_alu_input1,//249:186
+    ex_rs1,       //185:181
+    ex_csr_we,    //180:180
+    ex_mret,      //179:179
+    ex_ecall,     //178:178
+    ex_csrrw,     //177:177
+    ex_csrrs,     //176:176
+    ex_csrrc,     //175:175
+    ex_csrrwi,    //174:174
+    ex_csrrsi,    //173:173
+    ex_csrrci,    //172:172
+    ex_jalr,      //171:171
     ex_pc,        //170:139
     ex_memop,     //138:136
     ex_reg_wen,   //135:135
@@ -122,10 +160,12 @@ module ysyx_22040127_execute(
     end else if(ex_allowin)begin
       ex_valid <= id_to_ex_valid;
     end
-    
-    if(id_to_ex_valid && ex_allowin) begin
+    if(rst)begin
+      id_to_ex_bus_reg <= `ID_TO_EX_WIDTH'b0;
+    end else if(id_to_ex_valid && ex_allowin) begin
       id_to_ex_bus_reg <= id_to_ex_bus;
-    end else if(!mul_stage2 & !mul_type & !div_type)begin 
+      ex_flush <= id_flush | mem_mret;
+    end else if((!mul_stage2 & !mul_type & !div_type))begin // | mem_mret
       //critical: we need not flush the ex stage write signals when stalled by muls
       id_to_ex_bus_reg[210:206] <= 5'b0;//ex_rd
       id_to_ex_bus_reg[211:211] <= 1'b0;//ex_memread
@@ -245,9 +285,9 @@ module ysyx_22040127_execute(
   assign rtype_calc_result = 
   {64{rtype_alu_op[op_add]}}  & (ex_alu_input1 + ex_alu_input2) |
   {64{rtype_alu_op[op_mul]}}  & (mul_res_low) | //(ex_alu_input1 * ex_alu_input2) |
-  {64{rtype_alu_op[op_mulh]}}    & (mul_res_high) |
-  {64{rtype_alu_op[op_mulhu]}}   & (mul_res_high) |
-  {64{rtype_alu_op[op_mulhsu]}}  & (mul_res_high) |
+  {64{rtype_alu_op[op_mulh]}}   & (mul_res_high) |
+  {64{rtype_alu_op[op_mulhu]}}  & (mul_res_high) |
+  {64{rtype_alu_op[op_mulhsu]}} & (mul_res_high) |
   {64{rtype_alu_op[op_sub]}}  & (ex_alu_input1 - ex_alu_input2) |
   {64{rtype_alu_op[op_sll]}}  & (res_sll) |        //to be tested
   {64{rtype_alu_op[op_slt]}}  & ($signed(ex_alu_input1) < $signed(ex_alu_input2) ? 1 : 0) |

@@ -14,7 +14,6 @@
 #define INST_SIZE 4
 
 int sim_time, n;
-int read_bin = 0;
 uint64_t *cpu_gpr = NULL;
 uint32_t cpu_pc = 0;
 Vysyx_22040127_top* dut;
@@ -66,7 +65,7 @@ void set_simtime(){//x10 is a0(return)
 }
 
 
-static char *bin_file = NULL;
+static char *bin_file = "../rtt/rtthread.bin";
 static char *diff_so_file = NULL;
 static int parse_args(int argc, char *argv[]) {
   int o;
@@ -78,7 +77,7 @@ static int parse_args(int argc, char *argv[]) {
 
     printf("%c %s\n",(char)o,optarg);
     switch (o) {
-      case 'n': bin_file = optarg; read_bin = 1; break;
+      case 'n': bin_file = optarg; break;
       case 'd': diff_so_file = optarg; break;
       default:
         printf("you are not prepared!\n");
@@ -115,15 +114,13 @@ int main(int argc, char** argv, char** env) {
   contextp->commandArgs(argc, argv);
   parse_args(argc, argv);
   uint32_t inst,addr = 0x80000000;
-  if(read_bin){
-    FILE *fp;
-    fp = fopen(bin_file, "rb");
-    while(fread(&inst, INST_SIZE, 1, fp)){
-      //printf("addr %x inst %x\n",addr,inst);
-      if(addr % 8 == 4)pmem_write(addr,((long long)inst << 32),0xF0);
-      else pmem_write(addr,inst,0x0F);
-      addr += 4;
-    }
+  FILE *fp;
+  fp = fopen(bin_file, "rb");
+  while(fread(&inst, INST_SIZE, 1, fp)){
+    //printf("addr %x inst %x\n",addr,inst);
+    if(addr % 8 == 4)pmem_write(addr,((long long)inst << 32),0xF0);
+    else pmem_write(addr,inst,0x0F);
+    addr += 4;
   }
   dut = new Vysyx_22040127_top{contextp};
   #ifdef WAVE

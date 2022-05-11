@@ -11,6 +11,8 @@ extern void (*ref_difftest_raise_intr)(uint64_t NO);
 typedef struct {
   uint64_t gpr[32];
   uint64_t pc;
+  uint64_t mepc, mcause, mtvec, mstatus;
+  uint64_t mie, mip, mscratch, mtval;
 } riscv64_CPU_state;//nemu cpustate
 void init_difftest(char *ref_so_file, long img_size, int port);
 bool isa_difftest_checkregs(riscv64_CPU_state *ref_r, uint64_t pc);
