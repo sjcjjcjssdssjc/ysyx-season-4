@@ -1,3 +1,5 @@
+`include "mycpu.h"
+
 module ysyx_22040127_top(
   input clk,
   input rst,

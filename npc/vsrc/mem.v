@@ -16,7 +16,7 @@ module ysyx_22040127_memory(
   output reg   mem_flush
 );
   wire[2:0] mem_memop;   //input from id
-  wire      mem_memwrite;//input from id
+  wire      mem_memwrite;
   wire[63:0]mem_reg_wdata;
   wire      lb;
   wire      lh;
@@ -74,6 +74,7 @@ module ysyx_22040127_memory(
   sh ? {4{mem_wdata_tmp[15:0]}} :
   sw ? {2{mem_wdata_tmp[31:0]}} : 
   mem_wdata_tmp[63:0];
+  //assign mem_memwrite = mem_memwrite_tmp & !mem_flush;
   assign 
   { mem_des_csr,
     mem_alu_input1,//249:186
@@ -194,8 +195,23 @@ module ysyx_22040127_memory(
   /* verilator lint_off LATCH */
   always @(*) begin //need change to posedge clock
     if(mem_memread)pmem_read(mem_alu_output, doubly_aligned_data);
-    if(mem_memwrite & !mem_flush)pmem_write(mem_alu_output, mem_wdata, wmask);//waddr
+    if(mem_memwrite)pmem_write(mem_alu_output, mem_wdata, wmask);//waddr
     /* verilator lint_on LATCH */
   end
 
+/*
+  ysyx_22040127_dcache dcache(
+    .clk(clk),
+    .rst(rst),
+    .input_addr(),
+    .input_wdata(),
+    .input_wen(),
+    .input_memread(mem_memread),
+    .input_valid(),//ex_to_mem_valid
+    .input_size(),
+    .input_strb(),//bitmask
+    .output_data(),
+    .output_ready()
+  );
+*/
 endmodule

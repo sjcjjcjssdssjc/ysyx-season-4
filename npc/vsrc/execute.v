@@ -164,7 +164,7 @@ module ysyx_22040127_execute(
       id_to_ex_bus_reg <= `ID_TO_EX_WIDTH'b0;
     end else if(id_to_ex_valid && ex_allowin) begin
       id_to_ex_bus_reg <= id_to_ex_bus;
-      ex_flush <= id_flush | mem_mret;
+      ex_flush <= id_flush | mem_mret | ex_mret;
     end else if((!mul_stage2 & !mul_type & !div_type))begin // | mem_mret
       //critical: we need not flush the ex stage write signals when stalled by muls
       id_to_ex_bus_reg[210:206] <= 5'b0;//ex_rd

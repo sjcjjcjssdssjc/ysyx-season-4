@@ -1,3 +1,4 @@
+`include "mycpu.h"
 module ysyx_22040127_div (
   input clk,
   input rst,
