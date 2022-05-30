@@ -164,7 +164,7 @@ module ysyx_22040127_decode(
   assign imm_src2 = (id_inst_type == TYPE_I || id_inst_type == TYPE_S);//type_i
   assign id_alu_input1 = imm_src1 ? id_imm : id_regdata1_final;
   assign id_alu_input2 = imm_src2 ? id_imm : id_regdata2_final;
-
+ 
   assign id_regdata1_final = exid_raw_hazard1 ? ex_alu_output :
   //mem_load_use_hazard1 ? mem_final_rdata : 
   wb_load_use_hazard1 ? wb_reg_wdata : 
@@ -175,7 +175,7 @@ module ysyx_22040127_decode(
   wb_load_use_hazard2 ? wb_reg_wdata : 
   memid_raw_hazard2 ? mem_alu_output : 
   wbid_raw_hazard2 ? wb_reg_wdata : id_regdata2_tmp;
-  assign id_mem_wdata = id_regdata2_final;
+  assign id_mem_wdata = id_regdata2_final; 
 
   assign id_jalr = id_inst_type == 3'b000 && id_instruction[6:5] == 2'b11; 
   assign id_branch_result = {32{btype_taken}} & (id_pc + id_imm[31:0]) |

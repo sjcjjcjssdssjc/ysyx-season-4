@@ -11,7 +11,10 @@ module ysyx_22040127_execute(
   output[`EX_TO_MEM_WIDTH - 1:0]ex_to_mem_bus,
   input  mem_mret,
   input  id_flush,
-  output reg ex_flush
+  input  cache_pipelinehit,// cache_state == IDLE & (cache_way0hit | cache_way1hit)
+  input[2:0]  cache_state,
+  output reg ex_flush,
+  output     ex_ready_go
 );
 
   wire[63:0]rtype_calc_result;
@@ -51,7 +54,6 @@ module ysyx_22040127_execute(
   wire[31:0] ex_pc;
   wire[5:0]  ex_aluop;
   wire[2:0]  ex_memop;
-  wire       ex_ready_go;//self_willing
   wire       ex_memwrite;
   wire       ex_memread;
   wire[4:0]  ex_rd;
@@ -101,8 +103,10 @@ module ysyx_22040127_execute(
   assign ex_csr_we = (ex_csrrs | ex_csrrw | ex_csrrc | ex_csrrwi | ex_csrrsi | ex_csrrci
    | ex_mret | ex_ecall);//id_to_ex_valid_reg
 
-  assign ex_ready_go = (!(mul_type || mul_stage2) && 
-  !(div_type || (div_state[0] ^ div_state[1]))) || mul_ok || div_ready;
+  wire cache_readygo = cache_state == 3'b110 | (!ex_memwrite & !ex_memread) | cache_pipelinehit;
+  assign ex_ready_go = ((!(mul_type || mul_stage2) && 
+  !(div_type || (div_state[0] ^ div_state[1]))) || mul_ok || div_ready)
+  && cache_readygo;
   assign ex_allowin  = !ex_valid || ex_ready_go && mem_allowin;
   assign ex_to_mem_valid = ex_ready_go && ex_valid;
   assign 
@@ -165,8 +169,9 @@ module ysyx_22040127_execute(
     end else if(id_to_ex_valid && ex_allowin) begin
       id_to_ex_bus_reg <= id_to_ex_bus;
       ex_flush <= id_flush | mem_mret | ex_mret;
-    end else if((!mul_stage2 & !mul_type & !div_type))begin // | mem_mret
-      //critical: we need not flush the ex stage write signals when stalled by muls
+    end else if(!mul_stage2 & !mul_type & !div_type
+    & cache_readygo)begin 
+      //critical: we need not flush the ex stage write signals when stalled by muls and cache
       id_to_ex_bus_reg[210:206] <= 5'b0;//ex_rd
       id_to_ex_bus_reg[211:211] <= 1'b0;//ex_memread
       id_to_ex_bus_reg[212:212] <= 1'b0;//ex_memwrite

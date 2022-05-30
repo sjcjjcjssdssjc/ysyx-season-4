@@ -42,8 +42,10 @@ module ysyx_22040127_top(
   wire        if_allowin;
   wire        id_allowin;
   wire        ex_allowin;
+  wire        ex_ready_go;
   wire        mem_allowin;
   wire        wb_allowin;//ready_go is distributed in every module.
+  wire        cache_pipelinehit;
 
   wire        if_to_id_valid;
   wire        if_to_id_valid;
@@ -71,6 +73,8 @@ module ysyx_22040127_top(
   wire       wb_csr_we;
   wire[4:0]  wb_rd;
   wire       wb_reg_wen;
+  wire       diff_output_ready;
+  wire[2:0]  cache_state;
   //bus to be added.
   //IF
   reg         if_valid;
@@ -173,7 +177,10 @@ module ysyx_22040127_top(
     .ex_to_mem_bus(ex_to_mem_bus),
     .mem_mret(mem_to_wb_bus[109:109]),
     .id_flush(id_flush),
-    .ex_flush(ex_flush)
+    .cache_pipelinehit(cache_pipelinehit),
+    .cache_state(cache_state),
+    .ex_flush(ex_flush),
+    .ex_ready_go(ex_ready_go)
   );
   ysyx_22040127_memory mem(
     .clk(clk),
@@ -188,7 +195,11 @@ module ysyx_22040127_top(
     .mem_final_rdata(mem_final_rdata),
     .mem_memread(mem_memread),
     .ex_flush(ex_flush),
-    .mem_flush(mem_flush)
+    .ex_ready_go(ex_ready_go),
+    .mem_flush(mem_flush),
+    .diff_output_ready(diff_output_ready),
+    .cache_pipelinehit(cache_pipelinehit),
+    .cache_state(cache_state)
   );
   ysyx_22040127_RegisterFile wb(
     .clk(clk), 
