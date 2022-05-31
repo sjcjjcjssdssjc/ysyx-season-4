@@ -13,7 +13,10 @@ module ysyx_22040127_top(
   output wire[63:0] mie,
   output wire[63:0] mip,
   output wire[63:0] mscratch,
-  output wire[63:0] mtval
+  output wire[63:0] mtval,
+  output       wb_memwrite,
+  output[63:0] wb_diff_addr,
+  output[63:0] wb_diff_data
 );
   //TODO: add difftest to mhartid between nemu and npc, nemu and spike
   wire[63:0] mhartid;
@@ -73,7 +76,6 @@ module ysyx_22040127_top(
   wire       wb_csr_we;
   wire[4:0]  wb_rd;
   wire       wb_reg_wen;
-  wire       diff_output_ready;
   wire[2:0]  cache_state;
   //bus to be added.
   //IF
@@ -98,7 +100,7 @@ module ysyx_22040127_top(
     else pmem_read({64'h80000000}, if_pcdata);
   end
 
-  always @(posedge clk) begin
+  always @(posedge clk) begin//?
     id_ebreak <= if_ebreak;
     ex_ebreak <= id_ebreak;
     mem_ebreak <= ex_ebreak;
@@ -197,7 +199,6 @@ module ysyx_22040127_top(
     .ex_flush(ex_flush),
     .ex_ready_go(ex_ready_go),
     .mem_flush(mem_flush),
-    .diff_output_ready(diff_output_ready),
     .cache_pipelinehit(cache_pipelinehit),
     .cache_state(cache_state)
   );
@@ -228,6 +229,9 @@ module ysyx_22040127_top(
     .csr_mip(mip),
     .csr_mscratch(mscratch),
     .csr_mhartid(mhartid),
+    .wb_memwrite(wb_memwrite),
+    .wb_diff_data(wb_diff_data),
+    .wb_diff_addr(wb_diff_addr),
     .mem_flush(mem_flush)
   );//wb
   //Reg #(4, 4'b0) i1 (clk, rst, in, out, in[0]);

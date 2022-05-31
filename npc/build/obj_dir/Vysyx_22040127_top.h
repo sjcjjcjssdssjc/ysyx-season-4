@@ -29,6 +29,7 @@ class Vysyx_22040127_top VL_NOT_FINAL {
     VL_IN8(&clk,0,0);
     VL_IN8(&rst,0,0);
     VL_OUT8(&wb_valid,0,0);
+    VL_OUT8(&wb_memwrite,0,0);
     VL_OUT(&if_pc,31,0);
     VL_OUT(&wb_pc,31,0);
     VL_OUT64(&mepc,63,0);
@@ -39,6 +40,8 @@ class Vysyx_22040127_top VL_NOT_FINAL {
     VL_OUT64(&mip,63,0);
     VL_OUT64(&mscratch,63,0);
     VL_OUT64(&mtval,63,0);
+    VL_OUT64(&wb_diff_addr,63,0);
+    VL_OUT64(&wb_diff_data,63,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.

@@ -39,7 +39,6 @@ void npc_exec_once();
 void dump_gpr();//main.c
 
 extern u_int32_t cpu_pc;//main.c
-
 void cpu_exec(unsigned x){
   int y = x;
   while(y--){
@@ -54,6 +53,22 @@ void cpu_exec(unsigned x){
       //if(exec_cnt == 1)dut->wb_pc = 0x80000000;
       ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is nemu
       bool k = isa_difftest_checkregs(&ref_r, dut->wb_pc);
+
+      //compare the state machine(nextpc, regs of pc)
+      /*
+      if(dut-> wb_memwrite && ref_r.mwaddr != dut->wb_diff_addr){
+        //k=0;
+        printf("\033[1;31m nemu waddr:%lx our:%lx  after %d steps nemu pc:%lx our pc:%x \033[0m\n",
+        ref_r.mwaddr,dut->wb_diff_addr,exec_cnt,ref_r.pc,dut->wb_pc);
+      }
+      if(dut-> wb_memwrite && ref_r.mwdata != dut->wb_diff_data){
+        //k=0;
+        printf("\033[1;31m nemu wdata:%lx our:%lx  after %d steps nemu pc:%lx our pc:%x \033[0m\n",
+        ref_r.mwdata,dut->wb_diff_data,exec_cnt,ref_r.pc,dut->wb_pc);
+      }
+      */
+      //compare the memory content
+
       if(!k)for(int i=0;i<32;i++){
         if(ref_r.gpr[i] != cpu_gpr[i])
           printf("\033[1;31m%s nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!

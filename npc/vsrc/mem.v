@@ -15,14 +15,18 @@ module ysyx_22040127_memory(
   input        ex_flush,
   input        ex_ready_go,
   output reg   mem_flush,
-  output       diff_output_ready,
   output       cache_pipelinehit,
-  output [2:0]  cache_state
+  output [2:0] cache_state
 );
+
+  wire       mem_memwrite;
+  wire[63:0] mem_diff_addr;
+  wire[63:0] mem_diff_data;
   wire[2:0] mem_memop;   //input from id
   wire[2:0] ex_memop;   //input from id
-  wire      mem_memwrite;
   wire[63:0]mem_reg_wdata;
+  //wire[63:0]mem_diff_addr;
+  //wire[63:0]mem_diff_data;
   reg      lb;
   reg      lh;
   reg      lw;
@@ -111,7 +115,10 @@ module ysyx_22040127_memory(
   } = ex_to_mem_bus_reg;
 
   assign mem_to_wb_bus =
-  { mem_des_csr,   //191:180
+  { mem_memwrite,  //320:320
+    mem_diff_data, //319:256
+    mem_diff_addr, //255:192
+    mem_des_csr,   //191:180
     mem_alu_input1,//179:116
     mem_rs1,       //115:111
     mem_csr_we,    //110:110
@@ -212,8 +219,6 @@ module ysyx_22040127_memory(
     (mem_addr_lowmask[3'b111] & (lb | lbu)) ? {56'b0, doubly_aligned_data[63:56]}
     : 64'b0;
   
-  
-
   assign ex_wmask[0] = ex_addr_lowmask[3'b000] | ex_sd;
   assign ex_wmask[1] = ex_addr_lowmask[3'b001] | ex_addr_lowmask[3'b000] & (ex_sh|ex_sw) | ex_sd;
   assign ex_wmask[2] = ex_addr_lowmask[3'b010] | ex_addr_lowmask[3'b000] & ex_sw | ex_sd;
@@ -243,9 +248,10 @@ module ysyx_22040127_memory(
     .input_size(ex_memop[1:0]),
     .input_strb(ex_wmask),//bitmask
     .output_data(doubly_aligned_data),
-    .diff_output_ready(diff_output_ready),
     .cache_pipelinehit(cache_pipelinehit),
-    .cache_state(cache_state)
+    .cache_state(cache_state),
+    .diff_data(mem_diff_data),
+    .diff_addr(mem_diff_addr)
   );
 
 endmodule

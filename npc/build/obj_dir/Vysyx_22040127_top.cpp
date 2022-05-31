@@ -14,6 +14,7 @@ Vysyx_22040127_top::Vysyx_22040127_top(VerilatedContext* _vcontextp__, const cha
     , clk{vlSymsp->TOP.clk}
     , rst{vlSymsp->TOP.rst}
     , wb_valid{vlSymsp->TOP.wb_valid}
+    , wb_memwrite{vlSymsp->TOP.wb_memwrite}
     , if_pc{vlSymsp->TOP.if_pc}
     , wb_pc{vlSymsp->TOP.wb_pc}
     , mepc{vlSymsp->TOP.mepc}
@@ -24,6 +25,8 @@ Vysyx_22040127_top::Vysyx_22040127_top(VerilatedContext* _vcontextp__, const cha
     , mip{vlSymsp->TOP.mip}
     , mscratch{vlSymsp->TOP.mscratch}
     , mtval{vlSymsp->TOP.mtval}
+    , wb_diff_addr{vlSymsp->TOP.wb_diff_addr}
+    , wb_diff_data{vlSymsp->TOP.wb_diff_data}
     , rootp{&(vlSymsp->TOP)}
 {
 }

@@ -67,6 +67,9 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___ctor_var_reset(Vysyx_22040127_t
     vlSelf->mip = 0;
     vlSelf->mscratch = 0;
     vlSelf->mtval = 0;
+    vlSelf->wb_memwrite = 0;
+    vlSelf->wb_diff_addr = 0;
+    vlSelf->wb_diff_data = 0;
     vlSelf->ysyx_22040127_top__DOT__mhartid = 0;
     vlSelf->ysyx_22040127_top__DOT__if_pcdata = 0;
     vlSelf->ysyx_22040127_top__DOT__if_instruction = 0;
@@ -88,12 +91,11 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___ctor_var_reset(Vysyx_22040127_t
     vlSelf->ysyx_22040127_top__DOT__ex_flush = 0;
     vlSelf->ysyx_22040127_top__DOT__mem_flush = 0;
     VL_ZERO_RESET_W(262, vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus);
-    VL_ZERO_RESET_W(192, vlSelf->ysyx_22040127_top__DOT__mem_to_wb_bus);
+    VL_ZERO_RESET_W(321, vlSelf->ysyx_22040127_top__DOT__mem_to_wb_bus);
     vlSelf->ysyx_22040127_top__DOT__mem_final_rdata = 0;
     vlSelf->ysyx_22040127_top__DOT__wb_reg_wdata = 0;
     vlSelf->ysyx_22040127_top__DOT__wb_csrwdata = 0;
     vlSelf->ysyx_22040127_top__DOT__wb_csrrdata = 0;
-    vlSelf->ysyx_22040127_top__DOT__diff_output_ready = 0;
     vlSelf->ysyx_22040127_top__DOT__cache_state = 0;
     vlSelf->ysyx_22040127_top__DOT__if_valid = 0;
     vlSelf->ysyx_22040127_top__DOT__dec__DOT__btype_taken = 0;
@@ -238,6 +240,8 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___ctor_var_reset(Vysyx_22040127_t
     VL_ZERO_RESET_W(129, vlSelf->ysyx_22040127_top__DOT__exe__DOT__div__DOT__dividend);
     vlSelf->ysyx_22040127_top__DOT__exe__DOT__div__DOT__divisor = 0;
     VL_ZERO_RESET_W(65, vlSelf->ysyx_22040127_top__DOT__exe__DOT__div__DOT__subres);
+    vlSelf->ysyx_22040127_top__DOT__mem__DOT__mem_diff_addr = 0;
+    vlSelf->ysyx_22040127_top__DOT__mem__DOT__mem_diff_data = 0;
     vlSelf->ysyx_22040127_top__DOT__mem__DOT__lb = 0;
     vlSelf->ysyx_22040127_top__DOT__mem__DOT__lh = 0;
     vlSelf->ysyx_22040127_top__DOT__mem__DOT__lw = 0;
@@ -328,7 +332,7 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___ctor_var_reset(Vysyx_22040127_t
     for (int __Vi0=0; __Vi0<32; ++__Vi0) {
         vlSelf->ysyx_22040127_top__DOT__wb__DOT__rf[__Vi0] = 0;
     }
-    VL_ZERO_RESET_W(192, vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg);
+    VL_ZERO_RESET_W(321, vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg);
     vlSelf->__Vtask_ysyx_22040127_top__DOT__pmem_read__0__doubly_aligned_data = 0;
     vlSelf->__Vtask_ysyx_22040127_top__DOT__pmem_read__1__doubly_aligned_data = 0;
     vlSelf->__Vtask_ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__pmem_read__4__doubly_aligned_data = 0;

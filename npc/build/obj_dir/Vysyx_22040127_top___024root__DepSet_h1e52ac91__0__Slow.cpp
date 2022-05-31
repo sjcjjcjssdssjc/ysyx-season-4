@@ -591,6 +591,13 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
         Vysyx_22040127_top___024root____Vdpiimwrap_ysyx_22040127_top__DOT__pmem_read_TOP(0x80000000ULL, vlSelf->__Vtask_ysyx_22040127_top__DOT__pmem_read__1__doubly_aligned_data);
         vlSelf->ysyx_22040127_top__DOT__if_pcdata = vlSelf->__Vtask_ysyx_22040127_top__DOT__pmem_read__1__doubly_aligned_data;
     }
+    vlSelf->wb_memwrite = (1U & vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[0xaU]);
+    vlSelf->wb_diff_data = (((QData)((IData)(vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[9U])) 
+                             << 0x20U) | (QData)((IData)(
+                                                         vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[8U])));
+    vlSelf->wb_diff_addr = (((QData)((IData)(vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[7U])) 
+                             << 0x20U) | (QData)((IData)(
+                                                         vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[6U])));
     vlSelf->wb_pc = ((vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[3U] 
                       << 0x1aU) | (vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[2U] 
                                    >> 6U));
@@ -4349,6 +4356,19 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
                                                                  vlSelf->ysyx_22040127_top__DOT__mem__DOT__ex_to_mem_bus_reg[5U])) 
                                                  >> 0x1aU))) 
                        >> 0x20U)) >> 0xcU));
+    vlSelf->ysyx_22040127_top__DOT__mem_to_wb_bus[6U] 
+        = (IData)(vlSelf->ysyx_22040127_top__DOT__mem__DOT__mem_diff_addr);
+    vlSelf->ysyx_22040127_top__DOT__mem_to_wb_bus[7U] 
+        = (IData)((vlSelf->ysyx_22040127_top__DOT__mem__DOT__mem_diff_addr 
+                   >> 0x20U));
+    vlSelf->ysyx_22040127_top__DOT__mem_to_wb_bus[8U] 
+        = (IData)(vlSelf->ysyx_22040127_top__DOT__mem__DOT__mem_diff_data);
+    vlSelf->ysyx_22040127_top__DOT__mem_to_wb_bus[9U] 
+        = (IData)((vlSelf->ysyx_22040127_top__DOT__mem__DOT__mem_diff_data 
+                   >> 0x20U));
+    vlSelf->ysyx_22040127_top__DOT__mem_to_wb_bus[0xaU] 
+        = (1U & (vlSelf->ysyx_22040127_top__DOT__mem__DOT__ex_to_mem_bus_reg[4U] 
+                 >> 6U));
     __Vtemp_h9b7a1b1b__0[0U] = (IData)((((QData)((IData)(
                                                          (0x1fU 
                                                           & (vlSelf->ysyx_22040127_top__DOT__exe__DOT__id_to_ex_bus_reg[6U] 
@@ -4882,210 +4902,426 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
             >> 5U));
     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__ex_cache_wdata 
         = ((0U == (3U & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[4U] 
-                         >> 8U))) ? (((((((((- (QData)((IData)(
-                                                               (0U 
-                                                                == 
-                                                                (7U 
-                                                                 & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
-                                            & ((0xffffffffffffff00ULL 
-                                                & (((QData)((IData)(
-                                                                    vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
-                                                    << 0x20U) 
-                                                   | (0xffffffffffffff00ULL 
-                                                      & (QData)((IData)(
-                                                                        vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
-                                               | (QData)((IData)(
-                                                                 (0xffU 
-                                                                  & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))))) 
-                                           | ((- (QData)((IData)(
-                                                                 (1U 
-                                                                  == 
-                                                                  (7U 
-                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
-                                              & ((0xffffffffffff0000ULL 
-                                                  & (((QData)((IData)(
-                                                                      vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
-                                                      << 0x20U) 
-                                                     | (0xffffffffffff0000ULL 
-                                                        & (QData)((IData)(
-                                                                          vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
-                                                 | (QData)((IData)(
-                                                                   ((0xff00U 
-                                                                     & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
-                                                                        << 8U)) 
-                                                                    | (0xffU 
-                                                                       & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
-                                          | ((- (QData)((IData)(
-                                                                (2U 
+                         >> 8U))) ? ((((((((((- (QData)((IData)(
+                                                                (8U 
                                                                  == 
-                                                                 (7U 
+                                                                 (0xfU 
                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
-                                             & ((0xffffffffff000000ULL 
+                                             & ((0xffffffffffffff00ULL 
                                                  & (((QData)((IData)(
-                                                                     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                                     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
                                                      << 0x20U) 
-                                                    | (0xffffffffff000000ULL 
+                                                    | (0xffffffffffffff00ULL 
                                                        & (QData)((IData)(
-                                                                         vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
+                                                                         vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))) 
                                                 | (QData)((IData)(
-                                                                  ((0xff0000U 
-                                                                    & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
-                                                                       << 0x10U)) 
-                                                                   | (0xffffU 
-                                                                      & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
+                                                                  (0xffU 
+                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))))) 
+                                            | ((- (QData)((IData)(
+                                                                  (9U 
+                                                                   == 
+                                                                   (0xfU 
+                                                                    & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                               & ((0xffffffffffff0000ULL 
+                                                   & (((QData)((IData)(
+                                                                       vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
+                                                       << 0x20U) 
+                                                      | (0xffffffffffff0000ULL 
+                                                         & (QData)((IData)(
+                                                                           vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))) 
+                                                  | (QData)((IData)(
+                                                                    ((0xff00U 
+                                                                      & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
+                                                                         << 8U)) 
+                                                                     | (0xffU 
+                                                                        & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))))) 
+                                           | ((- (QData)((IData)(
+                                                                 (0xaU 
+                                                                  == 
+                                                                  (0xfU 
+                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                              & ((0xffffffffff000000ULL 
+                                                  & (((QData)((IData)(
+                                                                      vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
+                                                      << 0x20U) 
+                                                     | (0xffffffffff000000ULL 
+                                                        & (QData)((IData)(
+                                                                          vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))) 
+                                                 | (QData)((IData)(
+                                                                   ((0xff0000U 
+                                                                     & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
+                                                                        << 0x10U)) 
+                                                                    | (0xffffU 
+                                                                       & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))))) 
+                                          | ((- (QData)((IData)(
+                                                                (0xbU 
+                                                                 == 
+                                                                 (0xfU 
+                                                                  & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                             & (((QData)((IData)(
+                                                                 vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
+                                                 << 0x20U) 
+                                                | (QData)((IData)(
+                                                                  ((vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
+                                                                    << 0x18U) 
+                                                                   | (0xffffffU 
+                                                                      & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))))) 
                                          | ((- (QData)((IData)(
-                                                               (3U 
+                                                               (0xcU 
                                                                 == 
-                                                                (7U 
+                                                                (0xfU 
                                                                  & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
                                             & (((QData)((IData)(
-                                                                vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                                ((0xffffff00U 
+                                                                  & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U]) 
+                                                                 | (0xffU 
+                                                                    & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])))) 
                                                 << 0x20U) 
                                                | (QData)((IData)(
-                                                                 ((vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
-                                                                   << 0x18U) 
-                                                                  | (0xffffffU 
-                                                                     & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
+                                                                 vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))) 
                                         | ((- (QData)((IData)(
-                                                              (4U 
+                                                              (0xdU 
                                                                == 
-                                                               (7U 
+                                                               (0xfU 
                                                                 & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
                                            & (((QData)((IData)(
-                                                               ((0xffffff00U 
-                                                                 & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U]) 
-                                                                | (0xffU 
-                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])))) 
-                                               << 0x20U) 
-                                              | (QData)((IData)(
-                                                                vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
+                                                               (vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U] 
+                                                                >> 0x10U))) 
+                                               << 0x30U) 
+                                              | (((QData)((IData)(
+                                                                  (0xffU 
+                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
+                                                  << 0x28U) 
+                                                 | (0xffffffffffULL 
+                                                    & (((QData)((IData)(
+                                                                        vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
+                                                        << 0x20U) 
+                                                       | (QData)((IData)(
+                                                                         vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U])))))))) 
                                        | ((- (QData)((IData)(
-                                                             (5U 
+                                                             (0xeU 
                                                               == 
-                                                              (7U 
+                                                              (0xfU 
                                                                & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
                                           & (((QData)((IData)(
-                                                              (vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U] 
-                                                               >> 0x10U))) 
-                                              << 0x30U) 
+                                                              (vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U] 
+                                                               >> 0x18U))) 
+                                              << 0x38U) 
                                              | (((QData)((IData)(
                                                                  (0xffU 
                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
-                                                 << 0x28U) 
-                                                | (0xffffffffffULL 
+                                                 << 0x30U) 
+                                                | (0xffffffffffffULL 
+                                                   & (((QData)((IData)(
+                                                                       vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
+                                                       << 0x20U) 
+                                                      | (QData)((IData)(
+                                                                        vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U])))))))) 
+                                      | ((- (QData)((IData)(
+                                                            (0xfU 
+                                                             == 
+                                                             (0xfU 
+                                                              & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                         & (((QData)((IData)(
+                                                             (0xffU 
+                                                              & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
+                                             << 0x38U) 
+                                            | (0xffffffffffffffULL 
+                                               & (((QData)((IData)(
+                                                                   vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
+                                                   << 0x20U) 
+                                                  | (QData)((IData)(
+                                                                    vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))))) 
+                                     | (((((((((- (QData)((IData)(
+                                                                  (0U 
+                                                                   == 
+                                                                   (0xfU 
+                                                                    & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                               & ((0xffffffffffffff00ULL 
+                                                   & (((QData)((IData)(
+                                                                       vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                       << 0x20U) 
+                                                      | (0xffffffffffffff00ULL 
+                                                         & (QData)((IData)(
+                                                                           vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
+                                                  | (QData)((IData)(
+                                                                    (0xffU 
+                                                                     & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))))) 
+                                              | ((- (QData)((IData)(
+                                                                    (1U 
+                                                                     == 
+                                                                     (0xfU 
+                                                                      & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                                 & ((0xffffffffffff0000ULL 
+                                                     & (((QData)((IData)(
+                                                                         vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                         << 0x20U) 
+                                                        | (0xffffffffffff0000ULL 
+                                                           & (QData)((IData)(
+                                                                             vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
+                                                    | (QData)((IData)(
+                                                                      ((0xff00U 
+                                                                        & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
+                                                                           << 8U)) 
+                                                                       | (0xffU 
+                                                                          & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
+                                             | ((- (QData)((IData)(
+                                                                   (2U 
+                                                                    == 
+                                                                    (0xfU 
+                                                                     & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                                & ((0xffffffffff000000ULL 
+                                                    & (((QData)((IData)(
+                                                                        vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                        << 0x20U) 
+                                                       | (0xffffffffff000000ULL 
+                                                          & (QData)((IData)(
+                                                                            vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
+                                                   | (QData)((IData)(
+                                                                     ((0xff0000U 
+                                                                       & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
+                                                                          << 0x10U)) 
+                                                                      | (0xffffU 
+                                                                         & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
+                                            | ((- (QData)((IData)(
+                                                                  (3U 
+                                                                   == 
+                                                                   (0xfU 
+                                                                    & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                               & (((QData)((IData)(
+                                                                   vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                   << 0x20U) 
+                                                  | (QData)((IData)(
+                                                                    ((vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
+                                                                      << 0x18U) 
+                                                                     | (0xffffffU 
+                                                                        & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
+                                           | ((- (QData)((IData)(
+                                                                 (4U 
+                                                                  == 
+                                                                  (0xfU 
+                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                              & (((QData)((IData)(
+                                                                  ((0xffffff00U 
+                                                                    & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U]) 
+                                                                   | (0xffU 
+                                                                      & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])))) 
+                                                  << 0x20U) 
+                                                 | (QData)((IData)(
+                                                                   vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
+                                          | ((- (QData)((IData)(
+                                                                (5U 
+                                                                 == 
+                                                                 (0xfU 
+                                                                  & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                             & (((QData)((IData)(
+                                                                 (vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U] 
+                                                                  >> 0x10U))) 
+                                                 << 0x30U) 
+                                                | (((QData)((IData)(
+                                                                    (0xffU 
+                                                                     & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
+                                                    << 0x28U) 
+                                                   | (0xffffffffffULL 
+                                                      & (((QData)((IData)(
+                                                                          vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                          << 0x20U) 
+                                                         | (QData)((IData)(
+                                                                           vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U])))))))) 
+                                         | ((- (QData)((IData)(
+                                                               (6U 
+                                                                == 
+                                                                (0xfU 
+                                                                 & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                            & (((QData)((IData)(
+                                                                (vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U] 
+                                                                 >> 0x18U))) 
+                                                << 0x38U) 
+                                               | (((QData)((IData)(
+                                                                   (0xffU 
+                                                                    & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
+                                                   << 0x30U) 
+                                                  | (0xffffffffffffULL 
+                                                     & (((QData)((IData)(
+                                                                         vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                         << 0x20U) 
+                                                        | (QData)((IData)(
+                                                                          vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U])))))))) 
+                                        | ((- (QData)((IData)(
+                                                              (7U 
+                                                               == 
+                                                               (0xfU 
+                                                                & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
+                                           & (((QData)((IData)(
+                                                               (0xffU 
+                                                                & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
+                                               << 0x38U) 
+                                              | (0xffffffffffffffULL 
+                                                 & (((QData)((IData)(
+                                                                     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                     << 0x20U) 
+                                                    | (QData)((IData)(
+                                                                      vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))))
+            : ((1U == (3U & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[4U] 
+                             >> 8U))) ? ((((((- (QData)((IData)(
+                                                                (4U 
+                                                                 == 
+                                                                 (7U 
+                                                                  & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                                     >> 1U)))))) 
+                                             & ((0xffffffffffff0000ULL 
+                                                 & (((QData)((IData)(
+                                                                     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
+                                                     << 0x20U) 
+                                                    | (0xffffffffffff0000ULL 
+                                                       & (QData)((IData)(
+                                                                         vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))) 
+                                                | (QData)((IData)(
+                                                                  (0xffffU 
+                                                                   & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))))) 
+                                            | ((- (QData)((IData)(
+                                                                  (5U 
+                                                                   == 
+                                                                   (7U 
+                                                                    & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                                       >> 1U)))))) 
+                                               & (((QData)((IData)(
+                                                                   vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
+                                                   << 0x20U) 
+                                                  | (QData)((IData)(
+                                                                    ((vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
+                                                                      << 0x10U) 
+                                                                     | (0xffffU 
+                                                                        & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))))) 
+                                           | ((- (QData)((IData)(
+                                                                 (6U 
+                                                                  == 
+                                                                  (7U 
+                                                                   & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                                      >> 1U)))))) 
+                                              & (((QData)((IData)(
+                                                                  ((0xffff0000U 
+                                                                    & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U]) 
+                                                                   | (0xffffU 
+                                                                      & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])))) 
+                                                  << 0x20U) 
+                                                 | (QData)((IData)(
+                                                                   vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U]))))) 
+                                          | ((- (QData)((IData)(
+                                                                (7U 
+                                                                 == 
+                                                                 (7U 
+                                                                  & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                                     >> 1U)))))) 
+                                             & (((QData)((IData)(
+                                                                 (0xffffU 
+                                                                  & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
+                                                 << 0x30U) 
+                                                | (0xffffffffffffULL 
                                                    & (((QData)((IData)(
                                                                        vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
                                                        << 0x20U) 
                                                       | (QData)((IData)(
-                                                                        vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U])))))))) 
-                                      | ((- (QData)((IData)(
-                                                            (6U 
-                                                             == 
-                                                             (7U 
-                                                              & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
-                                         & (((QData)((IData)(
-                                                             (vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U] 
-                                                              >> 0x18U))) 
-                                             << 0x38U) 
-                                            | (((QData)((IData)(
-                                                                (0xffU 
-                                                                 & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
-                                                << 0x30U) 
-                                               | (0xffffffffffffULL 
-                                                  & (((QData)((IData)(
-                                                                      vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
-                                                      << 0x20U) 
-                                                     | (QData)((IData)(
-                                                                       vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U])))))))) 
-                                     | ((- (QData)((IData)(
-                                                           (7U 
-                                                            == 
-                                                            (7U 
-                                                             & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U]))))) 
-                                        & (((QData)((IData)(
-                                                            (0xffU 
-                                                             & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
-                                            << 0x38U) 
-                                           | (0xffffffffffffffULL 
-                                              & (((QData)((IData)(
-                                                                  vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                                        vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
+                                         | (((((- (QData)((IData)(
+                                                                  (0U 
+                                                                   == 
+                                                                   (7U 
+                                                                    & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                                       >> 1U)))))) 
+                                               & ((0xffffffffffff0000ULL 
+                                                   & (((QData)((IData)(
+                                                                       vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                       << 0x20U) 
+                                                      | (0xffffffffffff0000ULL 
+                                                         & (QData)((IData)(
+                                                                           vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
+                                                  | (QData)((IData)(
+                                                                    (0xffffU 
+                                                                     & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))))) 
+                                              | ((- (QData)((IData)(
+                                                                    (1U 
+                                                                     == 
+                                                                     (7U 
+                                                                      & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                                         >> 1U)))))) 
+                                                 & (((QData)((IData)(
+                                                                     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                     << 0x20U) 
+                                                    | (QData)((IData)(
+                                                                      ((vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
+                                                                        << 0x10U) 
+                                                                       | (0xffffU 
+                                                                          & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
+                                             | ((- (QData)((IData)(
+                                                                   (2U 
+                                                                    == 
+                                                                    (7U 
+                                                                     & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                                        >> 1U)))))) 
+                                                & (((QData)((IData)(
+                                                                    ((0xffff0000U 
+                                                                      & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U]) 
+                                                                     | (0xffffU 
+                                                                        & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])))) 
+                                                    << 0x20U) 
+                                                   | (QData)((IData)(
+                                                                     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
+                                            | ((- (QData)((IData)(
+                                                                  (3U 
+                                                                   == 
+                                                                   (7U 
+                                                                    & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                                       >> 1U)))))) 
+                                               & (((QData)((IData)(
+                                                                   (0xffffU 
+                                                                    & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
+                                                   << 0x30U) 
+                                                  | (0xffffffffffffULL 
+                                                     & (((QData)((IData)(
+                                                                         vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
+                                                         << 0x20U) 
+                                                        | (QData)((IData)(
+                                                                          vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))))
+                : ((2U == (3U & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[4U] 
+                                 >> 8U))) ? ((2U == 
+                                              (3U & 
+                                               (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                >> 2U)))
+                                              ? (((QData)((IData)(
+                                                                  vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[3U])) 
                                                   << 0x20U) 
                                                  | (QData)((IData)(
-                                                                   vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U])))))))
-            : ((1U == (3U & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[4U] 
-                             >> 8U))) ? (((((- (QData)((IData)(
-                                                               (0U 
-                                                                == 
-                                                                (3U 
-                                                                 & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
-                                                                    >> 1U)))))) 
-                                            & ((0xffffffffffff0000ULL 
-                                                & (((QData)((IData)(
+                                                                   vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])))
+                                              : ((3U 
+                                                  == 
+                                                  (3U 
+                                                   & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                      >> 2U)))
+                                                  ? 
+                                                 (((QData)((IData)(
+                                                                   vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])) 
+                                                   << 0x20U) 
+                                                  | (QData)((IData)(
+                                                                    vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[2U])))
+                                                  : 
+                                                 ((0U 
+                                                   == 
+                                                   (3U 
+                                                    & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
+                                                       >> 2U)))
+                                                   ? 
+                                                  (((QData)((IData)(
                                                                     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
                                                     << 0x20U) 
-                                                   | (0xffffffffffff0000ULL 
-                                                      & (QData)((IData)(
-                                                                        vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
-                                               | (QData)((IData)(
-                                                                 (0xffffU 
-                                                                  & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))))) 
-                                           | ((- (QData)((IData)(
-                                                                 (1U 
-                                                                  == 
-                                                                  (3U 
-                                                                   & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
-                                                                      >> 1U)))))) 
-                                              & (((QData)((IData)(
-                                                                  vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
-                                                  << 0x20U) 
-                                                 | (QData)((IData)(
-                                                                   ((vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U] 
-                                                                     << 0x10U) 
-                                                                    | (0xffffU 
-                                                                       & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))) 
-                                          | ((- (QData)((IData)(
-                                                                (2U 
-                                                                 == 
-                                                                 (3U 
-                                                                  & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
-                                                                     >> 1U)))))) 
-                                             & (((QData)((IData)(
-                                                                 ((0xffff0000U 
-                                                                   & vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U]) 
-                                                                  | (0xffffU 
-                                                                     & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])))) 
-                                                 << 0x20U) 
-                                                | (QData)((IData)(
-                                                                  vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))) 
-                                         | ((- (QData)((IData)(
-                                                               (3U 
-                                                                == 
-                                                                (3U 
-                                                                 & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U] 
-                                                                    >> 1U)))))) 
-                                            & (((QData)((IData)(
-                                                                (0xffffU 
-                                                                 & vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))) 
-                                                << 0x30U) 
-                                               | (0xffffffffffffULL 
-                                                  & (((QData)((IData)(
-                                                                      vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
-                                                      << 0x20U) 
-                                                     | (QData)((IData)(
-                                                                       vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U])))))))
-                : ((2U == (3U & (vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[4U] 
-                                 >> 8U))) ? ((4U & 
-                                              vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[2U])
-                                              ? (((QData)((IData)(
-                                                                  vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])) 
-                                                  << 0x20U) 
-                                                 | (QData)((IData)(
-                                                                   vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U])))
-                                              : (((QData)((IData)(
-                                                                  vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[1U])) 
-                                                  << 0x20U) 
-                                                 | (QData)((IData)(
-                                                                   vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))))
+                                                   | (QData)((IData)(
+                                                                     vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])))
+                                                   : 
+                                                  (((QData)((IData)(
+                                                                    vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U])) 
+                                                    << 0x20U) 
+                                                   | (QData)((IData)(
+                                                                     vlSelf->ysyx_22040127_top__DOT__mem__DOT__dcache__DOT__axi_mrdata[0U]))))))
                     : (((QData)((IData)(vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[1U])) 
                         << 0x20U) | (QData)((IData)(
                                                     vlSelf->ysyx_22040127_top__DOT__ex_to_mem_bus[0U]))))));

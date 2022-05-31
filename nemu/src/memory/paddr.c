@@ -15,14 +15,30 @@ paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 static word_t pmem_read(paddr_t addr, int len) {//word_t and paddr_t are uint64 
   word_t ret = host_read(guest_to_host(addr), len);
   #ifdef CONFIG_MTRACE 
-  printf("read memory 0x%x with length %d,data is 0x%lx\n", addr, len, ret);
+  //printf("nemu: \033[1;15 mread memory 0x%x with length %d,data is 0x%lx\033[0m\n", addr, len, ret);
   #endif
   return ret;
 }
 
 static void pmem_write(paddr_t addr, int len, word_t data) {
+  //cpu.mwaddr  = addr;
+  //cpu.mwvalue = data;
+  word_t read_value = host_read(guest_to_host(addr & 0xFFFFFFFFFFFFFFF8) , 8);
+  word_t rem = addr % 8;
+  cpu.mwaddr = addr;
+  if(len == 1)
+    cpu.mwdata = (read_value & ~(0xFF << (rem * 8))) | ((data & 0xFF) <<(rem * 8));
+  else if(len == 2)
+    cpu.mwdata = (read_value & ~(0xFFFF << (rem * 8))) | ((data & 0xFFFF) << (rem * 8));
+  else if(len == 4)
+    cpu.mwdata = (read_value & ~(0xFFFFFFFF << (rem * 8))) | ((data & 0xFFFFFFFF) << (rem * 8));
+  else 
+    cpu.mwdata = (read_value) | ((data & 0xFFFFFFFFFFFFFFFF) << (rem * 8));
   #ifdef CONFIG_MTRACE 
-  printf("write memory 0x%x with length %d,data is 0x%lx\n", addr, len, data);
+  if(addr == 0x80003698 && data){
+  printf("\033[1;15m nemu: write memory 0x%x with length %d,data is 0x%lx\033[0m\n", addr, len, data);
+  
+  }
   #endif
   host_write(guest_to_host(addr), len, data);
 }

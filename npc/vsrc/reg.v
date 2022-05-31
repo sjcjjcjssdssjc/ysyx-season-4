@@ -27,9 +27,11 @@ module ysyx_22040127_RegisterFile (
   output reg[63:0] csr_mip,
   output reg[63:0] csr_mscratch,
   output reg[63:0] csr_mhartid,
+  output       wb_memwrite,
+  output[63:0] wb_diff_data,
+  output[63:0] wb_diff_addr,
   input            mem_flush
 );
-
   localparam MTVEC    = 12'h305;
   localparam MCAUSE   = 12'h342;
   localparam MSTATUS  = 12'h300;
@@ -55,6 +57,8 @@ module ysyx_22040127_RegisterFile (
   wire       wb_csrrsi;
   wire       wb_csrrci;
   wire[63:0] wb_alu_input1;
+
+
   assign wb_csrrdata = {64{wb_des_csr == MTVEC}} & csr_mtvec |
   {64{wb_des_csr == MCAUSE}} & csr_mcause | {64{wb_des_csr == MSTATUS}} & csr_mstatus |
   {64{wb_des_csr == MEPC}}   & csr_mepc   | {64{wb_des_csr == MIE}} & csr_mie |
@@ -130,7 +134,10 @@ module ysyx_22040127_RegisterFile (
   assign wb_ready_go = 1'b1;
   assign wb_allowin  = !wb_valid || wb_ready_go;
   assign 
-  { wb_des_csr,
+  { wb_memwrite,
+    wb_diff_data,
+    wb_diff_addr,
+    wb_des_csr,
     wb_alu_input1,
     wb_rs1,
     wb_csr_we,

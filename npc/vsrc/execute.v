@@ -102,7 +102,7 @@ module ysyx_22040127_execute(
 
   assign ex_csr_we = (ex_csrrs | ex_csrrw | ex_csrrc | ex_csrrwi | ex_csrrsi | ex_csrrci
    | ex_mret | ex_ecall);//id_to_ex_valid_reg
-
+ 
   wire cache_readygo = cache_state == 3'b110 | (!ex_memwrite & !ex_memread) | cache_pipelinehit;
   assign ex_ready_go = ((!(mul_type || mul_stage2) && 
   !(div_type || (div_state[0] ^ div_state[1]))) || mul_ok || div_ready)

@@ -28,6 +28,8 @@ void difftest_regcpy(void *dut, bool direction) {
     cpu.mip = ((uint64_t *)dut)[38];
     cpu.mscratch = ((uint64_t *)dut)[39];
     cpu.mtval = ((uint64_t *)dut)[40];
+    cpu.mwaddr = ((uint64_t *)dut)[41];
+    cpu.mwdata = ((uint64_t *)dut)[42];
   } else {
     for(int i = 0; i < 32; i++){
      ((uint64_t *)dut)[i] = cpu.gpr[i];
@@ -41,6 +43,8 @@ void difftest_regcpy(void *dut, bool direction) {
     ((uint64_t *)dut)[38] = cpu.mip;
     ((uint64_t *)dut)[39] = cpu.mscratch;
     ((uint64_t *)dut)[40] = cpu.mtval;
+    ((uint64_t *)dut)[41] = cpu.mwaddr;
+    ((uint64_t *)dut)[42] = cpu.mwdata;
   }
   
 }

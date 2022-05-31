@@ -72,7 +72,7 @@ extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
   #ifdef MTRACE
   long long rdata;
   pmem_read(waddr + 0x80000000,&rdata);
-
+  if(waddr + 0x80000000 >= 0x80003690 && waddr + 0x80000000 < 0x800036a0)
   printf("\033[1;32m pc:%x write mem with addr %llx, data is %llx,mask is %x,\
   when read, it is %llx \033[0m\n",cpu_pc, waddr + 0x80000000,tmp,(unsigned int)(wmask & 0xFF)
   , rdata);

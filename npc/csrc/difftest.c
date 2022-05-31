@@ -27,6 +27,8 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   cpu.mip     = 0;
   cpu.mscratch= 0;
   cpu.mtval   = 0;
+  cpu.mwdata  = 0;
+  cpu.mwaddr  = 0;
   for(int i = 0; i < 32; i++)
     cpu.gpr[i] = cpu_gpr[i];
   if(ref_so_file == NULL)ref_so_file = "../nemu/build/riscv64-nemu-interpreter-so";
