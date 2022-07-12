@@ -14,16 +14,17 @@ module ysyx_22040127_memory(
   output       mem_memread,
   input        ex_flush,
   input        ex_ready_go,
+  output [2:0] ex_memop,//input from id
+  output [7:0] ex_wmask,
   output reg   mem_flush,
-  output       cache_pipelinehit,
-  output [2:0] cache_state
+  input [63:0] mem_doubly_aligned_data,
+  input [63:0] mem_diff_addr,
+  input [63:0] mem_diff_data,
+  input  [2:0] cache_state
 );
 
   wire       mem_memwrite;
-  wire[63:0] mem_diff_addr;
-  wire[63:0] mem_diff_data;
   wire[2:0] mem_memop;   //input from id
-  wire[2:0] ex_memop;   //input from id
   wire[63:0]mem_reg_wdata;
   //wire[63:0]mem_diff_addr;
   //wire[63:0]mem_diff_data;
@@ -61,8 +62,8 @@ module ysyx_22040127_memory(
   wire       mem_csrrsi;
   wire       mem_csrrci;
   wire       mem_csr_we;
+  wire       mem_ebreak;
 
-  wire ex_memop = ex_to_mem_bus[138:136];
   wire ex_lb  = (ex_memop == 3'b000);
   wire ex_lh  = (ex_memop == 3'b001);
   wire ex_lw  = (ex_memop == 3'b010);
@@ -74,6 +75,7 @@ module ysyx_22040127_memory(
   wire ex_sh  = (ex_memop[1:0] == 2'b01);
   wire ex_sw  = (ex_memop[1:0] == 2'b10);
   wire ex_sd  = (ex_memop[1:0] == 2'b11);
+  assign ex_memop = ex_to_mem_bus[138:136];
 
   assign mem_ready_go = 1'b1;
   //this is actually ex_ready_go
@@ -91,7 +93,8 @@ module ysyx_22040127_memory(
   //assign mem_memwrite = mem_memwrite_tmp & !mem_flush;
 
   assign 
-  { mem_des_csr,
+  { mem_ebreak,
+    mem_des_csr,
     mem_alu_input1,//249:186
     mem_rs1,       //185:181
     mem_csr_we,    //180:180
@@ -115,7 +118,8 @@ module ysyx_22040127_memory(
   } = ex_to_mem_bus_reg;
 
   assign mem_to_wb_bus =
-  { mem_memwrite,  //320:320
+  { mem_ebreak,    //321:321
+    mem_memwrite,  //320:320
     mem_diff_data, //319:256
     mem_diff_addr, //255:192
     mem_des_csr,   //191:180
@@ -162,11 +166,9 @@ module ysyx_22040127_memory(
     end
   end
 
-  wire[63:0]doubly_aligned_data;
   reg[63:0]rawdata;//after mask
   wire[7:0]ex_addr_lowmask;
   reg[7:0]mem_addr_lowmask;
-  wire[7:0]ex_wmask;
   wire[1:0]ex_size;
   always @(posedge clk) begin
     lb <= ex_lb;
@@ -200,23 +202,23 @@ module ysyx_22040127_memory(
   {32{lh}} & {32{rawdata[15]}} | {32{lw}} & {32{rawdata[31]}} |
   {32{ld}} & rawdata[63:32]; 
   //always @(posedge clk)begin
-  assign rawdata = ld ? doubly_aligned_data :
-    (mem_addr_lowmask[3'b000] & (lw | lwu)) ? {32'b0, doubly_aligned_data[31:0]} :
-    (mem_addr_lowmask[3'b100] & (lw | lwu)) ? {32'b0, doubly_aligned_data[63:32]}:
+  assign rawdata = ld ? mem_doubly_aligned_data :
+    (mem_addr_lowmask[3'b000] & (lw | lwu)) ? {32'b0, mem_doubly_aligned_data[31:0]} :
+    (mem_addr_lowmask[3'b100] & (lw | lwu)) ? {32'b0, mem_doubly_aligned_data[63:32]}:
 
-    (mem_addr_lowmask[3'b000] & (lh | lhu)) ? {48'b0, doubly_aligned_data[15:0]} :
-    (mem_addr_lowmask[3'b010] & (lh | lhu)) ? {48'b0, doubly_aligned_data[31:16]}:
-    (mem_addr_lowmask[3'b100] & (lh | lhu)) ? {48'b0, doubly_aligned_data[47:32]}:
-    (mem_addr_lowmask[3'b110] & (lh | lhu)) ? {48'b0, doubly_aligned_data[63:48]}:
+    (mem_addr_lowmask[3'b000] & (lh | lhu)) ? {48'b0, mem_doubly_aligned_data[15:0]} :
+    (mem_addr_lowmask[3'b010] & (lh | lhu)) ? {48'b0, mem_doubly_aligned_data[31:16]}:
+    (mem_addr_lowmask[3'b100] & (lh | lhu)) ? {48'b0, mem_doubly_aligned_data[47:32]}:
+    (mem_addr_lowmask[3'b110] & (lh | lhu)) ? {48'b0, mem_doubly_aligned_data[63:48]}:
 
-    (mem_addr_lowmask[3'b000] & (lb | lbu)) ? {56'b0, doubly_aligned_data[7:0]}:
-    (mem_addr_lowmask[3'b001] & (lb | lbu)) ? {56'b0, doubly_aligned_data[15:8]}:
-    (mem_addr_lowmask[3'b010] & (lb | lbu)) ? {56'b0, doubly_aligned_data[23:16]}:
-    (mem_addr_lowmask[3'b011] & (lb | lbu)) ? {56'b0, doubly_aligned_data[31:24]}:
-    (mem_addr_lowmask[3'b100] & (lb | lbu)) ? {56'b0, doubly_aligned_data[39:32]}:
-    (mem_addr_lowmask[3'b101] & (lb | lbu)) ? {56'b0, doubly_aligned_data[47:40]}:
-    (mem_addr_lowmask[3'b110] & (lb | lbu)) ? {56'b0, doubly_aligned_data[55:48]}:
-    (mem_addr_lowmask[3'b111] & (lb | lbu)) ? {56'b0, doubly_aligned_data[63:56]}
+    (mem_addr_lowmask[3'b000] & (lb | lbu)) ? {56'b0, mem_doubly_aligned_data[7:0]}:
+    (mem_addr_lowmask[3'b001] & (lb | lbu)) ? {56'b0, mem_doubly_aligned_data[15:8]}:
+    (mem_addr_lowmask[3'b010] & (lb | lbu)) ? {56'b0, mem_doubly_aligned_data[23:16]}:
+    (mem_addr_lowmask[3'b011] & (lb | lbu)) ? {56'b0, mem_doubly_aligned_data[31:24]}:
+    (mem_addr_lowmask[3'b100] & (lb | lbu)) ? {56'b0, mem_doubly_aligned_data[39:32]}:
+    (mem_addr_lowmask[3'b101] & (lb | lbu)) ? {56'b0, mem_doubly_aligned_data[47:40]}:
+    (mem_addr_lowmask[3'b110] & (lb | lbu)) ? {56'b0, mem_doubly_aligned_data[55:48]}:
+    (mem_addr_lowmask[3'b111] & (lb | lbu)) ? {56'b0, mem_doubly_aligned_data[63:56]}
     : 64'b0;
   
   assign ex_wmask[0] = ex_addr_lowmask[3'b000] | ex_sd;
@@ -232,26 +234,10 @@ module ysyx_22040127_memory(
 
   // /* verilator lint_off LATCH */
   // always @(*) begin //need change to posedge clock
-  //   if(mem_memread)pmem_read(mem_alu_output, doubly_aligned_data);
+  //   if(mem_memread)pmem_read(mem_alu_output, mem_doubly_aligned_data);
   //   if(mem_memwrite)pmem_write(mem_alu_output, mem_wdata, ex_wmask);//waddr
   //   /* verilator lint_on LATCH */
   // end
-  ysyx_22040127_dcache dcache( 
-    .clk(clk),
-    .rst(rst),
-    .input_addr(ex_to_mem_bus[127:64]),//ex_alu_output
-    .input_wdata(ex_to_mem_bus[63:0]),//ex_wdata(temporary)
-    .input_memwrite(ex_to_mem_bus[134:134]),//ex_memwrite
-    .input_memread(ex_to_mem_bus[133:133]),//ex_memread
-    //ex_to_mem_valid & 
-    .input_valid((ex_to_mem_bus[133:133] | ex_to_mem_bus[134:134])),//is this right?
-    .input_size(ex_memop[1:0]),
-    .input_strb(ex_wmask),//bitmask
-    .output_data(doubly_aligned_data),
-    .cache_pipelinehit(cache_pipelinehit),
-    .cache_state(cache_state),
-    .diff_data(mem_diff_data),
-    .diff_addr(mem_diff_addr)
-  );
+  
 
 endmodule

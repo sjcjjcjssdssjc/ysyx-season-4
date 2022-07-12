@@ -13,8 +13,9 @@ module ysyx_22040127_execute(
   input  id_flush,
   input  cache_pipelinehit,// cache_state == IDLE & (cache_way0hit | cache_way1hit)
   input[2:0]  cache_state,
-  output reg ex_flush,
-  output     ex_ready_go
+  output reg  ex_flush,
+  output[31:0]ex_pc,
+  output      ex_ready_go
 );
 
   wire[63:0]rtype_calc_result;
@@ -51,7 +52,6 @@ module ysyx_22040127_execute(
 
   //for pipeline
   wire[63:0] ex_mem_wdata;
-  wire[31:0] ex_pc;
   wire[5:0]  ex_aluop;
   wire[2:0]  ex_memop;
   wire       ex_memwrite;
@@ -99,6 +99,7 @@ module ysyx_22040127_execute(
   wire       ex_csrrci;
   wire       ex_csr_we;
   wire[11:0] ex_des_csr;
+  wire       ex_ebreak;
 
   assign ex_csr_we = (ex_csrrs | ex_csrrw | ex_csrrc | ex_csrrwi | ex_csrrsi | ex_csrrci
    | ex_mret | ex_ecall);//id_to_ex_valid_reg
@@ -110,7 +111,8 @@ module ysyx_22040127_execute(
   assign ex_allowin  = !ex_valid || ex_ready_go && mem_allowin;
   assign ex_to_mem_valid = ex_ready_go && ex_valid;
   assign 
-  { ex_des_csr,
+  { ex_ebreak,
+    ex_des_csr,
     ex_mret,        
     ex_ecall,       
     ex_csrrw,       
@@ -136,7 +138,8 @@ module ysyx_22040127_execute(
   } = id_to_ex_bus_reg;
 
   assign ex_to_mem_bus = 
-  { ex_des_csr,   //261:250
+  { ex_ebreak,    //262:262
+    ex_des_csr,   //261:250
     ex_alu_input1,//249:186
     ex_rs1,       //185:181
     ex_csr_we,    //180:180

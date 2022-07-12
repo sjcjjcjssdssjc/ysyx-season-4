@@ -17,58 +17,61 @@ module ysyx_22040127_top(
   output       wb_memwrite,
   output[63:0] wb_diff_addr,
   output[63:0] wb_diff_data
+
+  //output[63:0] //for axi
 );
   //TODO: add difftest to mhartid between nemu and npc, nemu and spike
   wire[63:0] mhartid;
   assign mtval = 64'b0;
-  //todo: branchstall, load-use
   reg [63:0] if_pcdata;
-  wire[31:0] if_instruction;
+  wire[31:0]if_instruction;
   wire       if_ebreak;
   wire       if_uart;//temporary(dpic is also)
-  reg        id_ebreak;
-  reg        ex_ebreak;
-  reg        mem_ebreak;
-  reg        wb_ebreak;
+  wire       if_flush;
+  reg        if_valid;
+  wire       if_ready_go;
+  wire       if_allowin;
+  wire       if_to_id_valid;
 
   reg [63:0] reg_wdata;
-  wire[63:0] alu_output;
   wire[31:0] id_branch_result;
   wire       id_branch_taken;
   wire[4:0]  id_rs1;
   wire[4:0]  id_rs2;
+  wire       id_jalr;
+  wire       id_flush;
+  wire       id_allowin;
   wire[63:0] id_regdata1;
   wire[63:0] id_regdata2;
-  wire       id_jalr;
+  wire       id_to_ex_valid;
 
-
-  wire        if_allowin;
-  wire        id_allowin;
+  wire[31:0]  ex_pc;
+  wire[2:0]   ex_memop;
+  wire[7:0]   ex_wmask;
+  wire        ex_flush;
   wire        ex_allowin;
   wire        ex_ready_go;
-  wire        mem_allowin;
-  wire        wb_allowin;//ready_go is distributed in every module.
-  wire        cache_pipelinehit;
-
-  wire        if_to_id_valid;
-  wire        if_to_id_valid;
-  wire        id_to_ex_valid;
   wire        ex_to_mem_valid;
-  wire        mem_to_wb_valid;
 
-  wire        if_flush;
-  wire        id_flush;
-  wire        ex_flush;
+  wire        dcache_pipelinehit;
+  wire        mem_allowin;
+  wire        mem_to_wb_valid;
   wire        mem_flush;
+  wire[63:0]  mem_alu_output;
+  wire        mem_memread;
+  wire[63:0]  mem_final_rdata;
+  wire[63:0]  mem_doubly_aligned_data;
+  wire [63:0] mem_diff_addr;
+  wire [63:0] mem_diff_data;
  // wire        wb_flush;
 
   wire[`IF_TO_ID_WIDTH - 1:0]  if_to_id_bus;
   wire[`ID_TO_EX_WIDTH - 1:0]  id_to_ex_bus;
   wire[`EX_TO_MEM_WIDTH - 1:0] ex_to_mem_bus;//width TBD
   wire[`MEM_TO_WB_WIDTH - 1:0] mem_to_wb_bus;//width TBD
-  wire[63:0] mem_alu_output;
-  wire       mem_memread;
-  wire[63:0] mem_final_rdata;
+
+
+  wire       wb_allowin;//ready_go is distributed in every module.
   wire[63:0] wb_reg_wdata;
   wire[63:0] wb_csrwdata;
   wire[63:0] wb_csrrdata;
@@ -76,16 +79,77 @@ module ysyx_22040127_top(
   wire       wb_csr_we;
   wire[4:0]  wb_rd;
   wire       wb_reg_wen;
-  wire[2:0]  cache_state;
+  wire       wb_ebreak;
+  wire[2:0]  dcache_state;
+  wire[2:0]  icache_state;
+  wire[31:0] next_pc;
+  reg[31:0]  next_pc_delayed;
   //bus to be added.
-  //IF
-  reg         if_valid;
-  wire        if_ready_go;
+  //PRE_IF
+
+  wire       icache_pipieline_hit;
+  wire[31:0] icache_addr;
+  wire       icache_valid; 
+  reg        preif_valid;
+  reg        preif_ready_go_delayed;
+  wire       preif_ready_go;
+  wire       preif_allowin;
+  wire[63:0] icache_data;
+  always @(posedge clk) begin
+    if(rst) begin
+      preif_valid <= 1'b0;
+    end else if(preif_allowin)begin
+      preif_valid <= 1'b1;
+    end
+  end
+  assign     preif_allowin = !preif_valid || preif_ready_go && if_allowin;
+  assign     next_pc = id_branch_taken & id_allowin ? id_branch_result :
+    (wb_mret) ? mepc[31:0] :
+    (preif_valid & preif_ready_go_delayed) ? if_pc + 4 : 
+    next_pc_delayed;
+    //if_pc;
+  assign     icache_addr  = next_pc;//icache request
+  assign     icache_valid = preif_valid & if_allowin;//inst_valid(see the book)
+
+  //reg     preif_valid = !rst;
+  assign     preif_ready_go = preif_valid & icache_pipieline_hit;//preif_valid?
+  ysyx_22040127_icache icache(
+    .clk(clk),
+    .rst(rst),
+    .input_addr({32'b0, icache_addr}),
+    .input_wdata(0),
+    .input_memwrite(0),
+    .input_memread(1'b1),
+    .input_valid(icache_valid),
+    .output_data(icache_data),
+    .cache_pipelinehit(icache_pipieline_hit),
+    .cache_state(icache_state)
+  );
+
+  ysyx_22040127_dcache dcache( 
+    .clk(clk),
+    .rst(rst),
+    .input_addr(ex_to_mem_bus[127:64]),//ex_alu_output
+    .input_wdata(ex_to_mem_bus[63:0]),//ex_wdata(temporary)
+    .input_memwrite(ex_to_mem_bus[134:134]),//ex_memwrite
+    .input_memread(ex_to_mem_bus[133:133]),//ex_memread
+    //ex_to_mem_valid & 
+    .input_valid((ex_to_mem_bus[133:133] | ex_to_mem_bus[134:134])),//is this right?
+    .input_size(ex_memop[1:0]),
+    .input_strb(ex_wmask),//bitmask
+    .output_data(mem_doubly_aligned_data),
+    .cache_pipelinehit(dcache_pipelinehit),
+    .cache_state(dcache_state),
+    .diff_data(mem_diff_data),
+    .diff_addr(mem_diff_addr)
+  );
+
   import "DPI-C" function void set_simtime();//terminate
   import "DPI-C" function void set_pc(input bit[31:0] pc);
   import "DPI-C" function void pmem_read(input longint raddr, output longint doubly_aligned_data);
   assign if_flush  = wb_mret;
-  assign if_instruction = (if_pc[2]) ? if_pcdata[63:32] : if_pcdata[31:0];
+  //assign if_instruction = (if_pc[2]) ? if_pcdata[63:32] : if_pcdata[31:0];
+
   assign if_ebreak = (if_instruction[6:0] == 7'b1110011) & if_instruction[20]
       & !(|{if_instruction[31:21],if_instruction[19:7]});
   assign if_uart   = if_instruction[6:0] == 7'b1111011;
@@ -93,40 +157,50 @@ module ysyx_22040127_top(
   assign if_allowin     = !if_valid || if_ready_go && id_allowin;
   //once rst = 0, if_allowin is set to 1
   assign if_to_id_valid = if_valid && if_ready_go;//always ready to go
-  assign if_to_id_bus   = {(id_branch_taken | wb_mret | if_uart ? 32'b0 : if_instruction), if_pc};
+  assign if_to_id_bus   = {if_ebreak , id_branch_taken | wb_mret | if_uart ? 
+  32'b0 : if_instruction, if_pc};
 
+  /*
   always @(*)begin //need change to posedge clock
     if(if_pc >= 32'h80000000)pmem_read({32'b0, if_pc}, if_pcdata);
     else pmem_read({64'h80000000}, if_pcdata);
   end
+  */
+  reg[31:0] if_instruction_reg;
+  reg       if_instruction_blocked;
+  assign    if_instruction = //id_allowin ? if_instruction_reg :
+  (if_pc[2]?icache_data[63:32]:icache_data[31:0]);
+  always @(posedge clk) begin
+    if(preif_ready_go_delayed & !if_allowin)begin//cannot id_branch_taken?
+      if_instruction_reg     <= if_instruction;
+      if_instruction_blocked <= 1'b1;
+    end else if(if_to_id_valid & id_allowin)
+      if_instruction_blocked   <= 1'b0;
 
-  always @(posedge clk) begin//?
-    id_ebreak <= if_ebreak;
-    ex_ebreak <= id_ebreak;
-    mem_ebreak <= ex_ebreak;
-    wb_ebreak <= mem_ebreak;
-    if(wb_ebreak)//TYPE_N
+    if(!rst)next_pc_delayed <= next_pc;
+    else next_pc_delayed    <= 32'h80000000;
+    preif_ready_go_delayed <= preif_ready_go;
+    if(wb_ebreak)//need revision
       set_simtime();
   end
 
   always @(posedge clk) begin
+    if(if_uart)$display("uart output");
     if(rst) begin
       if_valid <= 1'b0;
     end else if(if_allowin)begin
-      if_valid <= 1'b1;
+      if_valid <= preif_ready_go;//add more?
     end
 
     if(rst == 1'b1)
       if_pc <= 32'h80000000;
+    else if(preif_ready_go & if_allowin)
+      if_pc <= next_pc;
+    /*
     else if(id_branch_taken && if_allowin) if_pc <= id_branch_result;//id_inst_type == TYPE_B -> id_branch_taken
     else if(wb_mret)if_pc <= mepc[31:0];
     else if(if_allowin)if_pc <= if_pc + 4;
-
-    //else if(id_inst_type == TYPE_J && if_allowin)//type_u:auipc,j (to_if_valid is deprecated)
-    //  pc <= pc + alu_input1[31:0];
-    //else if(jalr && if_allowin) pc <= alu_output[31:0] & (~1);
-    //else if(if_allowin)pc <= pc + 4;
-
+    */
     set_pc(if_pc);
   end
 
@@ -165,7 +239,10 @@ module ysyx_22040127_top(
     .ex_csr_we(ex_to_mem_bus[180:180]),
     .mem_csr_we(mem_to_wb_bus[110:110]),
     .wb_csr_we(wb_csr_we),
+    .ex_pc(ex_pc),
     .if_flush(if_flush),
+    .if_instruction_reg(if_instruction_reg),
+    .if_instruction_blocked(if_instruction_blocked),
     .id_flush(id_flush)
   );
   ysyx_22040127_execute exe(
@@ -179,9 +256,10 @@ module ysyx_22040127_top(
     .ex_to_mem_bus(ex_to_mem_bus),
     .mem_mret(mem_to_wb_bus[109:109]),
     .id_flush(id_flush),
-    .cache_pipelinehit(cache_pipelinehit),
-    .cache_state(cache_state),
+    .cache_pipelinehit(dcache_pipelinehit),
+    .cache_state(dcache_state),
     .ex_flush(ex_flush),
+    .ex_pc(ex_pc),
     .ex_ready_go(ex_ready_go)
   );
   ysyx_22040127_memory mem(
@@ -198,9 +276,13 @@ module ysyx_22040127_top(
     .mem_memread(mem_memread),
     .ex_flush(ex_flush),
     .ex_ready_go(ex_ready_go),
+    .ex_memop(ex_memop),
+    .ex_wmask(ex_wmask),
     .mem_flush(mem_flush),
-    .cache_pipelinehit(cache_pipelinehit),
-    .cache_state(cache_state)
+    .mem_doubly_aligned_data(mem_doubly_aligned_data),
+    .mem_diff_addr(mem_diff_addr),
+    .mem_diff_data(mem_diff_data),
+    .cache_state(dcache_state)
   );
   ysyx_22040127_RegisterFile wb(
     .clk(clk), 
@@ -232,6 +314,7 @@ module ysyx_22040127_top(
     .wb_memwrite(wb_memwrite),
     .wb_diff_data(wb_diff_data),
     .wb_diff_addr(wb_diff_addr),
+    .wb_ebreak(wb_ebreak),
     .mem_flush(mem_flush)
   );//wb
   //Reg #(4, 4'b0) i1 (clk, rst, in, out, in[0]);

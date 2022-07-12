@@ -22,8 +22,8 @@ reg [Bits-1:0] ram [0:Word_Depth-1];
 always @(posedge CLK) begin
     if(wen) begin
         ram[A] <= (D & bwen) | (ram[A] & ~bwen);
-        if(A == 7'h69)
-        $display("write cache with addr 0x%0h, data is 0x%0h, strb 0x%0h\n",A,D,bwen);
+        //if(A == 7'h69)
+        //$display("write cache with addr 0x%0h, data is 0x%0h, strb 0x%0h\n",A,D,bwen);
     end
     Q <= cen ? ram[A] : {4{$random}};
     if(cen)begin

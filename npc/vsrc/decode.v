@@ -31,7 +31,10 @@ module ysyx_22040127_decode(
   input        ex_csr_we,
   input        mem_csr_we,
   input        wb_csr_we,
+  input[31:0]  ex_pc,
   input        if_flush,
+  input[31:0]  if_instruction_reg,
+  input  reg   if_instruction_blocked,
   output reg   id_flush
 );
   localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
@@ -61,6 +64,7 @@ module ysyx_22040127_decode(
   wire[63:0] id_regdata1_final;
   wire[63:0] id_regdata2_final;
   wire[63:0] id_mem_wdata;
+  wire       id_ebreak;
 
   //hazard
   wire   exid_raw_hazard1;
@@ -86,8 +90,8 @@ module ysyx_22040127_decode(
   assign memid_raw_hazard2 = (|mem_rd) && (mem_rd == id_rs2) && mem_reg_wen;
   assign wbid_raw_hazard1 = (|wb_rd) && (wb_rd == id_rs1) && wb_reg_wen;
   assign wbid_raw_hazard2 = (|wb_rd) && (wb_rd == id_rs2) && wb_reg_wen;
-  assign load_use_hazard1 = exid_raw_hazard1 && ex_memread;
-  assign load_use_hazard2 = exid_raw_hazard2 && ex_memread;
+  assign load_use_hazard1 = exid_raw_hazard1 && ex_memread && ex_pc != id_pc;
+  assign load_use_hazard2 = exid_raw_hazard2 && ex_memread && ex_pc != id_pc;
   assign mem_load_use_hazard1 =  mem_load_use_hazard1_tmp | (memid_raw_hazard1 && mem_memread);
   assign mem_load_use_hazard2 =  mem_load_use_hazard2_tmp | (memid_raw_hazard2 && mem_memread);
   assign wb_load_use_hazard1 = wb_load_use_hazard1_tmp;
@@ -100,7 +104,11 @@ module ysyx_22040127_decode(
 
   wire[31:0] id_pc;
   wire[31:0] id_instruction;
-  assign {id_instruction, id_pc} = if_to_id_bus_reg;//data from if delayed a cycle
+  assign {
+  id_ebreak, 
+  id_instruction,//[63:32]
+  id_pc          //[31:0]
+  } = if_to_id_bus_reg;//data from if delayed a cycle
 
   wire       id_mret;
   wire       id_ecall;
@@ -120,7 +128,8 @@ module ysyx_22040127_decode(
   assign id_csrrsi = id_instruction[14:12] == 3'b110 && (id_inst_type == TYPE_N);
   assign id_csrrci = id_instruction[14:12] == 3'b111 && (id_inst_type == TYPE_N);
   assign id_to_ex_bus
-  = {id_imm[11:0],   //274:263
+  = {id_ebreak,      //275:275
+     id_imm[11:0],   //274:263
      id_mret,        //262:262
      id_ecall,       //261:261
      id_csrrw,       //260:260
@@ -194,7 +203,7 @@ module ysyx_22040127_decode(
   assign id_memread = id_instruction[0] & id_instruction[1] & !id_instruction[2] 
   & !id_instruction[3] & !id_instruction[4] & !id_instruction[5] & !id_instruction[6];
 
-  //pipeline
+  //pipeline 
   assign id_ready_go = !(load_use_hazard1 || load_use_hazard2
   || mem_load_use_hazard1 || mem_load_use_hazard2 || ex_csr_we  
   && (|ex_rd)  && (ex_rd == id_rs1  || ex_rd == id_rs2) 
@@ -211,12 +220,19 @@ module ysyx_22040127_decode(
     end
     mem_load_use_hazard1_tmp <= load_use_hazard1;
     mem_load_use_hazard2_tmp <= load_use_hazard2;
-    wb_load_use_hazard1_tmp <= mem_load_use_hazard1;
+    wb_load_use_hazard1_tmp <= mem_load_use_hazard1; 
     wb_load_use_hazard2_tmp <= mem_load_use_hazard2;
     if(rst)begin
       if_to_id_bus_reg <= `IF_TO_ID_WIDTH'b0;
     end else if(if_to_id_valid && id_allowin) begin
-      if_to_id_bus_reg <= if_to_id_bus;
+      if(!if_instruction_blocked)
+        if_to_id_bus_reg <= if_to_id_bus;
+      else begin
+        if_to_id_bus_reg[31:0]  <= if_to_id_bus[31:0];
+        if_to_id_bus_reg[63:32] <= id_branch_taken ? 32'b0 : if_instruction_reg;
+        if_to_id_bus_reg[64]    <= if_to_id_bus[64];
+        
+      end
       id_flush <= mem_mret | if_flush;//otherwise stall
     end
   end

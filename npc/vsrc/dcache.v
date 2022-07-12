@@ -396,7 +396,7 @@ module ysyx_22040127_dcache(
 S011HD1P_X32Y2D128_BW dcache_way1(
     .Q(cache_rdata_way0),//ex
     .CLK(clk),
-    .CEN(input_memread | cache_miss),//ex
+    .CEN(input_memread | cache_miss),//ex cache_miss for cases when memwrite & 2ways are dirsy&valid
     .WEN(cache_wen_way0),//mem or later
     .BWEN(cache_strb),//mem or later
     .A(input_index),//ex

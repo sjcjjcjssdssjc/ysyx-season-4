@@ -30,6 +30,7 @@ module ysyx_22040127_RegisterFile (
   output       wb_memwrite,
   output[63:0] wb_diff_data,
   output[63:0] wb_diff_addr,
+  output           wb_ebreak,
   input            mem_flush
 );
   localparam MTVEC    = 12'h305;
@@ -134,7 +135,8 @@ module ysyx_22040127_RegisterFile (
   assign wb_ready_go = 1'b1;
   assign wb_allowin  = !wb_valid || wb_ready_go;
   assign 
-  { wb_memwrite,
+  { wb_ebreak,
+    wb_memwrite,
     wb_diff_data,
     wb_diff_addr,
     wb_des_csr,
