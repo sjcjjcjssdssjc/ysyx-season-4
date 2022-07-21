@@ -1,4 +1,5 @@
-`include "mycpu.h"
+`include "ysyx_22040127_mycpu.v"
+
 //4-way set-associative
 module ysyx_22040127_dcache(
     input clk,
@@ -16,7 +17,16 @@ module ysyx_22040127_dcache(
     output        cache_pipelinehit,
     output reg  [2:0]cache_state,
     output reg[63:0] diff_data,
-    output reg[63:0] diff_addr
+    output reg[63:0] diff_addr,
+
+    //sram<->axi
+    output reg   [63:0]axi_req_addr,//last 4 digit always is 0
+    output reg   [7:0] axi_req_strb,
+    output reg   [`CACHE_DATA_SIZE - 1:0] axi_req_data,
+    output reg   axi_req_wen,
+    output reg   axi_req_valid,
+    input axi_res_valid,
+    input [`CACHE_DATA_SIZE - 1:0] axi_mrdata
 );
 
     reg[1:0] input_size_reg;
@@ -36,15 +46,9 @@ module ysyx_22040127_dcache(
 
     
     reg   [31:0] mem_addr;
-    reg   [`CACHE_DATA_SIZE - 1:0] axi_req_data;
     reg   mem_wen;//size is deprecated for now
     wire   [7:0] mem_strb;
-    reg   axi_res_valid;
-    reg   axi_req_wen;
-    reg[7:0]   axi_req_strb;
-    reg   axi_req_valid;
-    reg   [63:0]axi_req_addr;
-    reg   [`CACHE_DATA_SIZE - 1:0] axi_mrdata;
+
 
     localparam IDLE = 3'b000, LOOKUP = 3'b001, MISS = 3'b010,
     REPLACE = 3'b011, REFILL = 3'b100, MISS_STALL = 3'b101, REFILL_STALL = 3'b110,
@@ -151,15 +155,8 @@ module ysyx_22040127_dcache(
       (cache_state == LOOKUP & (cache_raw & !cache_way0hit 
       & !cache_way1hit | !cache_way0hit & !cache_way1hit)) );
 
-    /* verilator lint_off LATCH */
-    always @(*) begin
-        if(!axi_req_wen & axi_req_valid)pmem_read(axi_req_addr & 64'hffffffff_fffffff0, axi_mrdata[63:0]);
-        if(!axi_req_wen & axi_req_valid)pmem_read((axi_req_addr & 64'hffffffff_fffffff0) + 8, axi_mrdata[127:64]);
-        if(axi_req_wen & axi_req_valid)pmem_write(axi_req_addr & 64'hffffffff_fffffff0, axi_req_data[63:0], axi_req_strb);
-        if(axi_req_wen & axi_req_valid)pmem_write((axi_req_addr & 64'hffffffff_fffffff0) + 8, axi_req_data[127:64], axi_req_strb);
-        //pmem_write missing.
-    end
-    /* verilator lint_on LATCH */
+    
+    
     assign output_data = cache_way0hit_reg ? output_data_way0: output_data_way1;
     
     assign ex_cache_strb[63:0] = {{8{input_strb[7]}},{8{input_strb[6]}}, 
@@ -313,28 +310,28 @@ module ysyx_22040127_dcache(
             MISS:
             begin
 
-                if(!cnt)begin//write back(random eviction)
-                    axi_req_addr  <= {32'b0, cache_way0tags[input_index], input_index, 4'b0}; 
+                if(!cnt && !axi_req_valid)begin//write back(random eviction)
+                    axi_req_addr  <= {32'b0, cache_way0tags[input_index], input_index, 4'b0};
+                    
                     axi_req_data  <= cache_rdata_way0;
                     axi_req_valid <= 1'b1;
-                end else begin
+                end else if(!axi_req_valid) begin
                     axi_req_addr  <= {32'b0, cache_way1tags[input_index], input_index, 4'b0}; 
                     axi_req_data  <= cache_rdata_way1;
                     axi_req_valid <= 1'b1;
                 end
             
                 if(!axi_res_valid)begin
+                    //if(axi_req_addr == 64'h8001dc10)$display("dcache write axi with addr 0x%0h, data is 0x%0h", axi_req_addr, axi_req_data);
+                   
                     axi_req_strb  <= 8'b11111111;
                     axi_req_wen   <= 1'b1;
-                    axi_res_valid <= 1'b1;
                     cache_state <= MISS;
                 end else begin
-                    //$display("write mem with 69 index, input_addr is 0x%0h data is 0x%0h\n",
-                    //axi_req_addr,axi_req_data);
+                    //if(axi_req_addr == 64'h8001dc10)$display("after dcache write axi with addr 0x%0h, data is 0x%0h", axi_req_addr, axi_req_data);
                     axi_req_valid <= 1'b0;
                     axi_req_wen   <= 1'b0;
                     cache_state <= MISS_STALL;
-                    axi_res_valid <= 1'b0;
                 end
             end
             MISS_STALL:
@@ -356,25 +353,19 @@ module ysyx_22040127_dcache(
                     if(cache_wen_way0)cache_way0tags[input_index] <= input_tag; 
                     else if(cache_wen_way1)cache_way1tags[input_index] <= input_tag; //?
 
-                    //if(input_index == 7'h69)
-                    //$display("read mem with 69 index, input_addr is 0x%0h data is 0x%0h (ex)0x%0h (axi_mrdata)0x%0h \
-                    //input_memwrite 0x%0h\n",
-                    //input_addr,cache_wdata,ex_cache_wdata,axi_mrdata,input_memwrite);
-                    //block1
                     if(cache_wen_way0)cache_way0D[input_index] <= cache_wen_way0 & input_memwrite;
                     if(cache_wen_way1)cache_way1D[input_index] <= cache_wen_way1 & input_memwrite;
                     cache_way0V[input_index] <= cache_way0V[input_index] | cache_wen_way0;
                     cache_way1V[input_index] <= cache_way1V[input_index] | cache_wen_way1;
                     axi_req_valid <= 1'b0;
-                    axi_res_valid <= 1'b0;
+                    //axi_res_valid <= 1'b0;
                     cache_state <= REFILL_STALL;
                 end else begin
                     
                     cache_state <= REFILL;
-                    axi_req_addr  <= input_addr;
+                    axi_req_addr  <= input_addr & 64'hffffffff_fffffff0;//&
                     axi_req_valid <= 1'b1;
                     axi_req_wen   <= 1'b0;
-                    axi_res_valid <= 1'b1;
                 end
             end
 

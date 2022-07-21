@@ -1,4 +1,4 @@
-`include "mycpu.h"
+`include "ysyx_22040127_mycpu.v"
 
 module ysyx_22040127_decode(
   input        clk,

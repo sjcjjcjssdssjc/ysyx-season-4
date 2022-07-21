@@ -30,6 +30,46 @@ class Vysyx_22040127_top VL_NOT_FINAL {
     VL_IN8(&rst,0,0);
     VL_OUT8(&wb_valid,0,0);
     VL_OUT8(&wb_memwrite,0,0);
+    VL_IN8(&axi_aw_ready_i,0,0);
+    VL_OUT8(&axi_aw_valid_o,0,0);
+    VL_OUT8(&axi_aw_prot_o,2,0);
+    VL_OUT8(&axi_aw_id_o,3,0);
+    VL_OUT8(&axi_aw_user_o,0,0);
+    VL_OUT8(&axi_aw_len_o,7,0);
+    VL_OUT8(&axi_aw_size_o,2,0);
+    VL_OUT8(&axi_aw_burst_o,1,0);
+    VL_OUT8(&axi_aw_lock_o,0,0);
+    VL_OUT8(&axi_aw_cache_o,3,0);
+    VL_OUT8(&axi_aw_qos_o,3,0);
+    VL_OUT8(&axi_aw_region_o,3,0);
+    VL_IN8(&axi_w_ready_i,0,0);
+    VL_OUT8(&axi_w_valid_o,0,0);
+    VL_OUT8(&axi_w_strb_o,7,0);
+    VL_OUT8(&axi_w_last_o,0,0);
+    VL_OUT8(&axi_w_user_o,0,0);
+    VL_OUT8(&axi_b_ready_o,0,0);
+    VL_IN8(&axi_b_valid_i,0,0);
+    VL_IN8(&axi_b_resp_i,1,0);
+    VL_IN8(&axi_b_id_i,3,0);
+    VL_IN8(&axi_b_user_i,0,0);
+    VL_IN8(&axi_ar_ready_i,0,0);
+    VL_OUT8(&axi_ar_valid_o,0,0);
+    VL_OUT8(&axi_ar_prot_o,2,0);
+    VL_OUT8(&axi_ar_id_o,3,0);
+    VL_OUT8(&axi_ar_user_o,0,0);
+    VL_OUT8(&axi_ar_len_o,7,0);
+    VL_OUT8(&axi_ar_size_o,2,0);
+    VL_OUT8(&axi_ar_burst_o,1,0);
+    VL_OUT8(&axi_ar_lock_o,0,0);
+    VL_OUT8(&axi_ar_cache_o,3,0);
+    VL_OUT8(&axi_ar_qos_o,3,0);
+    VL_OUT8(&axi_ar_region_o,3,0);
+    VL_OUT8(&axi_r_ready_o,0,0);
+    VL_IN8(&axi_r_valid_i,0,0);
+    VL_IN8(&axi_r_resp_i,1,0);
+    VL_IN8(&axi_r_last_i,0,0);
+    VL_IN8(&axi_r_id_i,3,0);
+    VL_IN8(&axi_r_user_i,0,0);
     VL_OUT(&if_pc,31,0);
     VL_OUT(&wb_pc,31,0);
     VL_OUT64(&mepc,63,0);
@@ -42,6 +82,10 @@ class Vysyx_22040127_top VL_NOT_FINAL {
     VL_OUT64(&mtval,63,0);
     VL_OUT64(&wb_diff_addr,63,0);
     VL_OUT64(&wb_diff_data,63,0);
+    VL_OUT64(&axi_aw_addr_o,63,0);
+    VL_OUT64(&axi_w_data_o,63,0);
+    VL_OUT64(&axi_ar_addr_o,63,0);
+    VL_IN64(&axi_r_data_i,63,0);
 
     // CELLS
     // Public to allow access to /* verilator public */ items.

@@ -1,4 +1,4 @@
-`include "mycpu.h"
+`include "ysyx_22040127_mycpu.v"
 
 module ysyx_22040127_execute(
   input  clk,
@@ -43,8 +43,8 @@ module ysyx_22040127_execute(
   wire[31:0]src1_sllw;
   wire[31:0]src1_srlw;
   wire[5:0] sft_input2;
-  wire[63:0]sra_mask_32;
   wire[63:0]sra_mask_64;
+  wire[63:0]sraw_mask_32;
   wire[63:0]sext_src1_sraw;
   wire[63:0]sext_src1_sllw;
   wire[63:0]sext_src1_srlw;
@@ -68,7 +68,6 @@ module ysyx_22040127_execute(
   wire mul_type;//ex1
   wire div_type;
   wire div_sign;
-  wire mul_stage2;
   wire mul_ok;  //ex3
   wire sign1;
   wire sign2;
@@ -105,9 +104,11 @@ module ysyx_22040127_execute(
    | ex_mret | ex_ecall);//id_to_ex_valid_reg
  
   wire cache_readygo = cache_state == 3'b110 | (!ex_memwrite & !ex_memread) | cache_pipelinehit;
-  assign ex_ready_go = ((!(mul_type || mul_stage2) && 
-  !(div_type || (div_state[0] ^ div_state[1]))) || mul_ok || div_ready)
-  && cache_readygo;
+
+  reg ex_result_blocked;
+
+  assign ex_ready_go = ((!mul_type && !(div_type || (div_state[0] ^ div_state[1]))) 
+  || mul_ok || div_ready) && cache_readygo;
   assign ex_allowin  = !ex_valid || ex_ready_go && mem_allowin;
   assign ex_to_mem_valid = ex_ready_go && ex_valid;
   assign 
@@ -162,6 +163,7 @@ module ysyx_22040127_execute(
     ex_mem_wdata  //63:0
   };
   always @(posedge clk) begin
+
     if(rst) begin
       ex_valid <= 1'b0;      
     end else if(ex_allowin)begin
@@ -172,7 +174,7 @@ module ysyx_22040127_execute(
     end else if(id_to_ex_valid && ex_allowin) begin
       id_to_ex_bus_reg <= id_to_ex_bus;
       ex_flush <= id_flush | mem_mret | ex_mret;
-    end else if(!mul_stage2 & !mul_type & !div_type
+    end else if(!mul_type & !div_type
     & cache_readygo)begin 
       //critical: we need not flush the ex stage write signals when stalled by muls and cache
       id_to_ex_bus_reg[210:206] <= 5'b0;//ex_rd
@@ -217,13 +219,13 @@ module ysyx_22040127_execute(
   assign remw_result  = rem[31:0];//$signed(ex_alu_input1[31:0]) % $signed(ex_alu_input2[31:0]);//to be deleted
   assign remuw_result = rem[31:0];//ex_alu_input1[31:0] % ex_alu_input2[31:0];//to be deleted
 
-  assign sra_mask_32    = {32'hffffffff, ~(32'hffffffff >> sft_input2)};
   assign sra_mask_64    = {~(64'hffffffffffffffff >> sft_input2)};
+  assign sraw_mask_32   = {32'hffffffff, ~(32'hffffffff >> sft_input2[4:0])};
   assign sft_input2  = ex_alu_input2[5:0];
-  assign src1_srlw   = ex_alu_input1[31:0] >> sft_input2;
-  assign src1_sllw   = ex_alu_input1[31:0] << sft_input2;
+  assign src1_srlw   = ex_alu_input1[31:0] >> sft_input2[4:0];
+  assign src1_sllw   = ex_alu_input1[31:0] << sft_input2[4:0];
 
-  assign sext_src1_sraw    = ({64{ex_alu_input1[31]}} & sra_mask_32) | {32'h0, src1_srlw};//{{32{src1_sraw[31]}}, src1_sraw[31:0]};
+  assign sext_src1_sraw    = ({64{ex_alu_input1[31]}} & sraw_mask_32) | {32'h0, src1_srlw};//{{32{src1_sraw[31]}}, src1_sraw[31:0]};
   assign sext_src1_sllw    = {{32{src1_sllw[31]}}, src1_sllw[31:0]};
   assign sext_src1_srlw    = {{32{src1_srlw[31]}}, src1_srlw[31:0]};
 
@@ -252,7 +254,7 @@ module ysyx_22040127_execute(
   */
   assign sign1    = !(ex_memop[0] & ex_memop[1]); 
   assign sign2    = !ex_memop[1];
-  assign mul_type = !(mul_stage2 || mul_ok) & (ex_inst_type == 3'b100)
+  assign mul_type = !(mul_ok) & (ex_inst_type == 3'b100)
    & (rtype_alu_op[op_mul] | rtype_alu_op[op_mulw] 
    | rtype_alu_op[op_mulh] | rtype_alu_op[op_mulhsu] | rtype_alu_op[op_mulhu]);//to be added(2/5)
   assign div_type = !(div_ready) & (ex_inst_type == 3'b100) & (rtype_alu_op[op_rem] | rtype_alu_op[op_remu] |
@@ -271,7 +273,6 @@ module ysyx_22040127_execute(
     mul_res_high, 
     mul_res_low,
     mul_type,
-    mul_stage2,
     mul_ok
   );
   ysyx_22040127_div div(

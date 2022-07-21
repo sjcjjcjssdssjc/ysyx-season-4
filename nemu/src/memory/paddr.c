@@ -15,7 +15,8 @@ paddr_t host_to_guest(uint8_t *haddr) { return haddr - pmem + CONFIG_MBASE; }
 static word_t pmem_read(paddr_t addr, int len) {//word_t and paddr_t are uint64 
   word_t ret = host_read(guest_to_host(addr), len);
   #ifdef CONFIG_MTRACE 
-  //printf("nemu: \033[1;15 mread memory 0x%x with length %d,data is 0x%lx\033[0m\n", addr, len, ret);
+  printf("pc:%lx nemu: \033[1;15 mread memory 0x%x with length %d,data is 0x%lx\033[0m\n", 
+  cpu.pc,addr, len, ret);
   #endif
   return ret;
 }
@@ -35,10 +36,8 @@ static void pmem_write(paddr_t addr, int len, word_t data) {
   else 
     cpu.mwdata = (read_value) | ((data & 0xFFFFFFFFFFFFFFFF) << (rem * 8));
   #ifdef CONFIG_MTRACE 
-  if(addr == 0x80003698 && data){
   printf("\033[1;15m nemu: write memory 0x%x with length %d,data is 0x%lx\033[0m\n", addr, len, data);
   
-  }
   #endif
   host_write(guest_to_host(addr), len, data);
 }

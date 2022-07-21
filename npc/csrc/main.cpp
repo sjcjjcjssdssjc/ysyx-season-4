@@ -11,6 +11,16 @@
 #include "paddr.h"
 #include "defs.h"
 
+#include "axi4.hpp"
+#include "axi4_slave.hpp"
+#include "axi4_mem.hpp"
+
+extern uint8_t pmem[CONFIG_MSIZE];
+
+axi4_ptr<64,64,4> mem_ptr;
+axi4_mem<64,64,4> mem(4096l*1024*1024);
+axi4<64,64,4> mem_sigs;
+axi4_ref<64,64,4> mem_sigs_ref(mem_sigs);
 #define INST_SIZE 4
 
 int sim_time, n;
@@ -56,7 +66,7 @@ const char *gpr[] = {//to be changed
   "t6"  //31
 };
 extern "C" void init_disasm(const char *triple);
-void sdb_mainloop(char *ref_so_file, long img_size, int port);
+void sdb_mainloop(char *ref_so_file, long img_size, int port, axi4_ref<64,64,4> &mem_ref);
 void nvboard_bind_all_pins(Vysyx_22040127_top* dut);
 
 extern "C" void set_gpr_ptr(const svOpenArrayHandle r) {
@@ -115,32 +125,95 @@ static int parse_args(int argc, char *argv[]) {
   }
   return 0;
 }
-void npc_exec_once(){
+void npc_exec_once(axi4_ref<64,64,4> &mem_ref){
   //nvboard_update();
-  for(int i = 0;i < 2; i++){
 
-    if(contextp->time() >= sim_time){
-      wrap_up_trace();
-      printf("\033[1;31m Hit Bad Trap \033[0m\n"); 
-      exit(1);
-    }
-    contextp->timeInc(1);
-    dut->clk = !dut->clk;
-    dut->eval();
-    dut->rst = 0;//to fix the sample bug
-    #ifdef WAVE
-    tfp->dump(contextp->time());
-    #endif
+  if(contextp->time() >= sim_time){
+    wrap_up_trace();
+    printf("\033[1;31m Hit Bad Trap \033[0m\n"); 
+    exit(1);
   }
+
+  contextp->timeInc(1);
+  dut->rst = 0;//to fix the sample bug
+  dut->clk = 1;
+
+  //updata_input:master->slave
+  //mem_sigs.member = mem_ref.*member; mem_ref is mem_ptr's ref
+  mem_sigs.update_input(mem_ref);                 //mem_sigs<-mem_ref master->slave
+  dut->eval();
+
+  //this update surfaces in next posedge
+  //updata_output:slave->master
+  mem.beat(mem_sigs_ref);//update this ref        //mem->mem_sigs_ref
+  mem_sigs.update_output(mem_ref);                //mem_sigs->mem_ref slave->master
+  
+  #ifdef WAVE
+  tfp->dump(contextp->time());
+  #endif
+
+  contextp->timeInc(1);
+  dut->clk = 0;
+  dut->eval();
+  #ifdef WAVE
+  tfp->dump(contextp->time());//must do right after eval
+  #endif
+  
+}
+
+
+void connect_wire(axi4_ptr<64,64,4> &mem_ptr){
+
+  //master->slave 
+  //no user prot qos lock cache region
+  mem_ptr.awready = &(dut->axi_aw_ready_i);
+  mem_ptr.awvalid = &(dut->axi_aw_valid_o);
+  mem_ptr.awaddr  = &(dut->axi_aw_addr_o);
+  mem_ptr.awid    = &(dut->axi_aw_id_o);
+  mem_ptr.awlen   = &(dut->axi_aw_len_o);
+  mem_ptr.awsize  = &(dut->axi_aw_size_o);
+  mem_ptr.awburst = &(dut->axi_aw_burst_o);
+  
+  //no user
+  mem_ptr.wready  = &(dut->axi_w_ready_i);
+  mem_ptr.wvalid  = &(dut->axi_w_valid_o);
+  mem_ptr.wdata   = &(dut->axi_w_data_o);
+  mem_ptr.wstrb   = &(dut->axi_w_strb_o);
+  mem_ptr.wlast   = &(dut->axi_w_last_o);
+  
+  mem_ptr.bready  = &(dut->axi_b_ready_o);
+  mem_ptr.bvalid  = &(dut->axi_b_valid_i);
+  mem_ptr.bresp   = &(dut->axi_b_resp_i);
+  mem_ptr.bid     = &(dut->axi_b_id_i);
+
+  //no prot user lock cache qos region
+  mem_ptr.arready = &(dut->axi_ar_ready_i);
+  mem_ptr.arvalid = &(dut->axi_ar_valid_o);
+  mem_ptr.araddr  = &(dut->axi_ar_addr_o);
+  mem_ptr.arid    = &(dut->axi_ar_id_o);
+  mem_ptr.arlen   = &(dut->axi_ar_len_o);
+  mem_ptr.arsize  = &(dut->axi_ar_size_o);
+  mem_ptr.arburst = &(dut->axi_ar_burst_o);
+
+  mem_ptr.rvalid  = &(dut->axi_r_valid_i);
+  mem_ptr.rresp   = &(dut->axi_r_resp_i);
+  mem_ptr.rdata   = &(dut->axi_r_data_i);
+  mem_ptr.rlast   = &(dut->axi_r_last_i);
+  mem_ptr.rid     = &(dut->axi_r_id_i);
+  mem_ptr.rready  = &(dut->axi_r_ready_o);
 }
 
 int main(int argc, char** argv, char** env) { 
+
+  printf("%s %s\n",argv[0],argv[1],argv[2]);
   #ifdef ITRACE
   init_disasm("riscv64-pc-linux-gnu");
   #endif
   contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
   parse_args(argc, argv);
+
+  
   uint32_t inst,addr = 0x80000000;
   FILE *fp;
   fp = fopen(bin_file, "rb");
@@ -150,6 +223,9 @@ int main(int argc, char** argv, char** env) {
     else pmem_write(addr,inst,0x0F);
     addr += 4;
   }
+  fclose(fp);
+  mem.load_binary(bin_file, 0x80000000);
+
   dut = new Vysyx_22040127_top{contextp};
   #ifdef WAVE
   tfp = new VerilatedVcdC;
@@ -162,6 +238,10 @@ int main(int argc, char** argv, char** env) {
   //nvboard_bind_all_pins(dut);
   //nvboard_init();
 
+  connect_wire(mem_ptr);
+  assert(mem_ptr.check());
+  axi4_ref<64,64,4> mem_ref(mem_ptr);
+  printf("\033[1;32m check complete \033[0m\n");
   dut->rst = 1;
   dut->clk = 0;
   while (n -- > 0) {
@@ -173,8 +253,9 @@ int main(int argc, char** argv, char** env) {
     tfp->dump(contextp->time());
     #endif
   }
-  npc_exec_once();
-  sdb_mainloop(diff_so_file,addr - 0x80000000,1234);
+  
+  npc_exec_once(mem_ref);
+  sdb_mainloop(diff_so_file,addr - 0x80000000,1234,mem_ref);
   wrap_up_trace();
   return 0;
 }

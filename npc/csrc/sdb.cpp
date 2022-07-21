@@ -22,6 +22,8 @@ riscv64_CPU_state ref_r;
 #include "verilated_vcd_c.h"
 #include "verilated_dpi.h"
 
+#include "axi4.hpp"
+
 const char *regs[] = {
   "$0", "ra", "sp", "gp", "tp", "t0", "t1", "t2",
   "s0", "s1", "a0", "a1", "a2", "a3", "a4", "a5",
@@ -35,14 +37,14 @@ extern Vysyx_22040127_top* dut;
 extern void wrap_up_trace();
 int display_size = 5;
 int exec_cnt = 0;
-void npc_exec_once();
+void npc_exec_once(axi4_ref<64,64,4> &mem_ref);
 void dump_gpr();//main.c
 
 extern u_int32_t cpu_pc;//main.c
-void cpu_exec(unsigned x){
+void cpu_exec(unsigned x, axi4_ref<64,64,4> &mem_ref){
   int y = x;
   while(y--){
-    npc_exec_once();
+    npc_exec_once(mem_ref);
     #ifdef ITRACE
     itrace(cpu_pc);
     #endif
@@ -136,8 +138,8 @@ static char* rl_gets() {
 
   return line_read;
 }
-static int cmd_c(char *args) {
-  cpu_exec(-1);
+static int cmd_c(char *args,axi4_ref<64,64,4> &mem_ref) {
+  cpu_exec(-1, mem_ref);
   return 0;
 }
 /*
@@ -148,12 +150,12 @@ static int cmd_d(char *args){
 }
 */
 
-static int cmd_q(char *args) {
+static int cmd_q(char *args,axi4_ref<64,64,4> &mem_ref) {
   wrap_up_trace();
   exit(0);
 }
 
-static int cmd_x(char * args){
+static int cmd_x(char * args,axi4_ref<64,64,4> &mem_ref){
   char *arg = strtok(NULL, " ");//first
 
   unsigned int len;
@@ -170,37 +172,12 @@ static int cmd_x(char * args){
   return 0;
 }
 
-static int cmd_p(char * args){
-  /*
-  char *arg = strtok(NULL, "\"");//second (there is no "")
-  bool success;
-  u_int64_t val = expr(arg, &success);
-  printf("the value is %lu (0x%lx)\n", val, val);
-  if(success)printf("valid.\n");
-  else printf("invalid.\n");
-  return success;
-  */
+static int cmd_p(char * args,axi4_ref<64,64,4> &mem_ref){
   return 0;
 }
 
-/*
-static int cmd_watch(char * args){
-  char *arg = strtok(NULL, "\"");//second (there is no "")
-  bool success;
-  
-  WP* wp = new_wp();
-  if(wp == 0)assert(0);
-  int l = strlen(arg);
-  wp -> expr = (char *)malloc(l);
-  memcpy(wp -> expr, arg, l);
-  wp -> expr[l] = 0;
-  wp -> val = expr(wp -> expr , &success);
-  if(success == 0)assert(0);
-  return success;
-}
-*/
 
-static int cmd_info(char *args) {
+static int cmd_info(char *args,axi4_ref<64,64,4> &mem_ref) {
   char *arg = strtok(NULL, " ");
   if(arg[0] == 'r'){
     dump_gpr();
@@ -208,19 +185,19 @@ static int cmd_info(char *args) {
   return 0;
 }
 
-static int cmd_si(char *args) {
+static int cmd_si(char *args,axi4_ref<64,64,4> &mem_ref) {
   char *arg = strtok(NULL, " ");
   int x = atoi(arg);
-  cpu_exec(x);
+  cpu_exec(x, mem_ref);
   return 0;
 }
 
-static int cmd_help(char *args);
+static int cmd_help(char *args,axi4_ref<64,64,4> &mem_ref);
 
 static struct {
   const char *name;
   const char *description;
-  int (*handler) (char *);
+  int (*handler) (char *, axi4_ref<64,64,4> &);
 } cmd_table [] = {
   { "c", "Continue the execution of the program", cmd_c },
   { "q", "Exit NEMU", cmd_q },
@@ -240,13 +217,13 @@ void sdb_set_batch_mode() {
   is_batch_mode = true;
 }
 
-void sdb_mainloop(char *ref_so_file, long img_size, int port) {//14
+void sdb_mainloop(char *ref_so_file, long img_size, int port, axi4_ref<64,64,4> &mem_ref) {//14
   #ifdef DIFF
   init_difftest(ref_so_file, img_size, port);
   //ref_difftest_exec(1);
   #endif
   if(is_batch_mode){
-    cpu_exec(-1);
+    cpu_exec(-1, mem_ref);
   }
   for (char *str; (str = rl_gets()) != NULL; ) {
     char *str_end = str + strlen(str);
@@ -267,7 +244,7 @@ void sdb_mainloop(char *ref_so_file, long img_size, int port) {//14
     int i;
     for (i = 0; i < NR_CMD; i ++) {
       if (strcmp(cmd, cmd_table[i].name) == 0) {
-        if (cmd_table[i].handler(args) < 0) { return; }
+        if (cmd_table[i].handler(args, mem_ref) < 0) { return; }
         break;
       }
     }

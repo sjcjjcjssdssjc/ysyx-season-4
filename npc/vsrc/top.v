@@ -1,6 +1,14 @@
-`include "mycpu.h"
+`include "ysyx_22040127_mycpu.v"
 
-module ysyx_22040127_top(
+module ysyx_22040127_top # (
+    parameter RW_DATA_WIDTH     = 64,
+    parameter RW_ADDR_WIDTH     = 64,//32,
+    parameter AXI_DATA_WIDTH    = 64,
+    parameter AXI_ADDR_WIDTH    = 64,//32,
+    parameter AXI_ID_WIDTH      = 4,
+    parameter AXI_STRB_WIDTH    = AXI_DATA_WIDTH/8,
+    parameter AXI_USER_WIDTH    = 1
+)(
   input clk,
   input rst,
   output reg[31:0] if_pc,
@@ -16,7 +24,59 @@ module ysyx_22040127_top(
   output wire[63:0] mtval,
   output       wb_memwrite,
   output[63:0] wb_diff_addr,
-  output[63:0] wb_diff_data
+  output[63:0] wb_diff_data,
+
+  // Advanced eXtensible Interface
+  input                               axi_aw_ready_i,              
+  output                              axi_aw_valid_o,
+  output [AXI_ADDR_WIDTH-1:0]         axi_aw_addr_o,
+  output [2:0]                        axi_aw_prot_o,
+  output [AXI_ID_WIDTH-1:0]           axi_aw_id_o,
+  output [AXI_USER_WIDTH-1:0]         axi_aw_user_o,
+  output [7:0]                        axi_aw_len_o,
+  output [2:0]                        axi_aw_size_o,
+  output [1:0]                        axi_aw_burst_o,
+  output                              axi_aw_lock_o,
+  output [3:0]                        axi_aw_cache_o,
+  output [3:0]                        axi_aw_qos_o,
+  output [3:0]                        axi_aw_region_o,
+
+  input                               axi_w_ready_i,                
+  output                              axi_w_valid_o,
+  output [AXI_DATA_WIDTH-1:0]         axi_w_data_o,
+  output [AXI_DATA_WIDTH/8-1:0]       axi_w_strb_o,
+  output                              axi_w_last_o,
+  output [AXI_USER_WIDTH-1:0]         axi_w_user_o,
+  
+  output                              axi_b_ready_o,                
+  input                               axi_b_valid_i,
+  input  [1:0]                        axi_b_resp_i,//abandon           
+  input  [AXI_ID_WIDTH-1:0]           axi_b_id_i,
+  input  [AXI_USER_WIDTH-1:0]         axi_b_user_i,
+
+  //slave->master   
+  input                               axi_ar_ready_i,            
+  //master->slave 
+  output                              axi_ar_valid_o,
+  output [AXI_ADDR_WIDTH-1:0]         axi_ar_addr_o,
+  output [2:0]                        axi_ar_prot_o,
+  output [AXI_ID_WIDTH-1:0]           axi_ar_id_o,
+  output [AXI_USER_WIDTH-1:0]         axi_ar_user_o,
+  output [7:0]                        axi_ar_len_o,
+  output [2:0]                        axi_ar_size_o,
+  output [1:0]                        axi_ar_burst_o,
+  output                              axi_ar_lock_o,
+  output [3:0]                        axi_ar_cache_o,
+  output [3:0]                        axi_ar_qos_o,
+  output [3:0]                        axi_ar_region_o,
+  
+  output                              axi_r_ready_o,                 
+  input                               axi_r_valid_i,                
+  input  [1:0]                        axi_r_resp_i,//abandon
+  input  [AXI_DATA_WIDTH-1:0]         axi_r_data_i,
+  input                               axi_r_last_i,
+  input  [AXI_ID_WIDTH-1:0]           axi_r_id_i,
+  input  [AXI_USER_WIDTH-1:0]         axi_r_user_i
 
   //output[63:0] //for axi
 );
@@ -70,6 +130,19 @@ module ysyx_22040127_top(
   wire[`EX_TO_MEM_WIDTH - 1:0] ex_to_mem_bus;//width TBD
   wire[`MEM_TO_WB_WIDTH - 1:0] mem_to_wb_bus;//width TBD
 
+  wire[63:0]d_req_addr;
+  wire[7:0] d_req_strb;
+  wire[`CACHE_DATA_SIZE - 1:0] d_req_data;
+  wire d_req_wen;
+  wire d_req_valid;
+  wire d_res_valid;
+  wire [`CACHE_DATA_SIZE - 1:0] d_mrdata;
+
+  wire[63:0]i_req_addr;
+  wire i_req_valid;
+  wire i_res_valid;
+  wire[`CACHE_DATA_SIZE-1:0] i_mrdata;
+
 
   wire       wb_allowin;//ready_go is distributed in every module.
   wire[63:0] wb_reg_wdata;
@@ -95,6 +168,9 @@ module ysyx_22040127_top(
   wire       preif_ready_go;
   wire       preif_allowin;
   wire[63:0] icache_data;
+
+  
+
   always @(posedge clk) begin
     if(rst) begin
       preif_valid <= 1'b0;
@@ -109,10 +185,79 @@ module ysyx_22040127_top(
     next_pc_delayed;
     //if_pc;
   assign     icache_addr  = next_pc;//icache request
-  assign     icache_valid = preif_valid & if_allowin;//inst_valid(see the book)
+  assign     icache_valid = preif_valid & if_allowin & !if_instruction_blocked;//inst_valid(see the book)
 
   //reg     preif_valid = !rst;
   assign     preif_ready_go = preif_valid & icache_pipieline_hit;//preif_valid?
+
+  ysyx_22040127_axi_rw axi(
+    .clk(clk),
+    .rst(rst),
+    .d_req_addr(d_req_addr),
+    .d_req_strb(d_req_strb),
+    .d_req_data(d_req_data),
+    .d_req_wen(d_req_wen),
+    .d_req_valid(d_req_valid),
+    .d_res_valid(d_res_valid),
+    .d_mrdata(d_mrdata),
+    .i_req_addr(i_req_addr),
+    .i_req_valid(i_req_valid),
+    .i_res_valid(i_res_valid),
+    .i_mrdata(i_mrdata),
+
+    // Advanced eXtensible Interface
+    .axi_aw_ready_i(axi_aw_ready_i),    
+    .axi_aw_valid_o(axi_aw_valid_o),
+    .axi_aw_addr_o(axi_aw_addr_o),
+    .axi_aw_prot_o(axi_aw_prot_o),
+    .axi_aw_id_o(axi_aw_id_o),
+    .axi_aw_user_o(axi_aw_user_o),
+    .axi_aw_len_o(axi_aw_len_o),
+    .axi_aw_size_o(axi_aw_size_o),
+    .axi_aw_burst_o(axi_aw_burst_o),
+    .axi_aw_lock_o(axi_aw_lock_o),
+    .axi_aw_cache_o(axi_aw_cache_o),
+    .axi_aw_qos_o(axi_aw_qos_o),
+    .axi_aw_region_o(axi_aw_region_o),
+
+    .axi_w_ready_i(axi_w_ready_i),     
+    .axi_w_valid_o(axi_w_valid_o),
+    .axi_w_data_o(axi_w_data_o),
+    .axi_w_strb_o(axi_w_strb_o),
+    .axi_w_last_o(axi_w_last_o),
+    .axi_w_user_o(axi_w_user_o),
+    
+    .axi_b_ready_o(axi_b_ready_o),            
+    .axi_b_valid_i(axi_b_valid_i),
+    .axi_b_resp_i(axi_b_resp_i),//abandon           
+    .axi_b_id_i(axi_b_id_i),
+    .axi_b_user_i(axi_b_user_i),
+
+    //slave->master   
+    .axi_ar_ready_i(axi_ar_ready_i),       
+    //master->slave 
+    .axi_ar_valid_o(axi_ar_valid_o),
+    .axi_ar_addr_o(axi_ar_addr_o),
+    .axi_ar_prot_o(axi_ar_prot_o),
+    .axi_ar_id_o(axi_ar_id_o),
+    .axi_ar_user_o(axi_ar_user_o),
+    .axi_ar_len_o(axi_ar_len_o),
+    .axi_ar_size_o(axi_ar_size_o),
+    .axi_ar_burst_o(axi_ar_burst_o),
+    .axi_ar_lock_o(axi_ar_lock_o),
+    .axi_ar_cache_o(axi_ar_cache_o),
+    .axi_ar_qos_o(axi_ar_qos_o),
+    .axi_ar_region_o(axi_ar_region_o),
+    
+    .axi_r_ready_o(axi_r_ready_o),
+    .axi_r_valid_i(axi_r_valid_i),                
+    .axi_r_resp_i(axi_r_resp_i),//abandon
+    .axi_r_data_i(axi_r_data_i),
+    .axi_r_last_i(axi_r_last_i),
+    .axi_r_id_i(axi_r_id_i),
+    .axi_r_user_i(axi_r_user_i)
+  );
+
   ysyx_22040127_icache icache(
     .clk(clk),
     .rst(rst),
@@ -123,7 +268,11 @@ module ysyx_22040127_top(
     .input_valid(icache_valid),
     .output_data(icache_data),
     .cache_pipelinehit(icache_pipieline_hit),
-    .cache_state(icache_state)
+    .cache_state(icache_state),
+    .axi_req_addr(i_req_addr),
+    .axi_req_valid(i_req_valid),
+    .axi_res_valid(i_res_valid),
+    .axi_mrdata(i_mrdata)
   );
 
   ysyx_22040127_dcache dcache( 
@@ -141,8 +290,17 @@ module ysyx_22040127_top(
     .cache_pipelinehit(dcache_pipelinehit),
     .cache_state(dcache_state),
     .diff_data(mem_diff_data),
-    .diff_addr(mem_diff_addr)
+    .diff_addr(mem_diff_addr),
+    .axi_req_addr(d_req_addr),
+    .axi_req_strb(d_req_strb),
+    .axi_req_data(d_req_data),
+    .axi_req_wen(d_req_wen),
+    .axi_req_valid(d_req_valid),
+    .axi_res_valid(d_res_valid),
+    .axi_mrdata(d_mrdata)
   );
+
+ // ysyx_22040127_axi axi_rw()
 
   import "DPI-C" function void set_simtime();//terminate
   import "DPI-C" function void set_pc(input bit[31:0] pc);
@@ -151,7 +309,8 @@ module ysyx_22040127_top(
   //assign if_instruction = (if_pc[2]) ? if_pcdata[63:32] : if_pcdata[31:0];
 
   assign if_ebreak = (if_instruction[6:0] == 7'b1110011) & if_instruction[20]
-      & !(|{if_instruction[31:21],if_instruction[19:7]});
+      & !(|{if_instruction[31:21],if_instruction[19:7]})
+      | if_instruction[6:0] == 7'b1101011;//riscvtest legacy(inst.c)
   assign if_uart   = if_instruction[6:0] == 7'b1111011;
   assign if_ready_go    = 1'b1;
   assign if_allowin     = !if_valid || if_ready_go && id_allowin;
