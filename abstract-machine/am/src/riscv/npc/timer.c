@@ -4,7 +4,10 @@ void __am_timer_init() {
 }
 
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime) {
-  uptime->us = 0;
+  uint64_t cycle = 0;
+  asm volatile("csrr %0, mcycle" : "=r"(cycle) : );
+  uptime->us = cycle * 10 / 24;
+  //uptime->us = 0;
 }
 
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc) {

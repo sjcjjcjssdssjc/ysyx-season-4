@@ -15,11 +15,13 @@ Area heap = RANGE(&_heap_start, PMEM_END);
 static const char mainargs[] = MAINARGS;
 
 void putch(char ch) {
+  asm volatile("mv a0, %0; .word 0x0000007b" : : "r"(ch));
 }
 
 void halt(int code) {
-  asm volatile("mv a0, %0; ebreak" : :"r"(code));
-  
+  asm volatile("mv a0, %0; .word 0x0000006b" : : "r"(code));
+  //asm volatile("mv a0, %0; ebreak" : :"r"(code));
+
   //should not reach here
   while(1);
 }
