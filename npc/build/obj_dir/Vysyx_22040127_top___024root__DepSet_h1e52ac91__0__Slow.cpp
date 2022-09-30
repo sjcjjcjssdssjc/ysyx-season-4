@@ -4056,7 +4056,7 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___ctor_var_reset(Vysyx_22040127_t
     vlSelf->ysyx_22040127_top__DOT__dec__DOT__id_ready_go = 0;
     vlSelf->ysyx_22040127_top__DOT__dec__DOT__id_valid = 0;
     VL_ZERO_RESET_W(65, vlSelf->ysyx_22040127_top__DOT__dec__DOT__if_to_id_bus_reg);
-    vlSelf->ysyx_22040127_top__DOT__dec__DOT__id_timer_int_tmp = 0;
+    vlSelf->ysyx_22040127_top__DOT__dec__DOT__if_timer_int_reg = 0;
     vlSelf->ysyx_22040127_top__DOT__dec__DOT__id_jalr_stuck = 0;
     vlSelf->ysyx_22040127_top__DOT__dec__DOT__id_jalr_stuck_reg = 0;
     vlSelf->ysyx_22040127_top__DOT__dec__DOT__stuck_jalr_result = 0;

@@ -33,13 +33,13 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
     
     for(int i = 0;i < src_h;i++){
       //printf("%p\n",dst->pixels + sizeof(int) * ((i + dst_y) * (dst->w) + dst_x));
-      printf("i is %d\n",i);
+      //printf("i is %d\n",i);
       memcpy((dst->pixels) + 4*((i + dst_y) * dst->w + dst_x),
       (src->pixels) + 4*((i + src_y) * src->w + src_x), 4 * src_w);
-      printf("!!");
+      //printf("!!");
       
     }
-    printf("no platte ok\n");
+    //printf("no platte ok\n");
     
   } else {
     for(int i = 0;i < src_h;i++){
@@ -52,7 +52,7 @@ void SDL_BlitSurface(SDL_Surface *src, SDL_Rect *srcrect, SDL_Surface *dst, SDL_
 }
 
 void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
-  printf("fill\n");
+  //printf("fill\n");
   int x=0, y=0, w, h;
 
   if(dstrect == NULL){
@@ -64,10 +64,10 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
     w = dstrect->w;
     h = dstrect->h;
   }
-  printf("%d %d\n",w,h);
+  //printf("%d %d\n",w,h);
   for(int j = y;j < y + h;j++)
     for(int i = x;i< x + w;i++){
-      printf("%d %d\n",i,j);
+      //printf("%d %d\n",i,j);
       ((uint32_t*)(dst->pixels))[j * (dst->w) + i] = color;
     }
   NDL_DrawRect((uint32_t *)dst->pixels, x, y, w, h); 
@@ -75,7 +75,7 @@ void SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, uint32_t color) {
 }
 
 void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
-  printf("updata\n");
+  //printf("updata\n");
   int paintw = w, painth = h;
   if(w==0)paintw = s->w;
   if(h==0)painth = s->h;
@@ -84,7 +84,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
   if(s->format->palette != NULL){
 
     for(int i = 0;i < painth;i++){
-      printf("%d %d\n",i,painth);
+      //printf("%d %d\n",i,painth);
       for(int j = 0;j < paintw;j++){
        
         uint8_t r = s->format->palette->colors[s->pixels[(i+y)*(s->w)+j+x]].r;
@@ -97,7 +97,7 @@ void SDL_UpdateRect(SDL_Surface *s, int x, int y, int w, int h) {
         buffer[i*paintw+j] |= b;
       }
     }
-    printf("updata ok\n");
+    //printf("updata ok\n");
     NDL_DrawRect(buffer, x, y, paintw, painth);
     
   } else{

@@ -4,7 +4,7 @@ INC_PATH ?=
 
 VERILATOR = verilator
 VERILATOR_CFLAGS += -MMD -cc  --exe  --trace --build \
-				-O3 --x-assign fast --x-initial fast --noassert
+				-O3 --x-assign fast --x-initial fast --noassert \
 
 BUILD_DIR = ./build
 OBJ_DIR = $(BUILD_DIR)/obj_dir
@@ -31,7 +31,7 @@ LDFLAGS += $(shell llvm-config-11 --libs)
 LDFLAGS += -lSDL2  -lreadline -ldl #-lSDL2_image
 
 
-$(BIN): $(VSRCS) $(CSRCS) #$(NVBOARD_ARCHIVE)
+$(BIN): $(VSRCS) $(CSRCS)
 	@rm -rf $(OBJ_DIR)
 	$(VERILATOR) $(VERILATOR_CFLAGS) \
 		-top $(TOPNAME) $^ \

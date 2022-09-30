@@ -167,7 +167,7 @@ class Vysyx_22040127_top___024root final : public VerilatedModule {
         CData/*0:0*/ ysyx_22040127_top__DOT__dec__DOT__wb_load_use_hazard2_tmp;
         CData/*0:0*/ ysyx_22040127_top__DOT__dec__DOT__id_ready_go;
         CData/*0:0*/ ysyx_22040127_top__DOT__dec__DOT__id_valid;
-        CData/*0:0*/ ysyx_22040127_top__DOT__dec__DOT__id_timer_int_tmp;
+        CData/*0:0*/ ysyx_22040127_top__DOT__dec__DOT__if_timer_int_reg;
         CData/*0:0*/ ysyx_22040127_top__DOT__dec__DOT__id_jalr_stuck;
         CData/*0:0*/ ysyx_22040127_top__DOT__dec__DOT__id_jalr_stuck_reg;
         CData/*2:0*/ ysyx_22040127_top__DOT__dec__DOT__inst_mux__DOT__i0__DOT__lut_out;
