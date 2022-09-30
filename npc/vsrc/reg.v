@@ -31,6 +31,7 @@ module ysyx_22040127_RegisterFile (
   output[63:0] wb_diff_data,
   output[63:0] wb_diff_addr,
   output           wb_ebreak,
+  output reg [63:0] rf [31:0],
   input            mem_flush
 );
   localparam MTVEC    = 12'h305;
@@ -121,7 +122,6 @@ module ysyx_22040127_RegisterFile (
     else if(wb_csr_we && wb_des_csr == MHARTID)csr_mhartid <= wb_csrwdata;
   end
 
-  reg [63:0] rf [31:0];
   reg [`MEM_TO_WB_WIDTH-1:0] mem_to_wb_bus_reg;
   wire non_zerow;
   assign non_zerow = (|wb_rd);
