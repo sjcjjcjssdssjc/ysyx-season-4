@@ -23,8 +23,10 @@ module ysyx_22040127_top # (
   output wire[63:0] mscratch,
   output wire[63:0] mtval,
   output       wb_memwrite,
-  output[63:0] wb_diff_addr,
-  output[63:0] wb_diff_data,
+  output[31:0] wb_instruction,
+  output       cmt_skip,
+  output[63:0] wb_diff_addr,//dep
+  output[63:0] wb_diff_data,//dep
 
   // Advanced eXtensible Interface
   input                               axi_aw_ready_i,
@@ -82,13 +84,13 @@ module ysyx_22040127_top # (
 );
   //TODO: add difftest to mhartid between nemu and npc, nemu and spike
   wire[63:0] mhartid;
-  assign mtval = 64'b0;
+  assign     mtval = 64'b0;
   reg [63:0] if_pcdata;
-  wire[31:0]if_instruction;
+  reg        if_valid;
+  wire[31:0] if_instruction;
   wire       if_ebreak;
   wire       if_uart;//temporary(dpic is also)
   wire       if_flush;
-  reg        if_valid;
   wire       if_ready_go;
   wire       if_allowin;
   wire       if_to_id_valid;
@@ -104,6 +106,9 @@ module ysyx_22040127_top # (
   wire[63:0] id_regdata1;
   wire[63:0] id_regdata2;
   wire       id_to_ex_valid;
+  wire       id_ecall;
+  wire       id_mret;
+  wire       load_branch;
 
   wire[31:0]  ex_pc;
   wire[2:0]   ex_memop;
@@ -112,8 +117,14 @@ module ysyx_22040127_top # (
   wire        ex_allowin;
   wire        ex_ready_go;
   wire        ex_to_mem_valid;
+  wire        ex_ecall;
+  wire        ex_mret;
+  wire        ex_mmio;
+  wire        ex_fencei;
+  wire        ecallmret_on;
 
   wire        dcache_pipelinehit;
+  wire        mem_ecall;
   wire        mem_allowin;
   wire        mem_to_wb_valid;
   wire        mem_flush;
@@ -123,6 +134,7 @@ module ysyx_22040127_top # (
   wire[63:0]  mem_doubly_aligned_data;
   wire [63:0] mem_diff_addr;
   wire [63:0] mem_diff_data;
+  wire [31:0] mem_pc;
  // wire        wb_flush;
 
   wire[`IF_TO_ID_WIDTH - 1:0]  if_to_id_bus;
@@ -153,10 +165,13 @@ module ysyx_22040127_top # (
   wire[4:0]  wb_rd;
   wire       wb_reg_wen;
   wire       wb_ebreak;
+  wire       wb_ecall;
+  wire       wb_timer_int;
+  wire       ecall_stuck;
+  wire       mret_stuck;
   wire[2:0]  dcache_state;
   wire[2:0]  icache_state;
   wire[31:0] next_pc;
-  reg[31:0]  next_pc_delayed;
   //bus to be added.
   //PRE_IF
 
@@ -164,13 +179,20 @@ module ysyx_22040127_top # (
   wire[31:0] icache_addr;
   wire       icache_valid;
   reg        preif_valid;
-  reg        preif_ready_go_delayed;
+  reg        preif_ready_go_reg;
   wire       preif_ready_go;
   wire       preif_allowin;
+  wire       preif_timer_int;
   wire[63:0] icache_data;
 
   reg        timer_blocked;
+  wire       timer_int = 0;
   reg        if_timer_blocked;
+  reg        if_timer_int_tmp;
+  wire       if_timer_int;
+
+
+  reg[31:0]  next_pc_reg;
 
 
   always @(posedge clk) begin
@@ -190,16 +212,23 @@ module ysyx_22040127_top # (
     end
   end
   assign     preif_allowin = !preif_valid || preif_ready_go && if_allowin;
-  assign     next_pc = id_branch_taken & id_allowin ? id_branch_result :
-    (wb_mret) ? mepc[31:0] :
-    (preif_valid & preif_ready_go_delayed) ? if_pc + 4 :
-    next_pc_delayed;
+  assign     next_pc =
+    //(timer_cancel) ? timerint_pc :
+    (wb_mret  | mret_stuck) ? mepc[31:0] :
+    (wb_ecall | ecall_stuck | wb_timer_int & timer_int | timer_blocked) ? mtvec[31:0] ://mod 4
+    (id_branch_taken & id_allowin & !if_timer_blocked) ? id_branch_result ://& !id_timer_int
+    (id_branch_taken & id_allowin & if_timer_blocked) ? mtvec[31:0] ://& !id_timer_int
+    (preif_valid & preif_ready_go_reg) ? if_pc + 4 :
+    next_pc_reg;
     //if_pc;
   assign     icache_addr  = next_pc;//icache request
-  assign     icache_valid = preif_valid & if_allowin & !if_instruction_blocked;//inst_valid(see the book)
+  assign     icache_valid = preif_valid & if_allowin & !if_instruction_blocked & (!ex_ecall & !mem_ecall
+  & !ex_mret & !mem_to_wb_bus[109:109] | wb_ecall | wb_mret);//mod 3
 
   //reg     preif_valid = !rst;
   assign     preif_ready_go = preif_valid & icache_pipieline_hit;//preif_valid?
+  assign     preif_timer_int = timer_int & !(wb_timer_int & timer_int);
+
 
   ysyx_22040127_axi_rw axi(
     .clk(clk),
@@ -277,9 +306,15 @@ module ysyx_22040127_top # (
     .input_memwrite(0),
     .input_memread(1'b1),
     .input_valid(icache_valid),
+    .load_branch(load_branch),
+    .id_allowin(id_allowin),
     .output_data(icache_data),
     .cache_pipelinehit(icache_pipieline_hit),
     .cache_state(icache_state),
+    .ecall_stuck(ecall_stuck),
+    .mret_stuck(mret_stuck),
+    .wb_ecall(wb_ecall),
+    .wb_mret(wb_mret),
     .axi_req_addr(i_req_addr),
     .axi_req_valid(i_req_valid),
     .axi_res_valid(i_res_valid),
@@ -289,6 +324,7 @@ module ysyx_22040127_top # (
   ysyx_22040127_dcache dcache(
     .clk(clk),
     .rst(rst),
+    .fencei(ex_fencei),
     .input_addr(ex_to_mem_bus[127:64]),//ex_alu_output
     .input_wdata(ex_to_mem_bus[63:0]),//ex_wdata(temporary)
     .input_memwrite(ex_to_mem_bus[134:134]),//ex_memwrite
@@ -307,6 +343,7 @@ module ysyx_22040127_top # (
     .axi_req_data(d_req_data),
     .axi_req_wen(d_req_wen),
     .axi_req_valid(d_req_valid),
+    .mmio(ex_mmio),
     .axi_res_valid(d_res_valid),
     .axi_mrdata(d_mrdata)
   );
@@ -316,19 +353,21 @@ module ysyx_22040127_top # (
   import "DPI-C" function void set_simtime();//terminate
   import "DPI-C" function void set_pc(input bit[31:0] pc);
   import "DPI-C" function void pmem_read(input longint raddr, output longint doubly_aligned_data);
-  assign if_flush  = wb_mret;
+  assign if_flush  = wb_mret | wb_ecall;
   //assign if_instruction = (if_pc[2]) ? if_pcdata[63:32] : if_pcdata[31:0];
 
   assign if_ebreak = (if_instruction[6:0] == 7'b1110011) & if_instruction[20]
-      & !(|{if_instruction[31:21],if_instruction[19:7]})
-      | if_instruction[6:0] == 7'b1101011;//riscvtest legacy(inst.c)
+      & !(|{if_instruction[31:21],if_instruction[19:7]});
+      //| if_instruction[6:0] == 7'b1101011;//riscvtest legacy(inst.c)
   assign if_uart   = if_instruction[6:0] == 7'b1111011;
   assign if_ready_go    = 1'b1;
   assign if_allowin     = !if_valid || if_ready_go && id_allowin;
   //once rst = 0, if_allowin is set to 1
   assign if_to_id_valid = if_valid && if_ready_go;//always ready to go
-  assign if_to_id_bus   = {if_ebreak , id_branch_taken | wb_mret | if_uart ?
+  assign if_to_id_bus   = {if_ebreak , id_branch_taken & !if_timer_blocked | ex_ecall | ex_mret // mod 4
+  | id_ecall | id_mret | wb_mret | wb_ecall | if_timer_int ?
   32'b0 : if_instruction, if_pc};
+  assign if_timer_int = if_timer_int_tmp | timer_int;
 
   /*
   always @(*)begin //need change to posedge clk
@@ -342,33 +381,39 @@ module ysyx_22040127_top # (
   assign    if_instruction = //id_allowin ? if_instruction_reg :
   (if_pc[2]?icache_data[63:32]:icache_data[31:0]);
   always @(posedge clk) begin
-    if(preif_ready_go_delayed & !if_allowin)begin//cannot id_branch_taken?
+   if(rst)begin//or preif?
+      if_instruction_reg     <= 32'b0;
+      if_instruction_blocked <= 1'b0;
+    end else if(preif_ready_go_reg & !if_allowin)begin//cannot id_branch_taken?
       if_instruction_reg     <= if_instruction;
       if_instruction_blocked <= 1'b1;
     end else if(if_to_id_valid & id_allowin)
       if_instruction_blocked   <= 1'b0;
 
-    if(!rst)next_pc_delayed <= next_pc;
-    else next_pc_delayed    <= 32'h80000000;
-    preif_ready_go_delayed <= preif_ready_go;
+    if(!rst)next_pc_reg <= next_pc;
+    else next_pc_reg    <= 32'h80000000;
+
+    if(rst)preif_ready_go_reg <= 1'b0;
+    else preif_ready_go_reg <= preif_ready_go;
     if(wb_ebreak)//need revision
       set_simtime();
   end
 
   always @(posedge clk) begin
-    /* verilator lint_off WIDTH */
-    if(if_uart)$write("%c",rf[10]);
-    /* verilator lint_on WIDTH */
     if(rst) begin
       if_valid <= 1'b0;
     end else if(if_allowin)begin
       if_valid <= preif_ready_go;//add more?
     end
 
-    if(rst == 1'b1)
+    if(rst == 1'b1)begin
       if_pc <= 32'h80000000;
-    else if(preif_ready_go & if_allowin)
+      if_timer_int_tmp <= 1'b0;
+      if_timer_blocked <= 1'b0;
+    end else if(preif_ready_go & if_allowin)
       if_pc <= next_pc;
+      if_timer_int_tmp <= preif_timer_int;//unuse
+      if_timer_blocked <= timer_blocked;
     /*
     else if(id_branch_taken && if_allowin) if_pc <= id_branch_result;//id_inst_type == TYPE_B -> id_branch_taken
     else if(wb_mret)if_pc <= mepc[31:0];
@@ -390,6 +435,7 @@ module ysyx_22040127_top # (
     .id_to_ex_valid(id_to_ex_valid),
     .id_to_ex_bus(id_to_ex_bus),
     .if_to_id_bus(if_to_id_bus),
+    .if_timer_int(if_timer_int),
     .id_rs1(id_rs1),
     .id_rs2(id_rs2),
     .id_regdata1_tmp(id_regdata1),
@@ -413,10 +459,24 @@ module ysyx_22040127_top # (
     .mem_csr_we(mem_to_wb_bus[110:110]),
     .wb_csr_we(wb_csr_we),
     .ex_pc(ex_pc),
+    .mepc_low(mepc[31:0]),
+    .preif_allowin(preif_allowin),
     .if_flush(if_flush),
     .if_instruction_reg(if_instruction_reg),
     .if_instruction_blocked(if_instruction_blocked),
-    .id_flush(id_flush)
+    .id_ecall(id_ecall),
+    .id_mret(id_mret),
+    .id_flush(id_flush),
+    .load_branch(load_branch),
+    .ecallmret_on(ecallmret_on),
+    .ex_ecall(ex_ecall),
+    .ex_mret(ex_mret),
+    .mem_pc(mem_pc),
+    .mem_ecall(mem_ecall),
+    .wb_ecall(wb_ecall),
+    .wb_mret(wb_mret),
+    .wb_pc(wb_pc),
+    .icache_state(icache_state)
   );
   ysyx_22040127_execute exe(
     .clk(clk),
@@ -433,7 +493,11 @@ module ysyx_22040127_top # (
     .cache_state(dcache_state),
     .ex_flush(ex_flush),
     .ex_pc(ex_pc),
-    .ex_ready_go(ex_ready_go)
+    .ex_ecall(ex_ecall),
+    .ex_mret(ex_mret),
+    .ex_ready_go(ex_ready_go),
+    .ex_fencei(ex_fencei),
+    .mem_ecall(mem_ecall)
   );
   ysyx_22040127_memory mem(
     .clk(clk),
@@ -443,6 +507,7 @@ module ysyx_22040127_top # (
     .ex_to_mem_valid(ex_to_mem_valid),//from last stage
     .mem_to_wb_valid(mem_to_wb_valid),//for next stage
     .ex_to_mem_bus(ex_to_mem_bus),
+    .ex_mmio(ex_mmio),
     .mem_to_wb_bus(mem_to_wb_bus),
     .mem_alu_output(mem_alu_output),
     .mem_final_rdata(mem_final_rdata),
@@ -455,6 +520,8 @@ module ysyx_22040127_top # (
     .mem_doubly_aligned_data(mem_doubly_aligned_data),
     .mem_diff_addr(mem_diff_addr),
     .mem_diff_data(mem_diff_data),
+    .mem_ecall(mem_ecall),
+    .mem_pc(mem_pc),
     .cache_state(dcache_state)
   );
   ysyx_22040127_RegisterFile wb(
@@ -476,6 +543,7 @@ module ysyx_22040127_top # (
     .wb_csrrdata(wb_csrrdata),
     .wb_mret(wb_mret),
     .wb_csr_we(wb_csr_we),
+    .wb_ecall(wb_ecall),
     .csr_mepc(mepc),
     .csr_mtvec(mtvec),
     .csr_mstatus(mstatus),
@@ -487,7 +555,10 @@ module ysyx_22040127_top # (
     .wb_memwrite(wb_memwrite),
     .wb_diff_data(wb_diff_data),
     .wb_diff_addr(wb_diff_addr),
+    .wb_timer_int(wb_timer_int),
     .wb_ebreak(wb_ebreak),
+    .wb_instruction(wb_instruction),
+    .cmt_skip(cmt_skip),
     .rf(rf),
     .mem_flush(mem_flush)
   );//wb

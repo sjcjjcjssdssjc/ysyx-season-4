@@ -13,8 +13,11 @@
 #ifdef DIFF
 #include "difftest.h"
 riscv64_CPU_state ref_r;
+riscv64_CPU_state dut_r;
 #endif 
-
+#ifdef VGA
+void init_vga();
+#endif
 
 #include "Vysyx_22040127_top.h"
 #include "Vysyx_22040127_top__Dpi.h"
@@ -35,50 +38,62 @@ static int is_batch_mode = true;
 extern uint64_t *cpu_gpr;//main.c(gpr of npc)
 extern Vysyx_22040127_top* dut;
 extern void wrap_up_trace();
+extern void device_update();
 int display_size = 5;
 int exec_cnt = 0;
 void npc_exec_once(axi4_ref<64,64,4> &mem_ref);
+void print_surrounding_inst();
 void dump_gpr();//main.c
 
-extern u_int32_t cpu_pc;//main.c
+//extern u_int32_t cpu_pc;//main.c
+uint32_t tmp_pc = 0x80000000;
+extern int cyclecnt;
 void cpu_exec(unsigned x, axi4_ref<64,64,4> &mem_ref){
   int y = x;
   while(y--){
     npc_exec_once(mem_ref);
-    #ifdef ITRACE
-    itrace(cpu_pc);
-    #endif
     #ifdef DIFF
     if(dut -> wb_valid){
+
+      #ifdef ITRACE
+      itrace(dut->wb_pc,dut->wb_instruction);
+      #endif 
+      tmp_pc = dut->wb_pc;
       exec_cnt++;
-      //if(exec_cnt == 1)dut->wb_pc = 0x80000000;
       ref_difftest_regcpy(&ref_r, DIFFTEST_TO_DUT);//ref_r is nemu
       bool k = isa_difftest_checkregs(&ref_r, dut->wb_pc);
-
-      //compare the state machine(nextpc, regs of pc)
-      /*
-      if(dut-> wb_memwrite && ref_r.mwaddr != dut->wb_diff_addr){
-        //k=0;
-        printf("\033[1;31m nemu waddr:%lx our:%lx  after %d steps nemu pc:%lx our pc:%x \033[0m\n",
-        ref_r.mwaddr,dut->wb_diff_addr,exec_cnt,ref_r.pc,dut->wb_pc);
+      if(dut -> cmt_skip){
+        for(int i = 0; i < 32; i++)
+          dut_r.gpr[i] = cpu_gpr[i];
+        dut_r.pc      = dut->wb_pc;
+        dut_r.mepc    = dut->mepc;
+        dut_r.mcause  = dut->mcause;
+        dut_r.mtvec   = dut->mtvec;
+        dut_r.mstatus = dut->mstatus;
+        dut_r.mie     = dut->mie;
+        dut_r.mip     = dut->mip;
+        dut_r.mscratch= dut->mscratch;
+        dut_r.mtval   = dut->mtval;
+        ref_difftest_regcpy(&dut_r, DIFFTEST_TO_REF);
+        k = 1;
       }
-      if(dut-> wb_memwrite && ref_r.mwdata != dut->wb_diff_data){
-        //k=0;
-        printf("\033[1;31m nemu wdata:%lx our:%lx  after %d steps nemu pc:%lx our pc:%x \033[0m\n",
-        ref_r.mwdata,dut->wb_diff_data,exec_cnt,ref_r.pc,dut->wb_pc);
-      }
-      */
+      
       //compare the memory content
-      if(!k)for(int i=0;i<32;i++){
-        if(ref_r.gpr[i] != cpu_gpr[i])
-          printf("\033[1;31m%s nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          regs[i], ref_r.gpr[i], cpu_gpr[i],ref_r.pc,dut->wb_pc,exec_cnt);
-      }
-      if(ref_r.mcause != dut->mcause){
+      if(!k){
+        #ifdef ITRACE
+          print_surrounding_inst();
+        #endif 
+        for(int i=0;i<32;i++){
+          if(ref_r.gpr[i] != cpu_gpr[i])
+            printf("\033[1;31m%s nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
+            regs[i], ref_r.gpr[i], cpu_gpr[i],ref_r.pc,dut->wb_pc,exec_cnt);
+        }
+        printf("%d\n",cyclecnt);
+        if(ref_r.mcause != dut->mcause){
           printf("\033[1;31m mcause: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
           ref_r.mcause, dut->mcause,ref_r.pc,dut->wb_pc,exec_cnt);
         }
-        if(ref_r.mepc != dut->mepc){
+        if(ref_r.mepc != dut->mepc){ 
           printf("\033[1;31m mepc: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
           ref_r.mepc, dut->mepc,ref_r.pc,dut->wb_pc,exec_cnt);
         }
@@ -106,9 +121,11 @@ void cpu_exec(unsigned x, axi4_ref<64,64,4> &mem_ref){
           printf("\033[1;31m mtvec: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
           ref_r.mtvec, dut->mtvec,ref_r.pc,dut->wb_pc,exec_cnt);
         }
-      //printf("wb pc is %x\n",dut->wb_pc);
-      if(ref_r.pc != dut->wb_pc)printf("\033[1;31m nemu pc:%lx our pc:%x after %d steps\033[0m\n",
-      ref_r.pc,dut->wb_pc,exec_cnt);
+        //printf("wb pc is %x\n",dut->wb_pc);
+        if(ref_r.pc != dut->wb_pc)printf("\033[1;31m nemu pc:%lx our pc:%x after %d steps\033[0m\n",
+        ref_r.pc,dut->wb_pc,exec_cnt);
+      
+      }
       
       if(k == 0){
         printf("\033[1;31m regs Not same:Hit Bad Trap \033[0m\n"); 
@@ -119,6 +136,9 @@ void cpu_exec(unsigned x, axi4_ref<64,64,4> &mem_ref){
 
       ref_difftest_exec(1);
     }
+    #endif
+    #ifdef VGA
+    device_update();
     #endif
   }
   
@@ -183,7 +203,7 @@ static int cmd_info(char *args,axi4_ref<64,64,4> &mem_ref) {
     dump_gpr();
   } else printf("unknown instruction\n");
   return 0;
-}
+} 
 
 static int cmd_si(char *args,axi4_ref<64,64,4> &mem_ref) {
   char *arg = strtok(NULL, " ");
@@ -221,6 +241,9 @@ void sdb_mainloop(char *ref_so_file, long img_size, int port, axi4_ref<64,64,4> 
   #ifdef DIFF
   init_difftest(ref_so_file, img_size, port);
   //ref_difftest_exec(1);
+  #endif
+  #ifdef VGA
+  init_vga();
   #endif
   if(is_batch_mode){
     cpu_exec(-1, mem_ref);

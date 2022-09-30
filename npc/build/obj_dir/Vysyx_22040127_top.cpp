@@ -10,11 +10,13 @@
 // Constructors
 
 Vysyx_22040127_top::Vysyx_22040127_top(VerilatedContext* _vcontextp__, const char* _vcname__)
-    : vlSymsp{new Vysyx_22040127_top__Syms(_vcontextp__, _vcname__, this)}
+    : VerilatedModel{*_vcontextp__}
+    , vlSymsp{new Vysyx_22040127_top__Syms(contextp(), _vcname__, this)}
     , clk{vlSymsp->TOP.clk}
     , rst{vlSymsp->TOP.rst}
     , wb_valid{vlSymsp->TOP.wb_valid}
     , wb_memwrite{vlSymsp->TOP.wb_memwrite}
+    , cmt_skip{vlSymsp->TOP.cmt_skip}
     , axi_aw_ready_i{vlSymsp->TOP.axi_aw_ready_i}
     , axi_aw_valid_o{vlSymsp->TOP.axi_aw_valid_o}
     , axi_aw_prot_o{vlSymsp->TOP.axi_aw_prot_o}
@@ -57,6 +59,7 @@ Vysyx_22040127_top::Vysyx_22040127_top(VerilatedContext* _vcontextp__, const cha
     , axi_r_user_i{vlSymsp->TOP.axi_r_user_i}
     , if_pc{vlSymsp->TOP.if_pc}
     , wb_pc{vlSymsp->TOP.wb_pc}
+    , wb_instruction{vlSymsp->TOP.wb_instruction}
     , mepc{vlSymsp->TOP.mepc}
     , mtvec{vlSymsp->TOP.mtvec}
     , mstatus{vlSymsp->TOP.mstatus}
@@ -73,10 +76,12 @@ Vysyx_22040127_top::Vysyx_22040127_top(VerilatedContext* _vcontextp__, const cha
     , axi_r_data_i{vlSymsp->TOP.axi_r_data_i}
     , rootp{&(vlSymsp->TOP)}
 {
+    // Register model with the context
+    contextp()->addModel(this);
 }
 
 Vysyx_22040127_top::Vysyx_22040127_top(const char* _vcname__)
-    : Vysyx_22040127_top(nullptr, _vcname__)
+    : Vysyx_22040127_top(Verilated::threadContextp(), _vcname__)
 {
 }
 
@@ -130,10 +135,6 @@ void Vysyx_22040127_top::eval_step() {
 //============================================================
 // Utilities
 
-VerilatedContext* Vysyx_22040127_top::contextp() const {
-    return vlSymsp->_vm_contextp__;
-}
-
 const char* Vysyx_22040127_top::name() const {
     return vlSymsp->name();
 }
@@ -144,6 +145,16 @@ const char* Vysyx_22040127_top::name() const {
 VL_ATTR_COLD void Vysyx_22040127_top::final() {
     Vysyx_22040127_top___024root___final(&(vlSymsp->TOP));
 }
+
+//============================================================
+// Implementations of abstract methods from VerilatedModel
+
+const char* Vysyx_22040127_top::hierName() const { return vlSymsp->name(); }
+const char* Vysyx_22040127_top::modelName() const { return "Vysyx_22040127_top"; }
+unsigned Vysyx_22040127_top::threads() const { return 1; }
+std::unique_ptr<VerilatedTraceConfig> Vysyx_22040127_top::traceConfig() const {
+    return std::unique_ptr<VerilatedTraceConfig>{new VerilatedTraceConfig{false, false, false}};
+};
 
 //============================================================
 // Trace configuration
@@ -170,6 +181,7 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root__trace_register(Vysyx_22040127_to
 
 VL_ATTR_COLD void Vysyx_22040127_top::trace(VerilatedVcdC* tfp, int levels, int options) {
     if (false && levels && options) {}  // Prevent unused
+    tfp->spTrace()->addModel(this);
     tfp->spTrace()->addInitCb(&trace_init, &(vlSymsp->TOP));
     Vysyx_22040127_top___024root__trace_register(&(vlSymsp->TOP), tfp->spTrace());
 }

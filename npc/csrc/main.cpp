@@ -125,6 +125,7 @@ static int parse_args(int argc, char *argv[]) {
   }
   return 0;
 }
+int cyclecnt = 0;
 void npc_exec_once(axi4_ref<64,64,4> &mem_ref){
   //nvboard_update();
 
@@ -135,28 +136,31 @@ void npc_exec_once(axi4_ref<64,64,4> &mem_ref){
   }
 
   contextp->timeInc(1);
-  dut->rst = 0;//to fix the sample bug
+  dut->rst = 0;//to fix the sample bug  
   dut->clk = 1;
 
   //updata_input:master->slave
   //mem_sigs.member = mem_ref.*member; mem_ref is mem_ptr's ref
   mem_sigs.update_input(mem_ref);                 //mem_sigs<-mem_ref master->slave
-  dut->eval();
+  dut->eval(); 
 
   //this update surfaces in next posedge
   //updata_output:slave->master
   mem.beat(mem_sigs_ref);//update this ref        //mem->mem_sigs_ref
   mem_sigs.update_output(mem_ref);                //mem_sigs->mem_ref slave->master
   
-  #ifdef WAVE
-  tfp->dump(contextp->time());
-  #endif
+  // #ifdef WAVE
+  //   if(cyclecnt >= 500000)
+  //     tfp->dump(contextp->time());
+  // #endif
 
   contextp->timeInc(1);
   dut->clk = 0;
-  dut->eval();
+  dut->eval();  
+  cyclecnt++;
   #ifdef WAVE
-  tfp->dump(contextp->time());//must do right after eval
+    if(cyclecnt >= 1000000 && cyclecnt <= 2000000)
+      tfp->dump(contextp->time());//must do right after eval
   #endif
   
 }
@@ -211,8 +215,7 @@ int main(int argc, char** argv, char** env) {
   #endif
   contextp = new VerilatedContext;
   contextp->commandArgs(argc, argv);
-  parse_args(argc, argv);
-
+  parse_args(argc, argv); 
   
   uint32_t inst,addr = 0x80000000;
   FILE *fp;
@@ -227,10 +230,10 @@ int main(int argc, char** argv, char** env) {
   mem.load_binary(bin_file, 0x80000000);
 
   dut = new Vysyx_22040127_top{contextp};
-  #ifdef WAVE
+  #ifdef WAVE  
   tfp = new VerilatedVcdC;
   contextp->traceEverOn(true);
-  dut->trace(tfp, 99);
+  dut->trace(tfp, 3);  
   tfp->open("./build/obj_dir/wave.vcd");
   #endif
   //0x7FFFFFFF

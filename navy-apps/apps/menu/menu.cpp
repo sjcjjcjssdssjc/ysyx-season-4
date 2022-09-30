@@ -119,9 +119,12 @@ int main(int argc, char *argv[], char *envp[]) {
 }
 
 static void draw_ch(BDF_Font *font, int x, int y, char ch, uint32_t fg, uint32_t bg) {
+  printf("before sur\n");
   SDL_Surface *s = BDF_CreateSurface(font, ch, fg, bg);
   SDL_Rect dstrect = { .x = x, .y = y };
+  printf("before blit\n");
   SDL_BlitSurface(s, NULL, screen, &dstrect);
+  printf("blit ok\n");
   SDL_FreeSurface(s);
 }
 
@@ -147,6 +150,7 @@ static void display_menu(int n) {
   char buf[80];
   int i;
   for (i = 0; i <= n; i ++) {
+    printf("item %d\n",i);
     auto *item = &items[page * 10 + i];
     sprintf(buf, "  [%d] %s", i, item->name);
     draw_text_row(buf, i);

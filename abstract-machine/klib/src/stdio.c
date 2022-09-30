@@ -7,7 +7,6 @@ char out[5000];//to be changed
 int snpflag = 0;
 size_t snn = 0;
 int printf(const char *fmt, ...) {
-  
   int ret;
   va_list ap;
   va_start(ap, fmt);

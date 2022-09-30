@@ -8,6 +8,7 @@ module ysyx_22040127_mul (
   output [63:0] high,
   output [63:0] low,
   input  mul_type, 
+  input  mul_stuck,
   output reg ready
 );
   wire[64:0] x_ext;
@@ -33,34 +34,43 @@ module ysyx_22040127_mul (
     {128{multiplied[2:0] == 3'b100}} & {x_comp[126:0], 1'b0};
 
   always @(posedge clk) begin
-    case(mul_state)
-      IDLE:begin
-        if(mul_type)begin
-          mul_state <= MUL_ON;
-          cnt <= 5'b0;
-          ready <= 1'b0;
-          res   <= 128'b0;
-          multiplier <= {{63{x_ext[64]}}, x_ext};
-          multiplied <= y_ext;
-        end else begin
-          ready <= 1'b0;
+    if(rst)begin
+      cnt   <= 0;
+      ready <= 0;
+      res   <= 0;
+      mul_state  <= 0;
+      multiplier <= 0;
+      multiplied <= 0;
+    end else begin 
+      case(mul_state)
+        IDLE:begin
+          if(mul_type & !mul_stuck)begin
+            mul_state <= MUL_ON;
+            cnt <= 5'b0;
+            ready <= 1'b0;
+            res   <= 128'b0;
+            multiplier <= {{63{x_ext[64]}}, x_ext};
+            multiplied <= y_ext;
+          end else if(!mul_stuck)begin
+            ready <= 1'b0;
+          end
         end
-      end
-      MUL_ON:begin
-        cnt <= cnt + 1;
-        res <= res + z;
-        multiplied <= multiplied >> 2;
-        multiplier <= multiplier << 2;
-        if(cnt == 5'b11111)mul_state <= MUL_OK;
-      end
-      MUL_OK:begin
-        ready <= 1'b1;
-        mul_state <= IDLE;
-      end
-      default: mul_state <= IDLE;
-    endcase
+        MUL_ON:begin
+          cnt <= cnt + 1;
+          res <= res + z;
+          multiplied <= multiplied >> 2;
+          multiplier <= multiplier << 2;
+          if(cnt == 5'b11111)mul_state <= MUL_OK;
+        end
+        MUL_OK:begin
+          ready <= 1'b1;
+          mul_state <= IDLE;
+        end
+        default: mul_state <= IDLE;
+      endcase
+    end
   end
-  
+   
   assign high = res[127:64];
   assign low  = res[63:0];
 

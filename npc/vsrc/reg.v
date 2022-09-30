@@ -19,6 +19,7 @@ module ysyx_22040127_RegisterFile (
   output    [63:0] wb_csrrdata,
   output           wb_mret,
   output           wb_csr_we,
+  output           wb_ecall,
   output reg[63:0] csr_mepc,
   output reg[63:0] csr_mtvec,
   output wire[63:0]csr_mstatus,
@@ -30,7 +31,10 @@ module ysyx_22040127_RegisterFile (
   output       wb_memwrite,
   output[63:0] wb_diff_data,
   output[63:0] wb_diff_addr,
-  output           wb_ebreak,
+  output       wb_timer_int,
+  output       wb_ebreak,
+  output[31:0] wb_instruction,
+  output reg   cmt_skip,
   output reg [63:0] rf [31:0],
   input            mem_flush
 );
@@ -42,6 +46,9 @@ module ysyx_22040127_RegisterFile (
   localparam MIP      = 12'h344;
   localparam MSCRATCH = 12'h340;
   localparam MHARTID  = 12'hF14;
+  localparam MCYCLE   = 12'hB00;
+
+  reg[63:0]  csr_mcycle;
 
   wire[11:0] wb_des_csr;
   wire[63:0] wb_reg_wdata_tmp;
@@ -51,7 +58,6 @@ module ysyx_22040127_RegisterFile (
   reg        mstatus_mie;
   reg        wb_flush;
   wire[4:0]  wb_rs1;
-  wire       wb_ecall;
   wire       wb_csrrw;
   wire       wb_csrrs;
   wire       wb_csrrc;
@@ -59,9 +65,15 @@ module ysyx_22040127_RegisterFile (
   wire       wb_csrrsi;
   wire       wb_csrrci;
   wire[63:0] wb_alu_input1;
+  wire       wb_rmcycle;
+  wire       wb_skip;
+  wire       wb_mmio;
 
+  assign wb_rmcycle  = (wb_des_csr == MCYCLE) & wb_csrrs;
+  assign wb_skip     = wb_rmcycle | wb_mmio; 
 
   assign wb_csrrdata = {64{wb_des_csr == MTVEC}} & csr_mtvec |
+  {64{wb_des_csr == MCYCLE}} & csr_mcycle |
   {64{wb_des_csr == MCAUSE}} & csr_mcause | {64{wb_des_csr == MSTATUS}} & csr_mstatus |
   {64{wb_des_csr == MEPC}}   & csr_mepc   | {64{wb_des_csr == MIE}} & csr_mie |
   {64{wb_des_csr == MIP}} & csr_mip | {64{wb_des_csr == MSCRATCH}} & csr_mscratch |
@@ -86,36 +98,42 @@ module ysyx_22040127_RegisterFile (
   //XSL[1](35 TBC) UXL[1](33 TBC) XS(16:15 TBC) FS(14:13 TBC)
 
   always @(posedge clk) begin
+    cmt_skip <= wb_skip;
     if(rst)begin 
       mstatus_mpp <= 2'b11;//write on 6
     end
     else if(wb_mret) mstatus_mpp <= 2'b11;//do not support user mode for now
+    else if(wb_ecall & wb_valid)mstatus_mpp <= 2'b11;//?
     else if(wb_csr_we && wb_des_csr == MSTATUS) begin
       mstatus_mpp <= wb_csrwdata[12:11];
     end
 
     if(rst)mstatus_mpie <= 1'b0;
-    else if(wb_mret) mstatus_mpie <= 1'b1;
-    else if(wb_ecall)mstatus_mpie <= mstatus_mie;
+    else if(wb_ecall & wb_valid)mstatus_mpie <= mstatus_mie;
+    else if(wb_mret & wb_valid) mstatus_mpie <= 1'b1;
     else if(wb_csr_we && wb_des_csr == MSTATUS) mstatus_mpie <= wb_csrwdata[7];
 
     if(rst)mstatus_mie <= 1'b0;
-    else if(wb_mret) mstatus_mie <= mstatus_mpie;
+    else if(wb_ecall & wb_valid) mstatus_mie <= 1'b0;
+    else if(wb_mret & wb_valid) mstatus_mie <= mstatus_mpie;//1'b1;
     else if(wb_csr_we && wb_des_csr == MSTATUS) mstatus_mie <= wb_csrwdata[3];
 
     if(rst)begin
-      csr_mepc     <= 64'b0;
+      csr_mepc   <= 64'b0;
+      csr_mcause <= 64'b0;
+    end else if(wb_ecall)begin
+      csr_mepc   <= {32'b0,wb_pc};//?
+      csr_mcause <= 11;
+    end else if(wb_csr_we && wb_des_csr == MEPC)csr_mepc <= wb_csrwdata;
+    else if(wb_csr_we && wb_des_csr == MCAUSE)csr_mcause <= wb_csrwdata;
+
+    if(rst)begin
       csr_mtvec    <= 64'b0;
-      csr_mcause   <= 64'b0;
       csr_mie      <= 64'b0;
       csr_mip      <= 64'b0;
       csr_mscratch <= 64'b0;
       csr_mhartid  <= 64'b0;
-    end
-
-    if(wb_csr_we && wb_des_csr == MEPC)csr_mepc <= wb_csrwdata;
-    else if(wb_csr_we && wb_des_csr == MTVEC)csr_mtvec <= wb_csrwdata;
-    else if(wb_csr_we && wb_des_csr == MCAUSE)csr_mcause <= wb_csrwdata;
+    end else if(wb_csr_we && wb_des_csr == MTVEC)csr_mtvec <= wb_csrwdata;
     else if(wb_csr_we && wb_des_csr == MIE)csr_mie <= wb_csrwdata;
     else if(wb_csr_we && wb_des_csr == MIP)csr_mip <= wb_csrwdata;
     else if(wb_csr_we && wb_des_csr == MSCRATCH)csr_mscratch <= wb_csrwdata;
@@ -135,7 +153,10 @@ module ysyx_22040127_RegisterFile (
   assign wb_ready_go = 1'b1;
   assign wb_allowin  = !wb_valid || wb_ready_go;
   assign 
-  { wb_ebreak,
+  { wb_instruction,
+    wb_mmio,
+    wb_timer_int,
+    wb_ebreak,
     wb_memwrite,
     wb_diff_data,
     wb_diff_addr,
@@ -182,5 +203,14 @@ module ysyx_22040127_RegisterFile (
     if (wb_reg_wen && (|wb_rd) && !wb_flush)begin
       rf[wb_rd] <= wb_reg_wdata;
     end 
+  end
+
+  always @(posedge clk)begin
+    if(rst)begin
+      csr_mcycle  <= 0;
+    end else begin
+      csr_mcycle  <= csr_mcycle + 1;
+    end
+
   end
 endmodule

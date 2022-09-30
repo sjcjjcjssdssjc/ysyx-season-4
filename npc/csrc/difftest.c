@@ -18,7 +18,7 @@ void (*ref_difftest_exec)(uint64_t n) = NULL;
 void (*ref_difftest_raise_intr)(uint64_t NO) = NULL;
 void init_difftest(char *ref_so_file, long img_size, int port) {
   riscv64_CPU_state cpu;
-  cpu.pc      = cpu_pc;
+  cpu.pc      = cpu_pc; 
   cpu.mepc    = 0;
   cpu.mcause  = 0;
   cpu.mtvec   = 0;

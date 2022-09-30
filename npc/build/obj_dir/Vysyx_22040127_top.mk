@@ -48,7 +48,6 @@ VM_USER_CFLAGS = \
 VM_USER_LDLIBS = \
 	-lLLVM-11 \
 	-lSDL2 \
-	-lSDL2_image \
 	-lreadline \
 	-ldl \
 
@@ -61,6 +60,7 @@ VM_USER_CLASSES = \
 	main \
 	paddr \
 	sdb \
+	vga \
 
 # User .cpp directories (from .cpp's on Verilator command line)
 VM_USER_DIR = \
@@ -89,6 +89,8 @@ main.o: /home/heisenberg/ysyx-workbench/npc/csrc/main.cpp
 paddr.o: /home/heisenberg/ysyx-workbench/npc/csrc/paddr.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 sdb.o: /home/heisenberg/ysyx-workbench/npc/csrc/sdb.cpp
+	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
+vga.o: /home/heisenberg/ysyx-workbench/npc/csrc/vga.c
 	$(OBJCACHE) $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(OPT_FAST) -c -o $@ $<
 
 ### Link rules... (from --exe)

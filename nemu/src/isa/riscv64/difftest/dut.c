@@ -9,13 +9,11 @@ bool isa_difftest_checkregs(CPU_state *ref_r, vaddr_t pc) {//pc comp
     if(ref_r -> gpr[i] != cpu.gpr[i])
       ok=0;
   }
-  //word_t mepc, mcause, mtvec, mstatus;
-  /*
-  if(ref_r->mepc != cpu.mepc || ref_r->mtvec != cpu.mtvec || ref_r->mcause != cpu.mcause 
-   || ref_r->pc != pc || ref_r->mstatus != cpu.mstatus || ref_r->mtval != cpu.mtval ||
-   ref_r->mie != cpu.mie || ref_r->mip != cpu.mip || ref_r->mscratch != cpu.mscratch )
+  if(ref_r->mepc != cpu.mepc || ref_r->mtvec != cpu.mtvec     || ref_r->mcause   != cpu.mcause 
+   || ref_r->pc  != pc       || ref_r->mstatus != cpu.mstatus || ref_r->mtval    != cpu.mtval 
+   || ref_r->mie != cpu.mie  || ref_r->mip != cpu.mip         || ref_r->mscratch != cpu.mscratch)
    return false;
-   */
+
   if(!ok)return false;
   return true;
 }

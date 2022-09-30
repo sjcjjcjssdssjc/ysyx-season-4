@@ -22,19 +22,6 @@ static word_t pmem_read(paddr_t addr, int len) {//word_t and paddr_t are uint64
 }
 
 static void pmem_write(paddr_t addr, int len, word_t data) {
-  //cpu.mwaddr  = addr;
-  //cpu.mwvalue = data;
-  word_t read_value = host_read(guest_to_host(addr & 0xFFFFFFFFFFFFFFF8) , 8);
-  word_t rem = addr % 8;
-  cpu.mwaddr = addr;
-  if(len == 1)
-    cpu.mwdata = (read_value & ~(0xFF << (rem * 8))) | ((data & 0xFF) <<(rem * 8));
-  else if(len == 2)
-    cpu.mwdata = (read_value & ~(0xFFFF << (rem * 8))) | ((data & 0xFFFF) << (rem * 8));
-  else if(len == 4)
-    cpu.mwdata = (read_value & ~(0xFFFFFFFF << (rem * 8))) | ((data & 0xFFFFFFFF) << (rem * 8));
-  else 
-    cpu.mwdata = (read_value) | ((data & 0xFFFFFFFFFFFFFFFF) << (rem * 8));
   #ifdef CONFIG_MTRACE 
   printf("\033[1;15m nemu: write memory 0x%x with length %d,data is 0x%lx\033[0m\n", addr, len, data);
   
@@ -64,9 +51,9 @@ void init_mem() {
 }
 
 word_t paddr_read(paddr_t addr, int len) {
-  if(addr >= 0x02000000 && addr <= 0x0200ffff){
-    return 0;
-  }
+  #ifdef CONFIG_TARGET_SHARE
+    if(((addr >> 28) & 0xF) == 0xa)return 0;
+  #endif
   if (likely(in_pmem(addr))) return pmem_read(addr, len);
   IFDEF(CONFIG_DEVICE, return mmio_read(addr, len));
   out_of_bound(addr);
@@ -74,9 +61,9 @@ word_t paddr_read(paddr_t addr, int len) {
 }
 
 void paddr_write(paddr_t addr, int len, word_t data) {
-  if(addr >= 0x02000000 && addr <= 0x0200ffff){
-    return;
-  }
+  #ifdef CONFIG_TARGET_SHARE
+    if(((addr >> 28) & 0xF) == 0xa)return;
+  #endif
   if (likely(in_pmem(addr))) { pmem_write(addr, len, data); return; }
   IFDEF(CONFIG_DEVICE, mmio_write(addr, len, data); return);
   out_of_bound(addr);

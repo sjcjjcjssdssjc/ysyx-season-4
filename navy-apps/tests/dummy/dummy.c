@@ -8,6 +8,7 @@
 #define SYS_yield 1
 extern int _syscall_(int, uintptr_t, uintptr_t, uintptr_t);
 int main() {
+  printf("1\n");
   fixedpt a = fixedpt_rconst(1.3);
   fixedpt b = fixedpt_rconst(0.6);
   fixedpt d[4];

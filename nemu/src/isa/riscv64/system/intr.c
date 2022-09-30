@@ -7,15 +7,8 @@ word_t isa_raise_intr(word_t NO, vaddr_t epc) {
    */
   word_t mtvec;
   cpu.mepc   = epc;
-  //printf("NO %ld\n",NO);
-  printf("before ecall mcause:%lx NO:%lx\n",cpu.mstatus,NO);
   if(NO <= 19 || NO == -1){//syscalls
-    /*
-    if(cpu.mstatus & 0x1800)
-      cpu.mcause = 11;
-    else
-    */ 
-    cpu.mcause = 11;//why is spike still 11
+    cpu.mcause = 11;
   }
   mtvec      = cpu.mtvec;
   if(cpu.mstatus & MIE)cpu.mstatus |= MPIE;

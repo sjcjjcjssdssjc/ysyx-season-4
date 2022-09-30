@@ -159,7 +159,7 @@ static inline fixedpt fixedpt_ceil(fixedpt A) {
 	if(A >= 0)return (A + FIXEDPT_FMASK) & (~FIXEDPT_FMASK);
 	else return -fixedpt_floor(-A);
 }
-
+/*
 fixedpt fixedpt_fromfloat(void *p) {
 	int value = *((int *)p);
 	int sign_flag = (value >> 31) & 1;
@@ -170,6 +170,7 @@ fixedpt fixedpt_fromfloat(void *p) {
 	if(sign_flag) ret = -ret;
 	return ret;
 }
+*/
 /*
  * Note: adding and substracting fixedpt numbers can be done by using
  * the regular integer operators + and -.

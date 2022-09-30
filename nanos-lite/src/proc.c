@@ -26,7 +26,10 @@ void init_proc() {
   Log("Initializing processes...");
 
   // load program here
-  naive_uload(NULL, "/bin/dummy");
+  naive_uload(NULL, "/bin/pal");
+  //APPS = pal menu nslider nterm bird
+  //TESTSOK = dummy hello timer-test event-test
+  //TESTSNO = bmp-test file-test
 }
 
 Context* schedule(Context *prev) {

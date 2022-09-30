@@ -11,9 +11,15 @@ module ysyx_22040127_icache(
     input        input_memwrite,//always 0
     input        input_memread,
     input        input_valid,
+    input        load_branch,
+    input        id_allowin,
     output [63:0] output_data,
     output        cache_pipelinehit,
     output reg  [2:0]cache_state,
+    output reg    ecall_stuck,//mod 4
+    output reg    mret_stuck,
+    input         wb_ecall,
+    input         wb_mret,
 
     //sram&axi
     output reg[63:0] axi_req_addr,
@@ -54,11 +60,9 @@ module ysyx_22040127_icache(
     wire [3:0]   input_offset = input_addr[3:0];   //low
 
     reg  [6:0]   cache_index_reg;
-    reg  [3:0]   cache_offset_reg;
 
     wire          cache_wen_way0;
     wire          cache_wen_way1;
-    wire          cache_miss;
     wire  [`CACHE_DATA_SIZE - 1:0] cache_strb;
     wire  [`CACHE_DATA_SIZE - 1:0] cache_wdata;
 
@@ -96,9 +100,6 @@ module ysyx_22040127_icache(
     //supposed to be inputs:
 
 
-    assign cache_miss = cache_way0valid & cache_way1valid
-    & (cache_state == IDLE & !(cache_way0hit | cache_way1hit));
-
     /* 
     always @(*) begin
         if(axi_req_valid)pmem_read(axi_req_addr & 64'hffffffff_fffffff0, axi_mrdata[63:0]);
@@ -119,43 +120,52 @@ module ysyx_22040127_icache(
             end
         end
     end
-
     reg cnt=0;
     always @(posedge clk)begin
         case(cache_state)
             IDLE: 
             begin
                 if(cache_way0hit | cache_way1hit)begin
-                    cache_offset_reg <= input_offset;
-
                     if(cache_way0hit)begin
                         cache_way0V[input_index] <= 1'b1;
                     end else begin
                         cache_way1V[input_index] <= 1'b1;
                     end
                     cache_state <= IDLE;
+                    ecall_stuck <= 1'b0;//mod 4
+                    mret_stuck  <= 1'b0;//mod 4
                     //both way0 and way1 should be replaced, randomly choose one
                 end else if(cache_way0valid & cache_way1valid) begin
                     //block2(tillend)(eviction)
                     cnt <= cnt + 1;
                     cache_state <= MISS;
+                    if(wb_ecall)ecall_stuck <= 1'b1;//mod 4
+                    if(wb_mret)mret_stuck <= 1'b1;//mod 4
                 end else if(!input_valid)begin
                     cache_state <= IDLE;
+                    ecall_stuck <= 1'b0;//mod 4
+                    mret_stuck  <= 1'b0;//mod 4
                 end else begin
                     cache_state <= REFILL;
+                    if(wb_ecall)ecall_stuck <= 1'b1;//mod 4
+                    if(wb_mret)mret_stuck <= 1'b1;//mod 4
                 end
             end
             MISS:
             begin
-                cache_state <= MISS_STALL;
+                if(!load_branch)begin
+                    cache_state <= MISS_STALL;
+                end
             end
             MISS_STALL:
             begin
-                cache_state <= REFILL;
-                if(!cnt)begin//write back(random eviction)
-                    cache_way0V[input_index] <= 1'b0;
-                end else begin
-                    cache_way1V[input_index] <= 1'b0;
+                if(!load_branch)begin
+                    cache_state <= REFILL;
+                    if(!cnt)begin//write back(random eviction)
+                        cache_way0V[input_index] <= 1'b0;
+                    end else begin
+                        cache_way1V[input_index] <= 1'b0;
+                    end
                 end
             end
 
@@ -171,12 +181,10 @@ module ysyx_22040127_icache(
                     axi_req_valid <= 1'b0;
                     //axi_res_valid <= 1'b0;
                     cache_state <= REFILL_STALL;
-                end else begin
-                    
+                end else if(!load_branch & id_allowin) begin
                     cache_state <= REFILL;
                     axi_req_addr  <= input_addr & 64'hffffffff_fffffff0;
                     axi_req_valid <= 1'b1;
-                    //axi_res_valid <= 1'b1;
                 end
             end
 

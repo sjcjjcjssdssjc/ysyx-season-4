@@ -12,14 +12,6 @@ Context* __am_irq_handle(Context *c) {//handler function(hui diao)
     //printf("%d %d\n",SYS_brk,c->mcause);
     switch (c->mcause) {
       case(11): ev.event = EVENT_SYSCALL; break; 
-      /*
-      unsigned long long result;
-      asm volatile("csrr  %0, mepc" : "=r"(result) : ); 
-      result += 4;
-      asm volatile("csrw  mepc, %0" : :"r"(result) ); 
-      printf("%lx\n",result);
-      break;
-      */
       default:  ev.event = EVENT_ERROR;  break;
     }
   
@@ -38,11 +30,6 @@ extern void __am_asm_trap(void);//trap.S
 bool cte_init(Context*(*handler)(Event, Context*)) {
   // initialize exception entry
   asm volatile("csrw mtvec, %0" : : "r"(__am_asm_trap));//异常入口地址
-  /*
-    SR[mepc] <- PC
-    SR[mcause] <- 一个描述失败原因的号码
-    PC <- SR[mtvec]
-  */
   // register event handler
   user_handler = handler;
 

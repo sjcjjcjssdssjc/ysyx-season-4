@@ -63,16 +63,19 @@ int fs_open(const char *pathname, int flags, int mode){//ignore flags and mode
     }
   }
   assert(ret != -1);
-  //printf("fopen %s fd:%d\n",pathname,ret);
   return ret;
 }
 size_t fs_read(int fd, void *buf, size_t len){
   size_t ret = 0;
-  //if(file_table[fd].open_offset + len > file_table[fd].size)len = file_table[fd].size - file_table[fd].open_offset;
+  //printf("%x %x\n",file_table[fd].open_offset + len,file_table[fd].size);
   if(fd == FD_EVENTS || fd == FD_DISPINFO){
     ret = file_table[fd].read(buf, file_table[fd].open_offset, len);
   }
-  else ret = ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);//read into buf
+  else {
+  //printf("%d open_offset %x\n",fd,file_table[fd].open_offset);
+    if(file_table[fd].size - file_table[fd].open_offset < len)len = file_table[fd].size - file_table[fd].open_offset;
+    ret = ramdisk_read(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);//read into buf
+  }
   file_table[fd].open_offset += ret;
   //printf("read %d\n",file_table[fd].open_offset);
   return ret;
@@ -80,30 +83,32 @@ size_t fs_read(int fd, void *buf, size_t len){
 size_t fs_write(int fd, const void *buf, size_t len){
   size_t ret = 0;
   //if(file_table[fd].open_offset + len > file_table[fd].size)len = file_table[fd].size - file_table[fd].open_offset;
-  //if(fd == 4)printf("w fbctl %d %d %d\n",fd, FD_STDERR, len);
   if(fd <= FD_DISPINFO)ret = file_table[fd].write(buf, file_table[fd].open_offset, len);
-  else ret = ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);
+  else {
+    ret = ramdisk_write(buf, file_table[fd].disk_offset + file_table[fd].open_offset, len);
+  }
   file_table[fd].open_offset += ret;
-  //printf("write %d\n",file_table[fd].open_offset);
+  //printf("write %d / %d\n",file_table[fd].open_offset,file_table[fd].size);
   return ret;
 }
 size_t fs_lseek(int fd, size_t offset, int whence){
   //if(fd >= sizeof(file_table) / sizeof(Finfo))return -1;
   if(whence == SEEK_SET){
     file_table[fd].open_offset = offset;
-    //printf("set");
+    //printf("%d set-%d\n",fd,file_table[fd].open_offset);
   } else if(whence == SEEK_CUR){
     file_table[fd].open_offset += offset;
-    //printf("cur");
+    //printf("cur-%d\n",file_table[fd].open_offset);
   } else if(whence == SEEK_END){
     file_table[fd].open_offset = file_table[fd].size + offset;
-    //printf("end");
+    //printf("end-%d\n",file_table[fd].open_offset);
   } 
-  //printf("%ld %d\n",offset, file_table[fd].open_offset);
+  printf("lseek %ld %d\n",offset, file_table[fd].open_offset);
   //assert(file_table[fd].open_offset > file_table[fd].size);
   return file_table[fd].open_offset;//error not implemented.
 }
 int fs_close(int fd){
+  file_table[fd].open_offset = 0;
   return 0;//make ARCH=riscv64-nemu update
 }
 void init_fs(){

@@ -28,7 +28,7 @@ INCFLAGS = $(addprefix -I, $(INC_PATH))
 CFLAGS += $(INCFLAGS) -DTOP_NAME="\"V$(TOPNAME)\""
 CFLAGS += $(shell llvm-config-11 --cxxflags)#3steps makefile,diasm.cc,defs.h
 LDFLAGS += $(shell llvm-config-11 --libs) 
-LDFLAGS += -lSDL2 -lSDL2_image -lreadline -ldl
+LDFLAGS += -lSDL2  -lreadline -ldl #-lSDL2_image
 
 
 $(BIN): $(VSRCS) $(CSRCS) #$(NVBOARD_ARCHIVE)

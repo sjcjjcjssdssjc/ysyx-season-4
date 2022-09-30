@@ -1,15 +1,14 @@
 #include "paddr.h"
 #include "defs.h"
 #include <stdio.h>
+#include <assert.h>
 extern void set_simtime();
 
 extern uint32_t cpu_pc;//main.c(cpu of npc)
+extern uint32_t vgactl_port_base[2];
+extern uint32_t* vmem;
+
 uint8_t pmem[CONFIG_MSIZE];//big endian
-// void inst_writebyindex(uint32_t ind, uint32_t inst)
-// {
-//   rom[ind] = inst;
-// }
-// uint32_t inst_read(uint32_t addr){return rom[(addr - 0x80000000) >> 2];}
 uint8_t* base(){
   return pmem;
 }
@@ -24,68 +23,53 @@ uint64_t paddr_read(uint64_t addr, uint64_t len){//sdb read
 }
 
 extern "C" void pmem_read(long long raddr, long long *rdata) {
-  // 总是读取地址为`raddr & ~0x7ull`的8字节返回给`rdata`
-  //printf("%llx\n",raddr);
-  long long tmp = raddr;
-  raddr &= ~(0x7ull);
-  raddr -= 0x80000000;
-  if(raddr + 0x80000000 >= 0x02000000 && raddr + 0x80000000 <= 0x0200ffff){
-    *rdata = 0;
-    return;//plic
+  if(raddr == 0xa0000100){//vgactl[0-1]
+    //printf("r vgactl %llx %x %x\n",raddr, vgactl_port_base[0],vgactl_port_base[1]);
+    *rdata = ((uint64_t)vgactl_port_base[1] << 32) | vgactl_port_base[0];
+    //Only support 64bit transfer. Length control(lb lw ld) is controlled by verilator.
+  } else if(raddr >= 0xa1000000 && raddr <= 0xa1200000){
+    *rdata = *(uint64_t *)((uint8_t *)vmem + raddr - 0xa1000000);
+    printf("r fb %llx %llx\n",raddr,*rdata);
   }
-  if(raddr < 0 || raddr >= CONFIG_MSIZE){
-    //printf("R %llx\n",raddr+0x80000000);
-    *rdata = 0;
-    return;
-  }
-  
-  long long res = 0;
-  for(long long i = raddr + 7; (int64_t)i >= (int64_t)raddr; i--){
-    
-    res <<= 8;
-    res += pmem[i];
-  }
-  *rdata = res;
-  #ifdef MTRACE// pc:80004664 write mem with addr 8001dcd0, data is 13c5100c4df5f22f,mask is ff,  when read, it is 13c5100c4df5f22f 
-  //printf("pc:%x read mem with addr %llx, data is %llx\n",cpu_pc,tmp,*rdata);
-  #endif
 }
 extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
-  // 总是往地址为`waddr & ~0x7ull`的8字节按写掩码`wmask`写入`wdata`
-  // `wmask`中每比特表示`wdata`中1个字节的掩码,
-  // 如`wmask = 0x3`代表只写入最低2个字节, 内存中的其它字节保持不变
-  waddr &= ~(0x7ull);
-  waddr -= 0x80000000;
-  if(waddr + 0x80000000 >= 0x02000000 && waddr + 0x80000000 <= 0x0200ffff)return;//plic
-  if(waddr < 0 || waddr >= CONFIG_MSIZE || !wmask){
-     printf("W %llx\n",waddr+0x80000000);
-  //   return;
-  }
-  
-  long long tmp = wdata;
-  for(long long i = waddr; i <= waddr + 7; i++){
-    if(wmask & (1 << (i - waddr))){
-      pmem[i] = wdata & 0xFF;
+
+  char c = wdata & 0xFF;
+  if(waddr == 0xa00003f8){//serial w
+    printf("%c",c);
+  } else if(waddr == 0xa0000100){ //vgactl[0-1]
+    printf("w vgactl addr%llx: mask:%x\n",waddr,wmask);
+    assert((wmask & 0xFF) == 0xF || (wmask & 0xFF) == 0xF0);
+    if((wmask & 0xFF) == 0x0F){
+      vgactl_port_base[0] = wdata;
+    } else {
+      vgactl_port_base[1] = wdata;
     }
-    wdata >>= 8;
+  } else if(waddr >= 0xa1000000 && waddr < 0xa1200000){
+    //printf("w fb waddr:%llx wdata:%llx mask:%x\n",waddr,wdata,wmask & 0xFF);
+    //printf("BLMFY %llx\n", waddr - 0xa1000000); 707b8
+    assert((wmask & 0xFF) == 0xF || (wmask & 0xFF) == 0xF0);
+    if((wmask & 0xFF) == 0x0F){
+      *(uint32_t *)((uint8_t *)vmem + waddr - 0xa1000000) = wdata;
+    } else {
+      *(uint32_t *)((uint8_t *)vmem + waddr - 0xa1000000 + 4) = wdata;
+    }
+    
+  } else {
+    
+    waddr &= ~(0x7ull);
+    waddr -= 0x80000000;
+    //no plic
+    long long tmp = wdata;
+    for(long long i = waddr; i <= waddr + 7; i++){
+      if(wmask & (1 << (i - waddr))){
+        pmem[i] = wdata & 0xFF;
+      }
+      wdata >>= 8;
+    }
   }
   #ifdef MTRACE
-  long long rdata;
-  pmem_read(waddr + 0x80000000,&rdata);
-  if(waddr + 0x80000000 >= 0x80003690 && waddr + 0x80000000 < 0x800036a0)
-  printf("\033[1;32m pc:%x write mem with addr %llx, data is %llx,mask is %x,\
-  when read, it is %llx \033[0m\n",cpu_pc, waddr + 0x80000000,tmp,(unsigned int)(wmask & 0xFF)
-  , rdata);
-
+    printf("write data with addr %llx, data is %llx mask %x\n",waddr,wdata,wmask);
   #endif
 }
 
-/*
-void paddr_write(uint64_t addr, uint64_t len, uint64_t val){//big endian
-  addr -= 0x80000000;
-  for(uint64_t i = addr; (int64_t)i <= (int64_t)(addr + len - 1); i++){
-    pmem[i] = val & 0xFF;
-    val >>= 8;
-  }
-}
-*/

@@ -15,14 +15,17 @@ module ysyx_22040127_execute(
   input[2:0]  cache_state,
   output reg  ex_flush,
   output[31:0]ex_pc,
-  output      ex_ready_go
+  output      ex_ecall,
+  output      ex_mret,
+  output      ex_ready_go,
+  output      ex_fencei,
+  input       mem_ecall
 );
 
   wire[63:0]rtype_calc_result;
   wire[63:0]itype_calc_result;
   wire[63:0]rtype_alu_op;
   wire[31:0]itype_alu_op;
-  wire[63:0]sub;
 
   wire[31:0]addw_result;
   wire[31:0]subw_result;
@@ -64,6 +67,7 @@ module ysyx_22040127_execute(
   wire[4:0]  ex_rs1;
   wire[4:0]  ex_rs2;
   wire       ex_reg_wen;
+  wire[31:0] ex_instruction;
 
   wire mul_type;//ex1
   wire div_type;
@@ -88,8 +92,6 @@ module ysyx_22040127_execute(
   wire[63:0] quo;
   wire[63:0] rem;
 
-  wire       ex_mret;
-  wire       ex_ecall;
   wire       ex_csrrw;
   wire       ex_csrrs;
   wire       ex_csrrc;
@@ -99,20 +101,27 @@ module ysyx_22040127_execute(
   wire       ex_csr_we;
   wire[11:0] ex_des_csr;
   wire       ex_ebreak;
+  wire       ex_timer_int;
+  wire       ex_excptions;
 
-  assign ex_csr_we = (ex_csrrs | ex_csrrw | ex_csrrc | ex_csrrwi | ex_csrrsi | ex_csrrci
-   | ex_mret | ex_ecall);//id_to_ex_valid_reg
- 
-  wire cache_readygo = cache_state == 3'b110 | (!ex_memwrite & !ex_memread) | cache_pipelinehit;
+  assign ex_csr_we = (ex_csrrs | ex_csrrw | ex_csrrc | ex_csrrwi | ex_csrrsi | ex_csrrci);
+  assign ex_excptions = ex_ecall | ex_mret | ex_timer_int;
+  // | ex_mret | ex_ecall);//id_to_ex_valid_reg
 
-  reg ex_result_blocked;
+  wire cache_readygo = (!ex_memwrite & !ex_memread & !ex_fencei) | cache_pipelinehit | ex_excptions;// | ex_flush
+
+  wire mul_stuck = mul_ok & !id_to_ex_valid;
+  wire div_stuck = div_ready & !id_to_ex_valid;
 
   assign ex_ready_go = ((!mul_type && !(div_type || (div_state[0] ^ div_state[1]))) 
   || mul_ok || div_ready) && cache_readygo;
   assign ex_allowin  = !ex_valid || ex_ready_go && mem_allowin;
   assign ex_to_mem_valid = ex_ready_go && ex_valid;
   assign 
-  { ex_ebreak,
+  { ex_fencei,
+    ex_instruction,
+    ex_timer_int,
+    ex_ebreak,
     ex_des_csr,
     ex_mret,        
     ex_ecall,       
@@ -139,7 +148,9 @@ module ysyx_22040127_execute(
   } = id_to_ex_bus_reg;
 
   assign ex_to_mem_bus = 
-  { ex_ebreak,    //262:262
+  { ex_instruction,
+    ex_timer_int,
+    ex_ebreak,    //262:262
     ex_des_csr,   //261:250
     ex_alu_input1,//249:186
     ex_rs1,       //185:181
@@ -173,7 +184,7 @@ module ysyx_22040127_execute(
       id_to_ex_bus_reg <= `ID_TO_EX_WIDTH'b0;
     end else if(id_to_ex_valid && ex_allowin) begin
       id_to_ex_bus_reg <= id_to_ex_bus;
-      ex_flush <= id_flush | mem_mret | ex_mret;
+      ex_flush <= id_flush | mem_mret | mem_ecall;
     end else if(!mul_type & !div_type
     & cache_readygo)begin 
       //critical: we need not flush the ex stage write signals when stalled by muls and cache
@@ -273,6 +284,7 @@ module ysyx_22040127_execute(
     mul_res_high, 
     mul_res_low,
     mul_type,
+    mul_stuck,
     mul_ok
   );
   ysyx_22040127_div div(
@@ -286,6 +298,7 @@ module ysyx_22040127_execute(
      : ex_alu_input2,
     div_sign,//input s,//w or y is signed
     div_type,//input is_div,
+    div_stuck,
     div_ready,
     div_state,
     quo,
@@ -341,7 +354,6 @@ module ysyx_22040127_execute(
 
   localparam TYPE_I = 3'b000, TYPE_U = 3'b001, TYPE_S = 3'b010,
   TYPE_J = 3'b011, TYPE_R = 3'b100, TYPE_B = 3'b101, TYPE_N = 3'b110;
-  assign sub = ex_alu_input1 - ex_alu_input2;
   //num,out,in
   always @(*) begin
     case(ex_inst_type)

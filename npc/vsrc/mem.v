@@ -8,6 +8,7 @@ module ysyx_22040127_memory(
   input      ex_to_mem_valid, //from last stage
   output     mem_to_wb_valid, //for next stage
   input [`EX_TO_MEM_WIDTH - 1:0] ex_to_mem_bus,
+  input                          ex_mmio,
   output[`MEM_TO_WB_WIDTH - 1:0] mem_to_wb_bus,
   output[63:0] mem_alu_output,
   output[63:0] mem_final_rdata,
@@ -20,12 +21,16 @@ module ysyx_22040127_memory(
   input [63:0] mem_doubly_aligned_data,
   input [63:0] mem_diff_addr,
   input [63:0] mem_diff_data,
+  output       mem_ecall,
+  output[31:0] mem_pc,
   input  [2:0] cache_state
 );
 
-  wire       mem_memwrite;
+  wire      mem_memwrite;
   wire[2:0] mem_memop;   //input from id
   wire[63:0]mem_reg_wdata;
+  wire      mem_mret;
+  wire      mem_mmio;
   //wire[63:0]mem_diff_addr;
   //wire[63:0]mem_diff_data;
   reg      lb;
@@ -35,7 +40,6 @@ module ysyx_22040127_memory(
   reg      lbu;
   reg      lhu;
   reg      lwu;
-  reg      sb;
   reg      sh;
   reg      sw;
   reg      sd;
@@ -46,15 +50,12 @@ module ysyx_22040127_memory(
   wire[63:0] mem_alu_input1;
   wire[11:0] mem_des_csr;
   wire[4:0]  mem_rd;    
-  wire[31:0] mem_pc;
   wire       mem_jalr;
   wire[63:0] mem_wdata_tmp;
   wire[63:0] mem_wdata;
   reg[63:0]  mem_reg_wdata;
   reg        mem_valid;
 
-  wire       mem_mret;
-  wire       mem_ecall;
   wire       mem_csrrw;
   wire       mem_csrrs;
   wire       mem_csrrc;
@@ -63,6 +64,8 @@ module ysyx_22040127_memory(
   wire       mem_csrrci;
   wire       mem_csr_we;
   wire       mem_ebreak;
+  wire       mem_timer_int;
+  wire[31:0] mem_instruction;
 
   wire ex_lb  = (ex_memop == 3'b000);
   wire ex_lh  = (ex_memop == 3'b001);
@@ -71,7 +74,6 @@ module ysyx_22040127_memory(
   wire ex_lbu = (ex_memop == 3'b100);
   wire ex_lhu = (ex_memop == 3'b101);
   wire ex_lwu = (ex_memop == 3'b110);
-  wire ex_sb  = (ex_memop[1:0] == 2'b00);
   wire ex_sh  = (ex_memop[1:0] == 2'b01);
   wire ex_sw  = (ex_memop[1:0] == 2'b10);
   wire ex_sd  = (ex_memop[1:0] == 2'b11);
@@ -83,17 +85,13 @@ module ysyx_22040127_memory(
   //stuck in ex stage so input won't change
   assign mem_allowin  = !mem_valid || mem_ready_go && wb_allowin;
   assign mem_to_wb_valid = mem_ready_go && mem_valid;
-  reg[`EX_TO_MEM_WIDTH - 1:0]  ex_to_mem_bus_reg; 
-  /*
-  assign mem_wdata = sb ? {8{mem_wdata_tmp[7:0]}} ://these are moved to cache
-  sh ? {4{mem_wdata_tmp[15:0]}} :
-  sw ? {2{mem_wdata_tmp[31:0]}} : 
-  mem_wdata_tmp[63:0];
-  */
-  //assign mem_memwrite = mem_memwrite_tmp & !mem_flush;
+  reg[`EX_TO_MEM_WIDTH:0]  ex_to_mem_bus_reg; 
 
   assign 
-  { mem_ebreak,
+  { mem_instruction,
+    mem_mmio,
+    mem_timer_int,
+    mem_ebreak,
     mem_des_csr,
     mem_alu_input1,//249:186
     mem_rs1,       //185:181
@@ -118,7 +116,10 @@ module ysyx_22040127_memory(
   } = ex_to_mem_bus_reg;
 
   assign mem_to_wb_bus =
-  { mem_ebreak,    //321:321
+  { mem_instruction,
+    mem_mmio,
+    mem_timer_int,
+    mem_ebreak,    //321:321
     mem_memwrite,  //320:320
     mem_diff_data, //319:256
     mem_diff_addr, //255:192
@@ -138,7 +139,7 @@ module ysyx_22040127_memory(
     mem_reg_wen,   //69:69
     mem_rd,        //68:64
     mem_reg_wdata  //63:0
-  };
+  }; 
 
   always @(*) begin
     //if(mem_jalr) mem_reg_wdata = {32'b0, mem_pc + 4};//id(the jalr need break down)
@@ -155,10 +156,12 @@ module ysyx_22040127_memory(
       mem_valid <= ex_to_mem_valid;
     end
     if(rst)begin
-      ex_to_mem_bus_reg <= `EX_TO_MEM_WIDTH'b0;
+      ex_to_mem_bus_reg   <= 0;
     end else if(ex_to_mem_valid && mem_allowin) begin
-      ex_to_mem_bus_reg <= ex_to_mem_bus;
-      mem_flush <= mem_mret | ex_flush;
+      ex_to_mem_bus_reg[263:0]   <= ex_to_mem_bus[263:0];
+      ex_to_mem_bus_reg[264]     <= ex_mmio;
+      ex_to_mem_bus_reg[296:265] <= ex_to_mem_bus[295:264];
+      mem_flush <= mem_mret | mem_ecall | ex_flush;
     end else if(ex_ready_go) begin
      
       ex_to_mem_bus_reg[179:179] <= 1'b0;
@@ -180,10 +183,6 @@ module ysyx_22040127_memory(
     lhu <= ex_lhu;
     lwu <= ex_lwu;
 
-    sb <= ex_sb;
-    sh <= ex_sh;
-    sw <= ex_sw;
-    sd <= ex_sd;
 
     mem_addr_lowmask <= ex_addr_lowmask;
   end
