@@ -120,11 +120,19 @@ static void csrrc_op(word_t dest, word_t src1, word_t src2, Decode *s,int is_imm
 static void mret_op(word_t dest, word_t src1, word_t src2, Decode *s){
   s->dnpc = cpu.mepc;//set mepc to pc+4(ecall)?
   //printf("mstatus is %lx\n",cpu.mstatus);
-  //cpu.mstatus &= (0xFFFFFFFFFFFFE7FF); //TBC
   if(cpu.mstatus & MPIE)cpu.mstatus |= MIE;
   else cpu.mstatus &= (~MIE);
   cpu.mstatus |= MPIE;//0x80
+  #ifndef CONFIG_TARGET_SHARE
+    cpu.mstatus &= 0xFFFFFFFFFFFFE7FF;
+  #endif
   //printf("mret %lx\n",cpu.mstatus & (0xFFFFFFFFFFFFE7FF));
+}
+static void ecall_op(word_t dest, word_t src1, word_t src2, Decode *s){
+  s->dnpc = isa_raise_intr(R(17), s->pc);
+  #ifndef CONFIG_TARGET_SHARE
+    cpu.mstatus |= 0x1800;
+  #endif
 }
 static void decode_operand(Decode *s, word_t *dest, word_t *src1, word_t *src2, int type) {
   uint32_t i = s->isa.inst.val;
@@ -236,7 +244,7 @@ static int decode_exec(Decode *s) {
   INSTPAT("??????? ????? ????? ??? ????? 11011 11", jal    , J, jal_op(dest, src1, s));
 
   INSTPAT("0000000 00001 00000 000 00000 11100 11", ebreak , N, NEMUTRAP(s->pc, R(10))); // R(10) is $a0
-  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, s->dnpc = isa_raise_intr(R(17), s->pc));
+  INSTPAT("0000000 00000 00000 000 00000 11100 11", ecall  , N, ecall_op(dest, src1, src2, s));
   INSTPAT("??????? ????? ????? 001 ????? 11100 11", csrrw  , N, csrrws_op(dest, src1, src2, s, 0, 0));
   INSTPAT("??????? ????? ????? 101 ????? 11100 11", csrrwi , N, csrrws_op(dest, src1, src2, s, 0, 1));
   INSTPAT("??????? ????? ????? 010 ????? 11100 11", csrrs  , N, csrrws_op(dest, src1, src2, s, 1, 0));
@@ -254,10 +262,10 @@ static int decode_exec(Decode *s) {
   //else cpu.mstatus &= (~SD);
   #ifdef CONFIG_TARGET_SHARE
     cpu.mstatus |= (0x1800LL);
+    cpu.mstatus &= (0x7FFFFFF000001888LL);
   #else
-    cpu.mstatus |= (0xa0001800LL);
+    cpu.mstatus &= (0x7FFFFFFa00021888LL);
   #endif
-  cpu.mstatus &= (0x7FFFFFF000001888LL);
   //hard wired value:
   //1:MPP(12:11)
   //0:uie(0),sie(1),WPRI(2),upie(4),spie(5),WPRI(6),SPP(8),WPRI(10:9),(35:13) 
