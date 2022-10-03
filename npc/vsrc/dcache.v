@@ -35,14 +35,13 @@ module ysyx_22040127_dcache(
     reg[3:0] input_offset_reg;
     reg cache_way0hit_reg;
     reg cache_way1hit_reg;
+    reg mmio_ok;
 
     always @(posedge clk) begin
         input_size_reg <= input_size;
         cache_way0hit_reg <= cache_way0hit;
         cache_way1hit_reg <= cache_way1hit;
         input_offset_reg  <= input_offset;
-        mmio_rdata_reg <= mmio_rdata;
-        mmio_reg <= mmio;
     end
     import "DPI-C" function void pmem_read(//memread isn't working
     input longint raddr, output longint doubly_aligned_data);
@@ -91,9 +90,9 @@ module ysyx_22040127_dcache(
     wire [`CACHE_DATA_SIZE - 1:0] cache_rdata_way1;
 
     wire cache_way0hit = (cache_way0tags[input_index] == input_tag & cache_way0V[input_index]) 
-    && input_valid && !mmio && !fencei || fencei_ok && fencei;
+    && input_valid && !mmio && !fencei || fencei_ok && fencei || mmio_ok && mmio;
     wire cache_way1hit = (cache_way1tags[input_index] == input_tag & cache_way1V[input_index])
-    && input_valid && !mmio && !fencei || fencei_ok && fencei;
+    && input_valid && !mmio && !fencei || fencei_ok && fencei || mmio_ok && mmio;
     wire cache_way0dirty  = cache_way0D[input_index] & input_valid;
     wire cache_way1dirty  = cache_way1D[input_index] & input_valid;
     wire cache_way0valid  = cache_way0V[input_index] & input_valid;
@@ -110,10 +109,9 @@ module ysyx_22040127_dcache(
     wire cache_raw_way0;
     wire cache_raw_way1;
     wire cache_raw;   
-    reg  mmio_reg;
-    wire[63:0]mmio_rdata;
+    reg  mmio_mem;
     reg [63:0]mmio_rdata_reg;
-    assign mmio = input_addr[31:28] == 4'ha;
+    assign mmio = input_addr[31:28] == 4'ha && input_valid;
     assign cache_wdata[127:64] = ({64{cache_state == IDLE & input_addr[3] == 1'b1
     | cache_state == LOOKUP & input_addr[3] == 1'b1}} & ex_cache_wdata) |
     ({64{cache_state == REFILL & input_memwrite & input_addr[3]}} & ex_cache_wdata) |
@@ -145,8 +143,8 @@ module ysyx_22040127_dcache(
     & (cache_state == IDLE | cache_state == LOOKUP)}} & ex_cache_strb)//&!raw
     | {64{axi_res_valid & cache_state == REFILL}};
 
-    assign  cache_pipelinehit = (cache_state == IDLE & (cache_way0hit | cache_way1hit | mmio | fencei_ok))
-     || (cache_state == LOOKUP & ((!cache_raw & (cache_way0hit | cache_way1hit)) | mmio | fencei_ok));
+    assign  cache_pipelinehit = (cache_state == IDLE & (cache_way0hit | cache_way1hit | fencei_ok))
+     || (cache_state == LOOKUP & ((!cache_raw & (cache_way0hit | cache_way1hit)) | fencei_ok));
     //supposed to be inputs:
 
     assign cache_raw_way0 = cache_way0hit & cache_wen_way0_reg
@@ -162,21 +160,21 @@ module ysyx_22040127_dcache(
       (cache_state == LOOKUP & (cache_raw & !cache_way0hit 
       & !cache_way1hit | !cache_way0hit & !cache_way1hit)) );
 
-
-    /* verilator lint_off LATCH */
+    /*
     always @(*)begin
         if(mmio && input_memread)begin
             pmem_read(input_addr & 64'hffffffff_fffffff8, mmio_rdata);//ok(create mmio_rdate_reg)
         end else if(mmio && input_memwrite)begin
             pmem_write(input_addr & 64'hffffffff_fffffff8,input_wdata,input_strb);
         end
-    /* verilator lint_on LATCH */
+
     end
+    */
     wire cache_way0fencev = cache_way0V[fencei_cnt];
     wire cache_way0fenced = cache_way0D[fencei_cnt];
     wire cache_way1fencev = cache_way1V[fencei_cnt];
     wire cache_way1fenced = cache_way1D[fencei_cnt];
-    assign output_data = mmio_reg ? mmio_rdata_reg : cache_way0hit_reg ? output_data_way0: output_data_way1;
+    assign output_data = mmio_mem ? mmio_rdata_reg : cache_way0hit_reg ? output_data_way0: output_data_way1;
     
     assign ex_cache_strb[63:0] = {{8{input_strb[7]}},{8{input_strb[6]}}, 
     {8{input_strb[5]}}, {8{input_strb[4]}},{8{input_strb[3]}}, 
@@ -235,17 +233,17 @@ module ysyx_22040127_dcache(
     //reg cache_way1hitbuf;
     reg cnt=0;
     always @(posedge clk)begin
+        mmio_rdata_reg <= axi_mrdata[63:0];
+        mmio_mem <= mmio_ok & mmio;
         case(cache_state)
             IDLE: 
             begin
+                mmio_ok <= 0;
                 if(!fencei)fencei_ok <= 0;
                 if(fencei & !fencei_ok)begin
                     cache_state <= FENCEI;
-                end else if(mmio)cache_state <= IDLE;
+                end else if(mmio & mmio_ok)cache_state <= IDLE;
                 else if(cache_way0hit | cache_way1hit)begin
-                    //if(input_index == 7'h69 && input_memwrite)
-                    //$display("hit write with 69 index, input_addr is 0x%0h data is 0x%0h\n",
-                    //input_addr,input_wdata);
                     cache_offset_reg <= input_offset;
                     if(input_memwrite) cache_index_reg <= input_index;
 
@@ -264,6 +262,10 @@ module ysyx_22040127_dcache(
                     diff_addr         <= input_addr;
                     cache_state <= LOOKUP;
                     //both way0 and way1 should be replaced, randomly choose one
+                end else if(mmio & !mmio_ok)begin
+                    cache_wen_way0_reg <= 1'b0;
+                    cache_wen_way1_reg <= 1'b0;
+                    cache_state <= REFILL;
                 end else if(cache_way1dirty & cache_way0valid & cache_way0dirty & cache_way1valid) begin
                     //block2(tillend)(eviction)
                     cache_wen_way0_reg <= 1'b0;
@@ -285,14 +287,12 @@ module ysyx_22040127_dcache(
             end
             LOOKUP://answer to previous clock cycle(pipelined)
             begin 
+                mmio_ok <= 1'b0;
                 if(!fencei)fencei_ok <= 0;
                 if(fencei & !fencei_ok)begin
                     cache_state <= FENCEI;
-                end else if(mmio)cache_state <= IDLE;
+                end else if(mmio & mmio_ok)cache_state <= IDLE;
                 else if(!cache_raw & (cache_way0hit | cache_way1hit))begin//read hit/write hit
-                    //if(input_index == 7'h69 && input_memwrite)
-                    //$display("hit write with 69 index, input_addr is 0x%0h data is 0x%0h\n",
-                    //input_addr,input_wdata);
                     cache_offset_reg <= input_offset;
                     if(input_memwrite) cache_index_reg <= input_index;
                     if(cache_way0hit)begin
@@ -314,6 +314,10 @@ module ysyx_22040127_dcache(
                 end else if(cache_way0hit | cache_way1hit)begin //raw
                     //diff_output_ready   <= 1'b0;
                     cache_state    <= IDLE;
+                end else if(mmio & !mmio_ok)begin
+                    cache_wen_way0_reg <= 1'b0;
+                    cache_wen_way1_reg <= 1'b0;
+                    cache_state <= REFILL;
                 end else if(cache_way1dirty & cache_way0valid & cache_way0dirty & cache_way1valid) begin
                     //block2(tillend)(eviction)
                     cache_wen_way0_reg <= 1'b0;
@@ -412,22 +416,34 @@ module ysyx_22040127_dcache(
             begin
                 if(axi_res_valid) begin
 
-                    if(cache_wen_way0)cache_way0tags[input_index] <= input_tag; 
-                    else if(cache_wen_way1)cache_way1tags[input_index] <= input_tag; //?
-
-                    if(cache_wen_way0)cache_way0D[input_index] <= cache_wen_way0 & input_memwrite;
-                    if(cache_wen_way1)cache_way1D[input_index] <= cache_wen_way1 & input_memwrite;
-                    cache_way0V[input_index] <= cache_way0V[input_index] | cache_wen_way0;
-                    cache_way1V[input_index] <= cache_way1V[input_index] | cache_wen_way1;
+                    if(!mmio)begin
+                        if(cache_wen_way0)cache_way0tags[input_index] <= input_tag;
+                        else if(cache_wen_way1)cache_way1tags[input_index] <= input_tag; //?
+                        if(cache_wen_way0)cache_way0D[input_index] <= cache_wen_way0 & input_memwrite;
+                        if(cache_wen_way1)cache_way1D[input_index] <= cache_wen_way1 & input_memwrite;
+                        cache_way0V[input_index] <= cache_way0V[input_index] | cache_wen_way0;
+                        cache_way1V[input_index] <= cache_way1V[input_index] | cache_wen_way1;
+                    end else begin
+                        mmio_ok <= 1'b1;
+                    end
                     axi_req_valid <= 1'b0;
                     //axi_res_valid <= 1'b0;
                     cache_state <= REFILL_STALL;
                 end else begin
                     
                     cache_state <= REFILL;
-                    axi_req_addr  <= input_addr & 64'hffffffff_fffffff0;//&
+                    if(!mmio)axi_req_addr  <= input_addr & 64'hffffffff_fffffff0;//&
+                    else begin
+                        if(input_memwrite)axi_req_addr <= input_addr & 64'hffffffff_fffffffC;
+                        else axi_req_addr <= input_addr & 64'hffffffff_fffffff8;
+                        
+                    end
+                    if(mmio & input_memwrite)begin
+                        axi_req_data  <= {64'b0, input_wdata};
+                        axi_req_strb  <= 8'b11111111;
+                    end
                     axi_req_valid <= 1'b1;
-                    axi_req_wen   <= 1'b0;
+                    axi_req_wen   <= mmio & input_memwrite;
                 end
             end
 

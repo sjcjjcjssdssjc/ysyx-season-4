@@ -79,7 +79,8 @@ module ysyx_22040127_decode(
   wire[63:0] id_regdata1_final;
   wire[63:0] id_regdata2_final;
   wire[63:0] id_mem_wdata;
-  wire       id_ebreak;
+  wire       id_ebreak  = (id_instruction[6:0] == 7'b1110011) & id_instruction[20]
+      & !(|{id_instruction[31:21],id_instruction[19:7]});
 
   //hazard
   wire   exid_raw_hazard1;
@@ -122,7 +123,6 @@ module ysyx_22040127_decode(
   wire[31:0] id_pc;
   wire[31:0] id_instruction;//mod 5
   assign {
-  id_ebreak, 
   id_instruction,//[63:32]
   id_pc          //[31:0]
   } = if_to_id_bus_reg;//data from if delayed a cycle
@@ -291,7 +291,6 @@ module ysyx_22040127_decode(
       else begin
         if_to_id_bus_reg[31:0]  <= if_to_id_bus[31:0];
         if_to_id_bus_reg[63:32] <= id_branch_taken ? 32'b0 : if_instruction_reg;
-        if_to_id_bus_reg[64]    <= if_to_id_bus[64];
         
       end
       id_flush <= mem_ecall | mem_mret | if_flush;//otherwise stall

@@ -29,18 +29,17 @@ extern "C" void pmem_read(long long raddr, long long *rdata) {
     //Only support 64bit transfer. Length control(lb lw ld) is controlled by verilator.
   } else if(raddr >= 0xa1000000 && raddr <= 0xa1200000){
     *rdata = *(uint64_t *)((uint8_t *)vmem + raddr - 0xa1000000);
-    printf("r fb %llx %llx\n",raddr,*rdata);
-  }
+  } else assert(0); 
 }
-extern "C" void pmem_write(long long waddr, long long wdata, char wmask) {
-
+extern "C" void pmem_write(long long waddr, long long wdata, char wmask) { 
+ 
   char c = wdata & 0xFF;
-  if(waddr == 0xa00003f8){//serial w
-    printf("%c",c);
-  } else if(waddr == 0xa0000100){ //vgactl[0-1]
-    printf("w vgactl addr%llx: mask:%x\n",waddr,wmask);
+  if(waddr == 0xa00003f8){//serial w(ok)
+    printf("%c",c); 
+  } else if(waddr == 0xa0000100){ //vgactl[0-1]     
+    printf("w vgactl addr%llx: mask:%x data:%lx\n",waddr,wmask,wdata);
     assert((wmask & 0xFF) == 0xF || (wmask & 0xFF) == 0xF0);
-    if((wmask & 0xFF) == 0x0F){
+    if((wmask & 0xFF) == 0x0F){ 
       vgactl_port_base[0] = wdata;
     } else {
       vgactl_port_base[1] = wdata;

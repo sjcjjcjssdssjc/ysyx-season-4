@@ -88,7 +88,6 @@ module ysyx_22040127_top # (
   reg [63:0] if_pcdata;
   reg        if_valid;
   wire[31:0] if_instruction;
-  wire       if_ebreak;
   wire       if_uart;//temporary(dpic is also)
   wire       if_flush;
   wire       if_ready_go;
@@ -356,15 +355,13 @@ module ysyx_22040127_top # (
   assign if_flush  = wb_mret | wb_ecall;
   //assign if_instruction = (if_pc[2]) ? if_pcdata[63:32] : if_pcdata[31:0];
 
-  assign if_ebreak = (if_instruction[6:0] == 7'b1110011) & if_instruction[20]
-      & !(|{if_instruction[31:21],if_instruction[19:7]});
       //| if_instruction[6:0] == 7'b1101011;//riscvtest legacy(inst.c)
   assign if_uart   = if_instruction[6:0] == 7'b1111011;
   assign if_ready_go    = 1'b1;
   assign if_allowin     = !if_valid || if_ready_go && id_allowin;
   //once rst = 0, if_allowin is set to 1
   assign if_to_id_valid = if_valid && if_ready_go;//always ready to go
-  assign if_to_id_bus   = {if_ebreak , id_branch_taken & !if_timer_blocked | ex_ecall | ex_mret // mod 4
+  assign if_to_id_bus   = {id_branch_taken & !if_timer_blocked | ex_ecall | ex_mret // mod 4
   | id_ecall | id_mret | wb_mret | wb_ecall | if_timer_int ?
   32'b0 : if_instruction, if_pc};
   assign if_timer_int = if_timer_int_tmp | timer_int;

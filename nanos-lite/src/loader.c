@@ -78,8 +78,8 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   }
   free(symstrtab);
   free(secstrtab);
-  printf("load ret %p\n",ret);
-  //asm volatile("fence.i");
+  //printf("load ret %p\n",ret);
+  asm volatile("fence.i");
   return ret;
 }
 

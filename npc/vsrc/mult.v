@@ -31,7 +31,7 @@ module ysyx_22040127_mul (
     {128{multiplied[2:0] == 3'b001 || multiplied[2:0] == 3'b010}} & multiplier           |
     {128{multiplied[2:0] == 3'b101 || multiplied[2:0] == 3'b110}} & x_comp      |
     {128{multiplied[2:0] == 3'b011}} & {multiplier[126:0], 1'b0}                |
-    {128{multiplied[2:0] == 3'b100}} & {x_comp[126:0], 1'b0};
+    {128{multiplied[2:0] == 3'b100}} & {x_comp[126:0], 1'b0}; 
 
   always @(posedge clk) begin
     if(rst)begin

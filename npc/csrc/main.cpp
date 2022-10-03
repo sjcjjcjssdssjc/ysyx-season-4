@@ -18,7 +18,7 @@
 extern uint8_t pmem[CONFIG_MSIZE];
 
 axi4_ptr<64,64,4> mem_ptr;
-axi4_mem<64,64,4> mem(4096l*1024*1024);
+axi4_mem<64,64,4> mem(4096l*1024*1024);//8000000
 axi4<64,64,4> mem_sigs;
 axi4_ref<64,64,4> mem_sigs_ref(mem_sigs);
 #define INST_SIZE 4
@@ -152,7 +152,7 @@ void npc_exec_once(axi4_ref<64,64,4> &mem_ref){
   // #ifdef WAVE
   //   if(cyclecnt >= 500000)
   //     tfp->dump(contextp->time());
-  // #endif
+  // #endif 
 
   contextp->timeInc(1);
   dut->clk = 0;
@@ -161,7 +161,7 @@ void npc_exec_once(axi4_ref<64,64,4> &mem_ref){
   #ifdef WAVE
     if(cyclecnt >= 1000000 && cyclecnt <= 2000000)
       tfp->dump(contextp->time());//must do right after eval
-  #endif
+  #endif 
   
 }
 
