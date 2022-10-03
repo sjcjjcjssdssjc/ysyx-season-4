@@ -9,7 +9,7 @@ AM_SRCS := riscv/npc/start.S \
            riscv/npc/trap.S \
            platform/dummy/vme.c \
            platform/dummy/mpe.c
-DIFF_REF_SO = $(NEMU_HOME)/build/riscv64-nemu-interpreter-so
+DIFF_REF_SO = $(NEMU_HOME)/riscv64-nemu-interpreter-so
 
 CFLAGS    += -fdata-sections -ffunction-sections
 LDFLAGS   += -T $(AM_HOME)/scripts/linker.ld --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
