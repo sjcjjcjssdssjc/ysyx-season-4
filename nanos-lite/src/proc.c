@@ -27,7 +27,7 @@ void init_proc() {
 
   // load program here
   naive_uload(NULL, "/bin/pal");
-  //APPS = pal menu nslider nterm bird
+  //APPS = pal nslider nterm bird
   //TESTSOK = dummy hello timer-test file-test bmp-test
 }
 

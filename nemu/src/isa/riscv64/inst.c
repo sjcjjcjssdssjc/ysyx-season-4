@@ -252,7 +252,11 @@ static int decode_exec(Decode *s) {
   INSTPAT_END();
   //if(((cpu.mstatus >> 13) & 0x3) == 0x3)cpu.mstatus |= (SD);
   //else cpu.mstatus &= (~SD);
-  cpu.mstatus |= (0x1800LL);
+  #ifdef CONFIG_TARGET_SHARE
+    cpu.mstatus |= (0x1800LL);
+  #else
+    cpu.mstatus |= (0xa0001800LL);
+  #endif
   cpu.mstatus &= (0x7FFFFFF000001888LL);
   //hard wired value:
   //1:MPP(12:11)
