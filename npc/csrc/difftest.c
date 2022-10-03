@@ -31,7 +31,7 @@ void init_difftest(char *ref_so_file, long img_size, int port) {
   cpu.mwaddr  = 0;
   for(int i = 0; i < 32; i++)
     cpu.gpr[i] = cpu_gpr[i];
-  if(ref_so_file == NULL)ref_so_file = "../nemu/build/riscv64-nemu-interpreter-so";
+  if(ref_so_file == NULL)ref_so_file = "../nemu/riscv64-nemu-interpreter-so";
   void *handle;
   handle = dlopen(ref_so_file, RTLD_LAZY);// | MUXNDEF(CONFIG_CC_ASAN, RTLD_DEEPBIND, 0)
   assert(handle);
