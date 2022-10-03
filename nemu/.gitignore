@@ -1,6 +1,6 @@
 *.*
 *
-!/build/riscv64-nemu-interpreter-so
+!riscv64-nemu-interpreter-so
 !*/
 !Makefile
 !*.mk
