@@ -18,6 +18,7 @@ module ysyx_22040127_icache(
     output reg  [2:0]cache_state,
     output reg    ecall_stuck,//mod 4
     output reg    mret_stuck,
+    output reg    on_hold,
     input         wb_ecall,
     input         wb_mret,
 
@@ -141,6 +142,7 @@ module ysyx_22040127_icache(
                     cache_state <= MISS;
                     if(wb_ecall)ecall_stuck <= 1'b1;//mod 4
                     if(wb_mret)mret_stuck <= 1'b1;//mod 4
+                    on_hold <= 1'b1;//mod 5
                 end else if(!input_valid)begin
                     cache_state <= IDLE;
                     ecall_stuck <= 1'b0;//mod 4
@@ -149,16 +151,21 @@ module ysyx_22040127_icache(
                     cache_state <= REFILL;
                     if(wb_ecall)ecall_stuck <= 1'b1;//mod 4
                     if(wb_mret)mret_stuck <= 1'b1;//mod 4
+                    on_hold <= 1'b1;//mod 5
                 end
             end
             MISS:
             begin
+                if(wb_ecall)ecall_stuck <= 1'b1;//mod 4
+                if(wb_mret)mret_stuck <= 1'b1;//mod 4
                 if(!load_branch)begin
                     cache_state <= MISS_STALL;
                 end
             end
             MISS_STALL:
             begin
+                if(wb_ecall)ecall_stuck <= 1'b1;//mod 4
+                if(wb_mret)mret_stuck <= 1'b1;//mod 4
                 if(!load_branch)begin
                     cache_state <= REFILL;
                     if(!cnt)begin//write back(random eviction)
@@ -171,6 +178,8 @@ module ysyx_22040127_icache(
 
             REFILL://3'b100
             begin
+                if(wb_ecall)ecall_stuck <= 1'b1;//mod 4
+                if(wb_mret)mret_stuck <= 1'b1;//mod 4
                 if(axi_res_valid) begin
 
                     if(cache_wen_way0)cache_way0tags[input_index] <= input_tag; 
@@ -190,7 +199,10 @@ module ysyx_22040127_icache(
 
             REFILL_STALL://write allocate(read miss)110
             begin
+                if(wb_ecall)ecall_stuck <= 1'b1;//mod 4
+                if(wb_mret)mret_stuck <= 1'b1;//mod 4
                 cache_state <= IDLE;
+                on_hold <= 1'b0;
             end
 
             default:;

@@ -97,6 +97,7 @@ class Vysyx_22040127_top___024root final : public VerilatedModule {
         CData/*0:0*/ ysyx_22040127_top__DOT__timer_blocked;
         CData/*0:0*/ ysyx_22040127_top__DOT__if_timer_blocked;
         CData/*0:0*/ ysyx_22040127_top__DOT__if_timer_int_tmp;
+        CData/*0:0*/ ysyx_22040127_top__DOT__on_hold;
         CData/*0:0*/ ysyx_22040127_top__DOT____Vcellinp__dcache__input_valid;
         CData/*0:0*/ ysyx_22040127_top__DOT__if_instruction_blocked;
         CData/*0:0*/ ysyx_22040127_top__DOT__axi__DOT__w_valid;
@@ -144,9 +145,9 @@ class Vysyx_22040127_top___024root final : public VerilatedModule {
         CData/*0:0*/ ysyx_22040127_top__DOT__dcache__DOT__cache_way1dirty;
         CData/*0:0*/ ysyx_22040127_top__DOT__dcache__DOT__cache_way0valid;
         CData/*0:0*/ ysyx_22040127_top__DOT__dcache__DOT__cache_way1valid;
-        CData/*0:0*/ ysyx_22040127_top__DOT__dcache__DOT__cache_raw_way0;
     };
     struct {
+        CData/*0:0*/ ysyx_22040127_top__DOT__dcache__DOT__cache_raw_way0;
         CData/*0:0*/ ysyx_22040127_top__DOT__dcache__DOT__cache_raw_way1;
         CData/*0:0*/ ysyx_22040127_top__DOT__dcache__DOT__cache_raw;
         CData/*0:0*/ ysyx_22040127_top__DOT__dcache__DOT__mmio_mem;
@@ -210,9 +211,9 @@ class Vysyx_22040127_top___024root final : public VerilatedModule {
         CData/*1:0*/ ysyx_22040127_top__DOT__wb__DOT__mstatus_mpp;
         CData/*0:0*/ ysyx_22040127_top__DOT__wb__DOT__mstatus_mpie;
         CData/*0:0*/ ysyx_22040127_top__DOT__wb__DOT__mstatus_mie;
-        CData/*0:0*/ ysyx_22040127_top__DOT__wb__DOT__wb_flush;
     };
     struct {
+        CData/*0:0*/ ysyx_22040127_top__DOT__wb__DOT__wb_flush;
         CData/*0:0*/ __Vclklast__TOP__clk;
         VL_OUT(if_pc,31,0);
         VL_OUT(wb_pc,31,0);
@@ -276,9 +277,9 @@ class Vysyx_22040127_top___024root final : public VerilatedModule {
         QData/*63:0*/ ysyx_22040127_top__DOT__mem_doubly_aligned_data;
         QData/*63:0*/ ysyx_22040127_top__DOT__mem_diff_addr;
         QData/*63:0*/ ysyx_22040127_top__DOT__mem_diff_data;
-        QData/*63:0*/ ysyx_22040127_top__DOT__if_to_id_bus;
     };
     struct {
+        QData/*63:0*/ ysyx_22040127_top__DOT__if_to_id_bus;
         QData/*63:0*/ ysyx_22040127_top__DOT__d_req_addr;
         QData/*63:0*/ ysyx_22040127_top__DOT__i_req_addr;
         QData/*63:0*/ ysyx_22040127_top__DOT__wb_reg_wdata;

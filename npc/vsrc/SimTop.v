@@ -189,6 +189,7 @@ module ysyx_22040127_top # (
   reg        if_timer_blocked;
   reg        if_timer_int_tmp;
   wire       if_timer_int;
+  wire       on_hold;
 
 
   reg[31:0]  next_pc_reg;
@@ -212,6 +213,7 @@ module ysyx_22040127_top # (
   end
   assign     preif_allowin = !preif_valid || preif_ready_go && if_allowin;
   assign     next_pc =
+    (on_hold) ? next_pc_reg :
     //(timer_cancel) ? timerint_pc :
     (wb_mret  | mret_stuck) ? mepc[31:0] :
     (wb_ecall | ecall_stuck | wb_timer_int & timer_int | timer_blocked) ? mtvec[31:0] ://mod 4
@@ -312,6 +314,7 @@ module ysyx_22040127_top # (
     .cache_state(icache_state),
     .ecall_stuck(ecall_stuck),
     .mret_stuck(mret_stuck),
+    .on_hold(on_hold),
     .wb_ecall(wb_ecall),
     .wb_mret(wb_mret),
     .axi_req_addr(i_req_addr),

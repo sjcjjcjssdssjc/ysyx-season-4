@@ -3705,35 +3705,38 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___settle__TOP__0(Vysyx_22040127_t
                                                   & ((~ (IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__id_valid)) 
                                                      | ((IData)(vlSelf->ysyx_22040127_top__DOT__dec__DOT__id_ready_go) 
                                                         & (IData)(vlSelf->ysyx_22040127_top__DOT__ex_allowin))));
-    vlSelf->ysyx_22040127_top__DOT__next_pc = ((1U 
-                                                & ((vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[3U] 
-                                                    >> 0xdU) 
-                                                   | (IData)(vlSelf->ysyx_22040127_top__DOT__mret_stuck)))
-                                                ? (IData)(vlSelf->mepc)
+    vlSelf->ysyx_22040127_top__DOT__next_pc = ((IData)(vlSelf->ysyx_22040127_top__DOT__on_hold)
+                                                ? vlSelf->ysyx_22040127_top__DOT__next_pc_reg
                                                 : (
                                                    (1U 
-                                                    & (((vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[3U] 
-                                                         >> 0xcU) 
-                                                        | (IData)(vlSelf->ysyx_22040127_top__DOT__ecall_stuck)) 
-                                                       | (IData)(vlSelf->ysyx_22040127_top__DOT__timer_blocked)))
-                                                    ? (IData)(vlSelf->mtvec)
+                                                    & ((vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[3U] 
+                                                        >> 0xdU) 
+                                                       | (IData)(vlSelf->ysyx_22040127_top__DOT__mret_stuck)))
+                                                    ? (IData)(vlSelf->mepc)
                                                     : 
-                                                   ((((IData)(vlSelf->ysyx_22040127_top__DOT__id_branch_taken) 
-                                                      & (IData)(vlSelf->ysyx_22040127_top__DOT__id_allowin)) 
-                                                     & (~ (IData)(vlSelf->ysyx_22040127_top__DOT__if_timer_blocked)))
-                                                     ? vlSelf->ysyx_22040127_top__DOT__id_branch_result
+                                                   ((1U 
+                                                     & (((vlSelf->ysyx_22040127_top__DOT__wb__DOT__mem_to_wb_bus_reg[3U] 
+                                                          >> 0xcU) 
+                                                         | (IData)(vlSelf->ysyx_22040127_top__DOT__ecall_stuck)) 
+                                                        | (IData)(vlSelf->ysyx_22040127_top__DOT__timer_blocked)))
+                                                     ? (IData)(vlSelf->mtvec)
                                                      : 
                                                     ((((IData)(vlSelf->ysyx_22040127_top__DOT__id_branch_taken) 
                                                        & (IData)(vlSelf->ysyx_22040127_top__DOT__id_allowin)) 
-                                                      & (IData)(vlSelf->ysyx_22040127_top__DOT__if_timer_blocked))
-                                                      ? (IData)(vlSelf->mtvec)
+                                                      & (~ (IData)(vlSelf->ysyx_22040127_top__DOT__if_timer_blocked)))
+                                                      ? vlSelf->ysyx_22040127_top__DOT__id_branch_result
                                                       : 
-                                                     (((IData)(vlSelf->ysyx_22040127_top__DOT__preif_valid) 
-                                                       & (IData)(vlSelf->ysyx_22040127_top__DOT__preif_ready_go_reg))
-                                                       ? 
-                                                      ((IData)(4U) 
-                                                       + vlSelf->if_pc)
-                                                       : vlSelf->ysyx_22040127_top__DOT__next_pc_reg)))));
+                                                     ((((IData)(vlSelf->ysyx_22040127_top__DOT__id_branch_taken) 
+                                                        & (IData)(vlSelf->ysyx_22040127_top__DOT__id_allowin)) 
+                                                       & (IData)(vlSelf->ysyx_22040127_top__DOT__if_timer_blocked))
+                                                       ? (IData)(vlSelf->mtvec)
+                                                       : 
+                                                      (((IData)(vlSelf->ysyx_22040127_top__DOT__preif_valid) 
+                                                        & (IData)(vlSelf->ysyx_22040127_top__DOT__preif_ready_go_reg))
+                                                        ? 
+                                                       ((IData)(4U) 
+                                                        + vlSelf->if_pc)
+                                                        : vlSelf->ysyx_22040127_top__DOT__next_pc_reg))))));
     vlSelf->ysyx_22040127_top__DOT__if_allowin = (1U 
                                                   & ((~ (IData)(vlSelf->ysyx_22040127_top__DOT__if_valid)) 
                                                      | (IData)(vlSelf->ysyx_22040127_top__DOT__id_allowin)));
@@ -3960,6 +3963,7 @@ VL_ATTR_COLD void Vysyx_22040127_top___024root___ctor_var_reset(Vysyx_22040127_t
     vlSelf->ysyx_22040127_top__DOT__timer_blocked = 0;
     vlSelf->ysyx_22040127_top__DOT__if_timer_blocked = 0;
     vlSelf->ysyx_22040127_top__DOT__if_timer_int_tmp = 0;
+    vlSelf->ysyx_22040127_top__DOT__on_hold = 0;
     vlSelf->ysyx_22040127_top__DOT__next_pc_reg = 0;
     vlSelf->ysyx_22040127_top__DOT____Vcellinp__dcache__input_valid = 0;
     for (int __Vi0=0; __Vi0<32; ++__Vi0) {
