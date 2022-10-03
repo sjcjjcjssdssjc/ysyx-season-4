@@ -27,6 +27,7 @@ int sim_time, n;
 uint64_t *cpu_gpr = NULL;
 uint32_t cpu_pc = 0;
 Vysyx_22040127_top* dut;
+#define WAVE 1
 #ifdef WAVE
 VerilatedVcdC* tfp;
 #endif
