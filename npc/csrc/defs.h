@@ -5,7 +5,7 @@
 #define ITRACE 1
 //#define MTRACE 1
 #define VGA  1
-//#define WAVE 1
+#define WAVE 1
 #define DIFF 1 //must define
 
 #endif
