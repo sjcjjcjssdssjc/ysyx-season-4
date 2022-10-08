@@ -85,45 +85,78 @@ void cpu_exec(unsigned x, axi4_ref<64,64,4> &mem_ref){
         #endif 
         for(int i=0;i<32;i++){
           if(ref_r.gpr[i] != cpu_gpr[i])
-            printf("\033[1;31m%s nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-            regs[i], ref_r.gpr[i], cpu_gpr[i],ref_r.pc,dut->wb_pc,exec_cnt);
+            printf("\033[1;31m%s nemu:%lx our processor:%lx \
+            nemu pc:%lx our pc:%x \033[0m\n", //nemupc!
+            regs[i], ref_r.gpr[i], cpu_gpr[i],ref_r.pc,dut->wb_pc);
         }
-        printf("%d\n",cyclecnt);
+        printf("cyclecnt is %d\n",cyclecnt);
+
         if(ref_r.mcause != dut->mcause){
-          printf("\033[1;31m mcause: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          ref_r.mcause, dut->mcause,ref_r.pc,dut->wb_pc,exec_cnt);
-        } else printf("mcause: %lx after %d steps\n", dut->mcause,exec_cnt);
+          printf("\033[1;31m mcause: nemu:%lx our processor:%lx \
+          nemu pc:%lx our pc:%x \033[0m\n", //nemupc!
+          ref_r.mcause, dut->mcause,ref_r.pc,dut->wb_pc);
+        } else { 
+          printf("mcause: %lx \n", dut->mcause);
+        }
+
         if(ref_r.mepc != dut->mepc){ 
-          printf("\033[1;31m mepc: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          ref_r.mepc, dut->mepc,ref_r.pc,dut->wb_pc,exec_cnt);
-        } else printf("mepc: %lx after %d steps\n", dut->mepc,exec_cnt);
+          printf("\033[1;31m mepc: nemu:%lx our processor:%lx \
+          nemu pc:%lx our pc:%x \033[0m\n", //nemupc!
+          ref_r.mepc, dut->mepc,ref_r.pc,dut->wb_pc);
+        } else {
+          printf("mepc: %lx \n", dut->mepc);
+        }
+
         if(ref_r.mie != dut->mie){
-          printf("\033[1;31m mie: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          ref_r.mie, dut->mie,ref_r.pc,dut->wb_pc,exec_cnt);
-        } else printf("mie: %lx after %d steps\n", dut->mie,exec_cnt);
+          printf("\033[1;31m mie: nemu:%lx our processor:%lx \
+          nemu pc:%lx our pc:%x \033[0m\n", //nemupc!
+          ref_r.mie, dut->mie,ref_r.pc,dut->wb_pc);
+        } else {
+          printf("mie: %lx \n", dut->mie);
+        }
+
         if(ref_r.mip != dut->mip){
-          printf("\033[1;31m mip: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          ref_r.mip, dut->mip,ref_r.pc,dut->wb_pc,exec_cnt);
-        } else printf("mip: %lx after %d steps\n", dut->mip,exec_cnt);
+          printf("\033[1;31m mip: nemu:%lx our processor:%lx \
+          nemu pc:%lx our pc:%x \033[0m\n", //nemupc!
+          ref_r.mip, dut->mip,ref_r.pc,dut->wb_pc);
+        } else {
+          printf("mip: %lx \n", dut->mip);
+        }
+
         if(ref_r.mscratch != dut->mscratch){
-          printf("\033[1;31m mscratch: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          ref_r.mscratch, dut->mscratch,ref_r.pc,dut->wb_pc,exec_cnt);
-        } else printf("mscratch: %lx after %d steps\n", dut->mscratch,exec_cnt);
+          printf("\033[1;31m mscratch: nemu:%lx our processor:%lx \
+          nemu pc:%lx our pc:%x \033[0m\n", //nemupc!
+          ref_r.mscratch, dut->mscratch,ref_r.pc,dut->wb_pc);
+        } else {
+          printf("mscratch: %lx \n", dut->mscratch);
+        }
+        
         if(ref_r.mstatus != dut->mstatus){
-          printf("\033[1;31m mstatus: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          ref_r.mstatus, dut->mstatus,ref_r.pc,dut->wb_pc,exec_cnt);
-        } else printf("mstatus: %lx after %d steps\n", dut->mstatus,exec_cnt);
+          printf("\033[1;31m mstatus: nemu:%lx our processor:%lx \
+          nemu pc:%lx our pc:%x \033[0m\n", //nemupc!
+          ref_r.mstatus, dut->mstatus,ref_r.pc,dut->wb_pc);
+        } else {
+          printf("mstatus: %lx \n", dut->mstatus);
+        }
+        
         if(ref_r.mtval != dut->mtval){
-          printf("\033[1;31m mtval: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          ref_r.mtval, dut->mtval,ref_r.pc,dut->wb_pc,exec_cnt);
-        } else printf("mtval: %lx after %d steps\n", dut->mtval,exec_cnt);
+          printf("\033[1;31m mtval: nemu:%lx our processor:%lx \
+          nemu pc:%lx our pc:%x \033[0m\n",
+          ref_r.mtval, dut->mtval,ref_r.pc,dut->wb_pc);
+        } else {
+          printf("mtval: %lx \n", dut->mtval);
+        }
+        
         if(ref_r.mtvec != dut->mtvec){
-          printf("\033[1;31m mtvec: nemu:%lx our processor:%lx nemu pc:%lx our pc:%x after %d steps\033[0m\n", //nemupc!
-          ref_r.mtvec, dut->mtvec,ref_r.pc,dut->wb_pc,exec_cnt);
-        } else printf("mtvec: %lx after %d steps\n", dut->mtvec,exec_cnt);
-        //printf("wb pc is %x\n",dut->wb_pc);
-        if(ref_r.pc != dut->wb_pc)printf("\033[1;31m nemu pc:%lx our pc:%x after %d steps\033[0m\n",
-        ref_r.pc,dut->wb_pc,exec_cnt);
+          printf("\033[1;31m mtvec: nemu:%lx our processor:%lx \
+           nemu pc:%lx our pc:%x \033[0m\n",
+          ref_r.mtvec, dut->mtvec,ref_r.pc,dut->wb_pc);
+        } else printf("mtvec: %lx \n", dut->mtvec);
+
+        if(ref_r.pc != dut->wb_pc){
+          printf("\033[1;31m nemu pc:%lx our pc:%x \033[0m\n",
+          ref_r.pc,dut->wb_pc);
+        }
       
       }
       
