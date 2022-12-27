@@ -60,7 +60,7 @@ void parse_elf(char *elf_file){
     shdr = (Elf64_Shdr*)malloc(sizeof(*shdr) * header.e_shnum);
     if(shdr == NULL)panic("unable to allocate memory for section header");
     
-    ret = fread(shdr, 1, sizeof(Elf64_Shdr) * header.e_shnum, fp);
+    ret = fread(shdr, 1, header.e_shentsize * header.e_shnum, fp);
 
     //This member holds the section header table index of the entry
     //associated with the section name string table.
@@ -149,7 +149,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   if(symtab){
     for(int i = 0;i < symtab_len; i++){
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);     
-      if(symtab[i].st_value == cpu.pc && pre <= 0x80800000 && !ret){
+      if(symtab[i].st_value == cpu.pc && pre <= 0x80800000 && !ret && symtab[i].st_type == FUNC){
           //printf("%d\n",stksiz);
           for(int i = 0;i < stksiz; i++)printf(" ");
           printf("%lx: call [%s@%lx]\n",pc, symstrtab + symtab[i].st_name, cpu.pc);
