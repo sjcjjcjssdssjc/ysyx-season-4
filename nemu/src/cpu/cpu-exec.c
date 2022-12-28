@@ -74,11 +74,13 @@ void parse_elf(char *elf_file){
       char *now = secstrtab + shdr[i].sh_name;
       if(strcmp(now,".strtab") == 0){
         symstrtab = (char *)malloc(shdr[i].sh_size);
+        printf("symstrtab %ld %ld\n", shdr[header.e_shstrndx].sh_size, shdr[i].sh_size);
         fseek(fp, shdr[i].sh_offset, SEEK_SET);//
         ret = fread(symstrtab, shdr[i].sh_size, 1, fp);//section header string
         break;
       }
     }
+    //printf("%p %p\n",secstrtab, symstrtab);
     if(!symstrtab)panic("symstrtab not found");
     for(int i = header.e_shnum; i >= 0; i--){
       char *now = secstrtab + shdr[i].sh_name;
@@ -149,8 +151,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
   if(symtab){
     for(int i = 0;i < symtab_len; i++){
       //printf("%lx:%d %s\n",symtab[j].st_value, symtab[j].st_name, symstrtab + symtab[j].st_name);     
-      if(symtab[i].st_value == cpu.pc && pre <= 0x80800000 && !ret && symtab[i].st_type == FUNC){
-          //printf("%d\n",stksiz);
+      if(symtab[i].st_value == cpu.pc && pre <= 0x80800000 && !ret && ELF64_ST_TYPE(symtab[i].st_info) == STT_FUNC){
           for(int i = 0;i < stksiz; i++)printf(" ");
           printf("%lx: call [%s@%lx]\n",pc, symstrtab + symtab[i].st_name, cpu.pc);
           stksiz++;
@@ -159,7 +160,7 @@ static void exec_once(Decode *s, vaddr_t pc) {
     if(ret){
       stksiz--;
       for(int i = 0;i < stksiz; i++)printf(" ");
-      printf("%lx: ret to %lx\n",pc, cpu.pc);
+      printf("%lx: ret to %lx\n",pre, s->pc);
     }
   }
 #endif
