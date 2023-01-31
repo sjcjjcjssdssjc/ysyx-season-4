@@ -56,7 +56,6 @@ int fs_open(const char *pathname, int flags, int mode){//ignore flags and mode
   int siz = sizeof(file_table) / sizeof(Finfo);
   int ret = -1;
   for(int i = 0; i < siz; i++) {
-    //printf("%s %s\n",pathname,file_table[i].name);
     if(strcmp(pathname, file_table[i].name) == 0){
       ret = i;
       break;

@@ -15,7 +15,6 @@
 #endif
 char *buff;
 static uintptr_t loader(PCB *pcb, const char *filename) {
-
   int fd = fs_open(filename,0,0);
   uintptr_t ret = 0;
   size_t offset = 0;
@@ -24,21 +23,17 @@ static uintptr_t loader(PCB *pcb, const char *filename) {
   buff = malloc(fsize);
   fs_lseek(fd, offset, SEEK_SET);//set to 0 again
   fs_read(fd, (void *)buff, fsize);
-  //printf("%d\n",fsize);
   fs_close(fd);
-  
   Elf_Ehdr  header;  //elf header
   Elf_Phdr* pheader; //program header
   Elf_Shdr* sheader; //section header
   memcpy(&header, (void *)buff, sizeof(header));
   offset += sizeof(header);
- 
   if(header.e_type == ET_EXEC && header.e_ident[1] == 'E' &&
-     header.e_ident[2] == 'L' && header.e_ident[3] == 'F') {
-       //printf("is elf\n");
-  }
+     header.e_ident[2] == 'L' && header.e_ident[3] == 'F');
   else printf("not a elf\n");
-  
+  //filesize and memsize
+  //https://stackoverflow.com/questions/27958743/difference-between-p-filesz-and-p-memsz-of-elf32-phdr
   pheader = malloc(sizeof(Elf_Phdr) * header.e_phnum);
   sheader = malloc(sizeof(Elf_Shdr) * header.e_shnum);
   memcpy(pheader, buff + header.e_phoff, sizeof(Elf_Phdr) * header.e_phnum);
