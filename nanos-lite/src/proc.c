@@ -14,7 +14,7 @@ Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
 }
 void context_kload(PCB *pcb, void (*entry)(void *), void *arg){
   pcb->cp = kcontext((pcb->as).area, entry, arg);
-  pcb->cp->mcause = 10;
+  pcb->cp->mcause = 0;
   pcb->cp->mstatus = 0xa00001800;
   pcb->cp->mepc = (uintptr_t)entry;
   for(int i = 0;i < 32;i++){
