@@ -17,6 +17,7 @@ void context_kload(PCB *pcb, void (*entry)(void *), void *arg){
   pcb->cp->mcause = 0;
   pcb->cp->mstatus = 0xa00001800;
   pcb->cp->mepc = (uintptr_t)entry;
+  pcb->cp->gpr[10] = arg;
   for(int i = 0;i < 32;i++){
     pcb->cp->gpr[i] = 0;
   }
