@@ -69,6 +69,8 @@ void __am_switch(Context *c) {
 void map(AddrSpace *as, void *va, void *pa, int prot) {
 }
 
-Context *ucontext(AddrSpace *as, Area kstack, void *entry) {
-  return NULL;
+Context* ucontext(AddrSpace *as, Area kstack, void *entry) {
+  kstack.start = malloc(8 * PGSIZE);
+  kstack.end = (char *)(kstack.start) + 8 * PGSIZE;
+  return (Context *)(kstack.start);
 }

@@ -1,5 +1,6 @@
 #include <proc.h>
 #include <elf.h>
+#include <memory.h>
 #include "fs.h"
 #include "loader.h"
 #ifdef __LP64__
@@ -82,5 +83,19 @@ void naive_uload(PCB *pcb, const char *filename) {
   uintptr_t entry = loader(pcb, filename);
   Log("Jump to entry = %p", entry);
   ((void(*)())entry) ();
+}
+Context* ucontext(AddrSpace *as, Area kstack, void *entry);
+void context_uload(PCB *pcb, const char *filename) {
+  uintptr_t entry = loader(pcb, filename);
+  Log("Jump to entry = %p", entry);
+  pcb->cp = ucontext(NULL, (pcb->as).area, (void *)entry);
+  pcb->cp->mcause = 0;
+  pcb->cp->mstatus = 0xa00001800;
+  pcb->cp->mepc = (uintptr_t)entry;
+  for(int i = 0;i < 32;i++) {
+    pcb->cp->gpr[i] = 0;
+  }
+  pcb->cp->gpr[28] = (uintptr_t)(heap.end);//sp(does not recover in trap.S)
+  printf("%p\n",heap.end);
 }
 

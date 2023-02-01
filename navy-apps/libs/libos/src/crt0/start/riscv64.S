@@ -1,4 +1,5 @@
 .globl  _start
 _start:
-  move s0, zero
+  li s0, 0
+  move sp, t3
   jal call_main

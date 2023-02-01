@@ -102,7 +102,7 @@ size_t fs_lseek(int fd, size_t offset, int whence){
     file_table[fd].open_offset = file_table[fd].size + offset;
     //printf("end-%d\n",file_table[fd].open_offset);
   } 
-  printf("lseek %ld %d\n",offset, file_table[fd].open_offset);
+  //printf("lseek %ld %d\n",offset, file_table[fd].open_offset);
   //assert(file_table[fd].open_offset > file_table[fd].size);
   return file_table[fd].open_offset;//error not implemented.
 }

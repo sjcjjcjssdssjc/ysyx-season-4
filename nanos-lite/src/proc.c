@@ -6,7 +6,7 @@
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB pcb_boot = {};
 PCB *current = NULL;
-void naive_uload(PCB *pcb, const char *filename);//loader.c
+void context_uload(PCB *pcb, const char *filename);//loader.c
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   kstack.start = malloc(8 * PGSIZE);
   kstack.end = (char *)(kstack.start) + 8 * PGSIZE;
@@ -17,10 +17,10 @@ void context_kload(PCB *pcb, void (*entry)(void *), void *arg){
   pcb->cp->mcause = 0;
   pcb->cp->mstatus = 0xa00001800;
   pcb->cp->mepc = (uintptr_t)entry;
-  pcb->cp->gpr[10] = arg;
   for(int i = 0;i < 32;i++){
     pcb->cp->gpr[i] = 0;
   }
+  pcb->cp->gpr[10] = (uintptr_t)arg;
 }
 
 void switch_boot_pcb() {
@@ -43,7 +43,7 @@ void init_proc() {
   Log("Initializing processes...");
 
   // load program here
-  naive_uload(NULL, "/bin/dummy");
+  context_uload(&pcb[1], "/bin/pal");
   //APPS = pal nslider nterm bird
   //TESTSOK = dummy hello timer-test file-test bmp-test
 }
@@ -53,7 +53,7 @@ Context* schedule(Context *prev) {
   current->cp = prev;
 
   // always select pcb[0] as the new process
-  current = &pcb[0];
+  current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
 
   // then return the new context
   return current->cp;
