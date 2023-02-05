@@ -96,14 +96,23 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     pcb->cp->gpr[i] = 0;
   }
   pcb->cp->gpr[28] = (uintptr_t)(heap.end);//sp(does not recover in trap.S)
+
   char** ptr = (char **)(&(pcb->cp->pdir));
+  int envc = 0;
+  for(; envp && envp[envc] != NULL; envp++);
+  for(int i = 0; i < envc; i++) {
+    ptr[envc - 1 - i] = argv[i];
+  }
+
+  ptr = (char **)(&(pcb->cp->pdir) + envc);
   int argc = 0;
   for(; argv && argv[argc] != NULL; argc++);
   for(int i = 0; i < argc; i++) {
-    ptr[argc - i] = argv[i];
+    ptr[argc - 1 - i] = argv[i];
   }
-  int* ptr_int = (int *)(&pcb->cp->pdir);
+  int* ptr_int = (int *)(ptr + argc);
   *ptr_int = argc;
   pcb->cp->gpr[29] = (uintptr_t)ptr_int;
+
 }
 

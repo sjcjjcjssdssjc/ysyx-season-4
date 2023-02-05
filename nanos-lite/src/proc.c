@@ -42,8 +42,9 @@ void init_proc() {
 
   Log("Initializing processes...");
   char *args[3] = {"skip", "you", NULL};
+  char *envp[2] = {"a", NULL};
   // load program here
-  context_uload(&pcb[1], "/bin/pal", args, NULL);
+  context_uload(&pcb[1], "/bin/pal", args, envp);
   //APPS = pal nslider nterm bird
   //TESTSOK = dummy hello timer-test file-test bmp-test
 }
