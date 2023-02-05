@@ -85,17 +85,25 @@ void naive_uload(PCB *pcb, const char *filename) {
   ((void(*)())entry) ();
 }
 Context* ucontext(AddrSpace *as, Area kstack, void *entry);
-void context_uload(PCB *pcb, const char *filename) {
+void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
   uintptr_t entry = loader(pcb, filename);
   Log("Jump to entry = %p", entry);
   pcb->cp = ucontext(NULL, (pcb->as).area, (void *)entry);
   pcb->cp->mcause = 0;
   pcb->cp->mstatus = 0xa00001800;
   pcb->cp->mepc = (uintptr_t)entry;
-  for(int i = 0;i < 32;i++) {
+  for(int i = 0; i < 32; i++) {
     pcb->cp->gpr[i] = 0;
   }
   pcb->cp->gpr[28] = (uintptr_t)(heap.end);//sp(does not recover in trap.S)
-  printf("%p\n",heap.end);
+  char** ptr = (char **)(&(pcb->cp->pdir));
+  int argc = 0;
+  for(; argv && argv[argc] != NULL; argc++);
+  for(int i = 0; i < argc; i++) {
+    ptr[argc - i] = argv[i];
+  }
+  int* ptr_int = (int *)(&pcb->cp->pdir);
+  *ptr_int = argc;
+  pcb->cp->gpr[29] = (uintptr_t)ptr_int;
 }
 

@@ -6,7 +6,7 @@
 static PCB pcb[MAX_NR_PROC] __attribute__((used)) = {};
 static PCB pcb_boot = {};
 PCB *current = NULL;
-void context_uload(PCB *pcb, const char *filename);//loader.c
+void context_uload(PCB *pcb, const char *filename,char *const argv[], char *const envp[]);//loader.c
 Context *kcontext(Area kstack, void (*entry)(void *), void *arg) {
   kstack.start = malloc(8 * PGSIZE);
   kstack.end = (char *)(kstack.start) + 8 * PGSIZE;
@@ -41,9 +41,9 @@ void init_proc() {
   switch_boot_pcb();
 
   Log("Initializing processes...");
-
+  char *args[3] = {"skip", "you", NULL};
   // load program here
-  context_uload(&pcb[1], "/bin/pal");
+  context_uload(&pcb[1], "/bin/pal", args, NULL);
   //APPS = pal nslider nterm bird
   //TESTSOK = dummy hello timer-test file-test bmp-test
 }
