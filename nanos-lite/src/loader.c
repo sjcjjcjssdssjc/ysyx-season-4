@@ -99,12 +99,13 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
 
   char** ptr = (char **)(&(pcb->cp->pdir));
   int envc = 0;
-  for(; envp && envp[envc] != NULL; envp++);
+  for(; envp && envp[envc] != NULL; envc++);
   for(int i = 0; i < envc; i++) {
-    ptr[envc - 1 - i] = argv[i];
+    ptr[envc - i] = envp[i];
   }
+  ptr[0] = NULL;
 
-  ptr = (char **)(&(pcb->cp->pdir) + envc);
+  ptr = (char **)(&(pcb->cp->pdir) + envc + 1);
   int argc = 0;
   for(; argv && argv[argc] != NULL; argc++);
   for(int i = 0; i < argc; i++) {
