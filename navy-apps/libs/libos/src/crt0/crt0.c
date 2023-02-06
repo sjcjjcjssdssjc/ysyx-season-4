@@ -8,21 +8,23 @@ extern char **environ;
 void call_main(uintptr_t *args) {
   char *empty[] =  {NULL };
   int argc = args[0];
-
+  printf("%p %d\n", args, argc);
   char *argv[argc + 1];
   argv[argc] = NULL;
   for(int i = 0; i < argc; i++) {
     argv[i] = (char *)args[-1 - i];
-    //printf("argv %d %s\n", i, argv[i]);
+    printf("argv %p %s\n", args - 1 - i,argv[i]);
   }
 
   int envc = 0;
-  for(; args[-argc - 1 - envc] != 0; envc++);
+  for(; args[-argc - 2 - envc] != 0; envc++);
+  //2 contains argc and NULL
+  printf("%d\n",envc);
   char *envp[envc + 1];
-  envp[envc] = 0;
+  envp[envc] = NULL;
   for(int i = 0; i < envc; i++) {
-    envp[i] = (char *)args[-argc - 1 - i];
-    //printf("envp %d %s\n", i, envp[i]);
+    envp[i] = (char *)args[-argc - 2 - i];
+    printf("envp %d %s\n", i, envp[i]);
   }
   environ = empty;
   exit(main(argc, argv, empty));

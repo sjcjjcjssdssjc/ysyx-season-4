@@ -95,25 +95,36 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   for(int i = 0; i < 32; i++) {
     pcb->cp->gpr[i] = 0;
   }
-  pcb->cp->gpr[28] = (uintptr_t)(heap.end);//sp(does not recover in trap.S)
+  //printf("%p %p\n",heap.start, heap.end);
 
-  char** ptr = (char **)(&(pcb->cp->pdir));
-  int envc = 0;
-  for(; envp && envp[envc] != NULL; envc++);
-  for(int i = 0; i < envc; i++) {
-    ptr[envc - i] = envp[i];
-  }
-  ptr[0] = NULL;
+  char** ptr = (char **)(heap.end);
+  ptr = ptr - 1;
+  //PUSH
 
-  ptr = (char **)(&(pcb->cp->pdir) + envc + 1);
   int argc = 0;
   for(; argv && argv[argc] != NULL; argc++);
-  for(int i = 0; i < argc; i++) {
-    ptr[argc - 1 - i] = argv[i];
-  }
-  int* ptr_int = (int *)(ptr + argc);
+  int* ptr_int = (int *)ptr;
   *ptr_int = argc;
-  pcb->cp->gpr[29] = (uintptr_t)ptr_int;
+  pcb->cp->gpr[10] = (uintptr_t)ptr_int;
+  //heap.end - 8
+
+  for(int i = 0; i < argc; i++) {
+    ptr[-i - 1] = argv[i];
+  }
+  
+  ptr = ptr - argc - 1;
+  ptr[0] = NULL;
+
+  int envc = 0;
+  for(; envp && envp[envc] != NULL; envc++);
+  //no need for NULL
+  for(int i = 0; i < envc; i++) {
+    ptr[-1 - i] = envp[i];
+    //printf("%p\n", ptr - 1 - i);
+  }
+  ptr[-envc - 1] = NULL;
+  pcb->cp->GPRx = (uintptr_t)(ptr - envc - 1);//assert
+
 
 }
 
