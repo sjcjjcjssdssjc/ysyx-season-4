@@ -128,7 +128,8 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     //printf("%p\n", ptr - 1 - i);
   }
   ptr[-envc - 1] = NULL;
-  pcb->cp->GPRx = (uintptr_t)(ptr - envc - 1);
+  pcb->cp->gpr[11] = (uintptr_t)(ptr - envc - 2);
+  //sp
   //pcb->cp->GPRx = (uintptr_t)(heap.end);
   printf("%p ok\n", pcb->cp->GPRx);
 }

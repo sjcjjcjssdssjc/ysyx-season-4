@@ -26,7 +26,7 @@ void call_main(uintptr_t *args) {
     envp[i] = (char *)args[-argc - 2 - i];
     printf("envp %p %s\n", envp[i], envp[i]);
   }
-  environ = empty;
-  exit(main(argc, argv, empty));
+  environ = envp;
+  exit(main(argc, argv, envp));
   assert(0);
 }
