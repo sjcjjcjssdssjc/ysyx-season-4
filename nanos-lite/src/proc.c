@@ -41,12 +41,13 @@ void init_proc() {
   switch_boot_pcb();
 
   Log("Initializing processes...");
-  char *args[3] = {"skip", "you", NULL};
-  char *envp[2] = {"a", NULL};
+  char *args[3] = {"skip", NULL};
+  char *envp[2] = {NULL};
   // load program here
-  context_uload(&pcb[1], "/bin/pal", args, envp);
-  //APPS = pal nslider nterm bird
-  //TESTSOK = dummy hello timer-test file-test bmp-test
+  context_uload(&pcb[1], "/bin/event-test", args, envp);
+  //APPS = pal nslider nterm
+  //menu
+  //TESTSOK = dummy hello timer-test file-test bmp-test event-test
 }
 
 Context* schedule(Context *prev) {
