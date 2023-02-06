@@ -86,9 +86,13 @@ void naive_uload(PCB *pcb, const char *filename) {
 }
 Context* ucontext(AddrSpace *as, Area kstack, void *entry);
 void context_uload(PCB *pcb, const char *filename, char *const argv[], char *const envp[]) {
+  //first recover sp goes to k stack
+  //when switched out, context->cp is u stack
+  //so after _start switch into u stack
   uintptr_t entry = loader(pcb, filename);
   Log("Jump to entry = %p", entry);
   pcb->cp = ucontext(NULL, (pcb->as).area, (void *)entry);
+  //Log("new pcb %p", pcb->cp);
   pcb->cp->mcause = 0;
   pcb->cp->mstatus = 0xa00001800;
   pcb->cp->mepc = (uintptr_t)entry;
@@ -98,6 +102,7 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
   //printf("%p %p\n",heap.start, heap.end);
 
   char** ptr = (char **)(heap.end);
+  //char** ptr = (char **)(&(pcb->cp->pdir));
   ptr = ptr - 1;
   //PUSH
 
@@ -123,8 +128,8 @@ void context_uload(PCB *pcb, const char *filename, char *const argv[], char *con
     //printf("%p\n", ptr - 1 - i);
   }
   ptr[-envc - 1] = NULL;
-  pcb->cp->GPRx = (uintptr_t)(ptr - envc - 1);//assert
-
-
+  pcb->cp->GPRx = (uintptr_t)(ptr - envc - 1);
+  //pcb->cp->GPRx = (uintptr_t)(heap.end);
+  printf("%p ok\n", pcb->cp->GPRx);
 }
 

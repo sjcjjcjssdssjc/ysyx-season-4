@@ -30,7 +30,7 @@ void switch_boot_pcb() {
 void hello_fun(void *arg) {
   int j = 1;
   while (1) {
-    Log("Hello World from Nanos-lite with arg '%p' for the %dth time!", (uintptr_t)arg, j);
+    //Log("Hello World from Nanos-lite with arg '%p' for the %dth time!", (uintptr_t)arg, j);
     j ++;
     yield();
   }
@@ -42,11 +42,12 @@ void init_proc() {
 
   Log("Initializing processes...");
   char *args[3] = {"skip", "you", NULL};
-  char *envp[2] = {"a", NULL};
+  char *envp[2] = {NULL};
   // load program here
-  context_uload(&pcb[1], "/bin/pal", args, envp);
+  context_uload(&pcb[1], "/bin/file-test", args, envp);
   //APPS = pal nslider nterm bird
-  //TESTSOK = dummy hello timer-test file-test bmp-test
+  //TESTSOK = dummy hello timer-test 
+  //file-test bmp-test
 }
 
 Context* schedule(Context *prev) {
@@ -54,8 +55,9 @@ Context* schedule(Context *prev) {
   current->cp = prev;
 
   // always select pcb[0] as the new process
+  //printf("schedule current %p to %d whose sp is ", current->cp, current == &pcb[0] ? 1 : 0);
   current = (current == &pcb[0] ? &pcb[1] : &pcb[0]);
-
+  //printf("%p\n", current->cp);
   // then return the new context
   return current->cp;
 
